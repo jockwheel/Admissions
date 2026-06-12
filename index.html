@@ -78,7 +78,7 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
 /* HERO - meeting-first layout */
 .hero{background:#003260;border-radius:8px;border-top:4px solid #C49A3C;margin-bottom:1rem;padding:1.25rem 1.5rem;}
 .hero-top{display:grid;grid-template-columns:auto 1fr auto;gap:1.25rem;align-items:start;}
-.hphoto{width:90px;height:90px;border-radius:50%;overflow:hidden;border:3px solid rgba(196,154,60,.4);display:flex;align-items:center;justify-content:center;font-family:'EB Garamond',serif;font-size:28px;font-weight:600;position:relative;cursor:pointer;flex-shrink:0;}
+.hphoto{width:130px;height:130px;border-radius:50%;overflow:hidden;border:3px solid rgba(196,154,60,.4);display:flex;align-items:center;justify-content:center;font-family:'EB Garamond',serif;font-size:40px;font-weight:600;position:relative;cursor:pointer;flex-shrink:0;}
 .hphoto img{width:100%;height:100%;object-fit:cover;}
 .pov{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;border-radius:50%;gap:2px;}
 .hphoto:hover .pov{opacity:1;}
@@ -726,7 +726,7 @@ function detail(){
 
     // HERO
     '<div class="hero">'+
-      '<div class="hero-top">'+ph+
+      '<div class="hero-top" style="gap:1.5rem">'+ph+
         '<div style="flex:1;min-width:0">'+
           '<div class="hname">'+s.last+', '+s.first+'</div>'+
           '<div class="hschool">'+(s.school||'School not provided')+(s.grade?' &nbsp;&middot;&nbsp;<strong style="color:rgba(255,255,255,.9)">'+s.grade+'</strong>':'')+'</div>'+
