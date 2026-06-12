@@ -1046,6 +1046,100 @@ function runImport(){
 }
 function showIR(msg,ok){var e=document.getElementById('ires');e.textContent=msg;e.className='ires '+(ok?'ok':'err');e.style.display='block';}
 
+// PHOTO IMPORT
+function openPhotoImport(){
+  document.getElementById('ov-photos').classList.add('open');
+  document.getElementById('photo-progress').style.display='none';
+  document.getElementById('photo-results').style.display='none';
+}
+function closePhotoImport(){document.getElementById('ov-photos').classList.remove('open');}
+
+document.getElementById('btn-import-photos').addEventListener('click',openPhotoImport);
+document.getElementById('btn-import-photos-sb').addEventListener('click',openPhotoImport);
+document.getElementById('mx-photos').addEventListener('click',closePhotoImport);
+document.getElementById('btn-cancel-photos').addEventListener('click',closePhotoImport);
+document.getElementById('btn-pick-photos').addEventListener('click',function(){
+  document.getElementById('fi-photos').click();
+});
+
+document.getElementById('fi-photos').addEventListener('change',function(){
+  var files=Array.from(this.files);
+  if(!files.length)return;
+  document.getElementById('photo-progress').style.display='block';
+  document.getElementById('photo-results').style.display='none';
+
+  var matched=0,unmatched=[],total=files.length,done=0;
+
+  // Build lookup: "lastfirst" -> student
+  var lookup={};
+  students.forEach(function(s){
+    var key=(s.last+s.first).toLowerCase().replace(/[^a-z]/g,'');
+    lookup[key]=s;
+    // also lastname only as fallback
+    var lkey=s.last.toLowerCase().replace(/[^a-z]/g,'');
+    if(!lookup['_l_'+lkey])lookup['_l_'+lkey]=[];
+    lookup['_l_'+lkey].push(s);
+  });
+
+  function updateBar(d,t){
+    var pct=Math.round(d/t*100);
+    document.getElementById('photo-bar').style.width=pct+'%';
+    document.getElementById('photo-status').textContent='Processing '+d+' of '+t+'...';
+  }
+
+  function processNext(i){
+    if(i>=files.length){
+      // Save photos to separate localStorage key
+      var photos={};
+      students.forEach(function(s){if(s.photo)photos[s.id]=s.photo;});
+      try{localStorage.setItem(PHOTO_SK,JSON.stringify(photos));}catch(e){console.warn('Photo storage full',e);}
+      render();if(selId)detail();
+      document.getElementById('photo-progress').style.display='none';
+      document.getElementById('photo-results').style.display='block';
+      document.getElementById('photo-matched').textContent=matched+' of '+total+' photos matched and loaded.';
+      var unmatchedEl=document.getElementById('photo-unmatched');
+      unmatchedEl.textContent=unmatched.length?'Could not match ('+unmatched.length+'): '+unmatched.slice(0,8).join(', ')+(unmatched.length>8?'...':''):'All photos matched!';
+      unmatchedEl.style.color=unmatched.length?'#A8302A':'#2A6B4A';
+      return;
+    }
+    var file=files[i];
+    var base=file.name.replace(/\.[^.]+$/,'');
+    var parts=base.split('_');
+    var last=parts[0]||'';
+    var first=parts.slice(1).join(' ');
+    var key=(last+first).toLowerCase().replace(/[^a-z]/g,'');
+    var student=lookup[key]||null;
+    // fallback: last name only if unique
+    if(!student){
+      var lkey='_l_'+last.toLowerCase().replace(/[^a-z]/g,'');
+      var byLast=lookup[lkey]||[];
+      if(byLast.length===1)student=byLast[0];
+    }
+    if(!student){unmatched.push(base);done++;updateBar(done,total);processNext(i+1);return;}
+
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var img=new Image();
+      img.onload=function(){
+        var canvas=document.createElement('canvas');
+        var MAX=400;
+        var w=img.width,h=img.height;
+        if(w>h){if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}}
+        else{if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}}
+        canvas.width=w;canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        var data=canvas.toDataURL('image/jpeg',0.75);
+        student.photo=data;
+        matched++;done++;updateBar(done,total);processNext(i+1);
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+    this.value='';
+  }
+  processNext(0);
+});
+
 // EXPORT
 function exportCSV(){
   if(!students.length){alert('No students to export.');return;}
