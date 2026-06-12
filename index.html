@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Pacifica Christian — Admissions Tracker</title>
+<title>Pacifica Christian -- Admissions Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -512,7 +512,7 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
 
 <script>
 (function(){
-var SK='pca_v7', BIN_SK='pca_bin7';
+var SK='pca_v8', BIN_SK='pca_bin8';
 var API_KEY='$2a$10$iUdtSGo4J9aBaBvDeIXfOeV3OsFG5KY0lLIErpqxeO.w/WIX/iJVi';
 var students=[], selId=null, editId=null, fIds=[], mPhoto=null, syncT=null;
 
@@ -527,22 +527,54 @@ function push(){
   var url=bin?'https://api.jsonbin.io/v3/b/'+bin:'https://api.jsonbin.io/v3/b';
   var method=bin?'PUT':'POST';
   var h={'Content-Type':'application/json','X-Master-Key':API_KEY};
-  if(!bin){h['X-Bin-Name']='pca-adm7';h['X-Bin-Private']='true';}
+  if(!bin){h['X-Bin-Name']='pca-adm8';h['X-Bin-Private']='true';}
   setSd('busy','Saving...');
   fetch(url,{method:method,headers:h,body:JSON.stringify({s:students})})
-    .then(function(r){return r.json();})
-    .then(function(d){if(!bin&&d.metadata&&d.metadata.id)localStorage.setItem(BIN_SK,d.metadata.id);setSd('ok','Saved');setTimeout(function(){setSd('ok','');},2000);})
-    .catch(function(){setSd('err','Sync error');});
+    .then(function(r){
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      return r.json();
+    })
+    .then(function(d){
+      if(!bin&&d.metadata&&d.metadata.id){
+        localStorage.setItem(BIN_SK,d.metadata.id);
+        // Update key to new bin name
+        localStorage.setItem('pca_bin8',d.metadata.id);
+      }
+      setSd('ok','Saved');
+      setTimeout(function(){setSd('ok','');},2000);
+    })
+    .catch(function(e){
+      setSd('err','Offline - saved locally');
+      // Retry once after 3s
+      setTimeout(function(){
+        if(navigator&&navigator.onLine)push();
+      },3000);
+    });
 }
 
 function pull(){
   var bin=localStorage.getItem(BIN_SK)||'';
-  if(!bin){loadLocal();render();push();return;}
+  // Always load local first so page renders immediately
+  loadLocal();
+  render();
+  if(!bin){
+    // No bin yet -- push local data to create one
+    if(students.length>0)push();
+    return;
+  }
   setSd('busy','Loading...');
   fetch('https://api.jsonbin.io/v3/b/'+bin+'/latest',{headers:{'X-Master-Key':API_KEY}})
     .then(function(r){return r.json();})
-    .then(function(d){if(d.record&&d.record.s){students=d.record.s;saveLocal();}else loadLocal();setSd('ok','Live');setTimeout(function(){setSd('ok','');},2000);render();})
-    .catch(function(){loadLocal();setSd('err','Offline');render();});
+    .then(function(d){
+      if(d.record&&d.record.s&&d.record.s.length>0){
+        // Use cloud data if it has more students, otherwise keep local
+        if(d.record.s.length>=students.length){
+          students=d.record.s;saveLocal();
+        }
+      }
+      setSd('ok','Live');setTimeout(function(){setSd('ok','');},2000);render();
+    })
+    .catch(function(){setSd('err','Offline');render();});
 }
 
 // HELPERS
