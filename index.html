@@ -483,13 +483,18 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
   <div class="mh"><div class="mt2">Import from FinalSite CSV</div><button class="mx" id="mx-import">&times;</button></div>
   <div class="mb">
     <div class="ihint">
-      <strong>Paste your FinalSite export directly -- no cleanup needed.</strong><br><br>
-      Handles the double-header format FinalSite uses. Pulls student info, both parents, all visit dates, financial aid, interests, and all checklist items.<br><br>
-      Re-importing is safe -- existing students are <strong>updated not duplicated.</strong> Photos, reader scores, and meeting notes are preserved on re-import.
+      Works directly with your FinalSite export -- no cleanup needed. Handles any size.<br><br>
+      Re-importing is safe -- existing students are <strong>updated not duplicated.</strong> Photos, notes, and decisions are preserved.
     </div>
-    <div class="fi full" style="margin-top:4px">
-      <label>Paste CSV data here</label>
-      <textarea class="iarea" id="csv-area" placeholder="CONTACT,CONTACT,...,PARENT1,PARENT1,...&#10;name,first_name,last_name,..."></textarea>
+    <input type="file" id="fi-csv" accept=".csv,text/csv" style="display:none"/>
+    <button class="abtn abtn-nv" id="btn-pick-csv" style="width:100%;margin-bottom:10px">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Choose CSV File
+    </button>
+    <div id="csv-filename" style="font-size:11px;color:#9EA4B0;text-align:center;margin-bottom:8px;display:none"></div>
+    <div class="fi full">
+      <label>Or paste CSV text directly</label>
+      <textarea class="iarea" id="csv-area" placeholder="CONTACT,CONTACT,...&#10;name,first_name,last_name,..."></textarea>
     </div>
     <div class="ires" id="ires"></div>
   </div>
@@ -1169,6 +1174,20 @@ document.getElementById('btn-del').addEventListener('click',delStudent);
 document.getElementById('mx-import').addEventListener('click',closeImport);
 document.getElementById('btn-cancel-import').addEventListener('click',closeImport);
 document.getElementById('btn-run-import').addEventListener('click',runImport);
+document.getElementById('btn-pick-csv').addEventListener('click',function(){document.getElementById('fi-csv').click();});
+document.getElementById('fi-csv').addEventListener('change',function(){
+  var file=this.files[0];if(!file)return;
+  var fn=document.getElementById('csv-filename');
+  fn.textContent=file.name+' ('+Math.round(file.size/1024)+'KB)';
+  fn.style.display='block';
+  var reader=new FileReader();
+  reader.onload=function(e){
+    document.getElementById('csv-area').value=e.target.result;
+    showIR('File loaded -- click Import.',true);
+  };
+  reader.readAsText(file);
+  this.value='';
+});
 
 // CSV file picker
 document.getElementById('btn-pick-csv').addEventListener('click',function(){
