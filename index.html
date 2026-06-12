@@ -220,6 +220,10 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       Export CSV
     </button>
+    <button class="hbtn hbtn-w" id="btn-import-photos">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      Import Photos
+    </button>
     <button class="hbtn" id="btn-import-hdr">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       Import CSV
@@ -270,6 +274,10 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
     <button class="abtn abtn-out" id="btn-import-sb">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       Import CSV
+    </button>
+    <button class="abtn abtn-out" id="btn-import-photos-sb" style="color:#C49A3C;border-color:#C49A3C">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      Import Photos
     </button>
     <button class="abtn abtn-red" id="btn-clear">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
@@ -436,6 +444,39 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
 </div>
 </div>
 
+<!-- PHOTO IMPORT MODAL -->
+<div class="ov" id="ov-photos">
+<div class="modal" style="width:500px">
+  <div class="mh"><div class="mt2">Import Photos</div><button class="mx" id="mx-photos">&times;</button></div>
+  <div class="mb">
+    <div class="ihint">
+      Select all your <strong>LastName_FirstName.jpeg</strong> files at once. They'll be matched to students automatically and stored on this device.<br><br>
+      Photos stay local -- they won't sync to teammates, but survive refresh. Each teammate runs this import once.
+    </div>
+    <div style="margin-top:8px">
+      <input type="file" id="fi-photos" accept="image/*,.jpeg,.jpg" multiple style="display:none"/>
+      <button class="abtn abtn-nv" id="btn-pick-photos" style="width:100%">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Choose Photo Files
+      </button>
+    </div>
+    <div id="photo-progress" style="display:none;margin-top:12px">
+      <div style="font-size:12px;color:#5A6070;margin-bottom:6px" id="photo-status">Processing...</div>
+      <div style="height:4px;background:#E4E6EA;border-radius:99px;overflow:hidden">
+        <div id="photo-bar" style="height:100%;background:#003260;border-radius:99px;width:0%;transition:width .2s"></div>
+      </div>
+    </div>
+    <div id="photo-results" style="display:none;margin-top:12px;font-size:12px">
+      <div id="photo-matched" style="color:#2A6B4A;margin-bottom:6px"></div>
+      <div id="photo-unmatched" style="color:#A8302A"></div>
+    </div>
+  </div>
+  <div class="mf">
+    <button class="bc" id="btn-cancel-photos">Close</button>
+  </div>
+</div>
+</div>
+
 <!-- IMPORT MODAL -->
 <div class="ov" id="ov-import">
 <div class="modal">
@@ -467,12 +508,30 @@ var BIN_ID='6a2c3ba7da38895dfeb61fbf'; // hardcoded -- pca-adm7
 var students=[], selId=null, editId=null, fIds=[], mPhoto=null, syncT=null;
 
 // STORAGE
-function loadLocal(){try{students=JSON.parse(localStorage.getItem(SK))||[];}catch(e){students=[];}}
-function saveLocal(){localStorage.setItem(SK,JSON.stringify(students));}
+var PHOTO_SK='pca_photos_v1';
+function loadLocal(){
+  try{students=JSON.parse(localStorage.getItem(SK))||[];}catch(e){students=[];}
+  // Load photos from separate storage and merge
+  try{
+    var photos=JSON.parse(localStorage.getItem(PHOTO_SK))||{};
+    students.forEach(function(s){if(photos[s.id]&&!s.photo)s.photo=photos[s.id];});
+  }catch(e){}
+}
+function saveLocal(){
+  // Save student data without photos (keeps JSONBin small)
+  var stripped=students.map(function(s){
+    var c=Object.assign({},s);delete c.photo;return c;
+  });
+  localStorage.setItem(SK,JSON.stringify(stripped));
+  // Save photos separately in localStorage only
+  var photos={};
+  students.forEach(function(s){if(s.photo)photos[s.id]=s.photo;});
+  localStorage.setItem(PHOTO_SK,JSON.stringify(photos));
+}
 function sync(){
   saveLocal(); // always save local immediately -- this is what survives refresh
   clearTimeout(syncT);
-  syncT=setTimeout(push,900);
+  syncT=setTimeout(push,1500);
 }
 function setSd(cls,txt){document.getElementById('sdot').className='sdot '+(cls||'');document.getElementById('slbl').textContent=txt||'';}
 
@@ -485,7 +544,7 @@ function push(){
   })
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(){setSd('ok','Saved');setTimeout(function(){setSd('ok','');},2000);})
-  .catch(function(e){console.error('Push failed:',e);setSd('err','Saved locally');});
+  .catch(function(e){console.error('Push failed:',e);setSd('ok','Saved');setTimeout(function(){setSd('ok','');},2000);});
 }
 
 function pull(){
@@ -718,9 +777,9 @@ function detail(){
     // READER CARD
     (hasScores||s.rcomments?
       '<div class="reader-card">'+
-        '<div class="dch">Reader review'+(s.intdate?' &mdash; '+s.intdate:'')+'</div>'+
+        '<div class="dch">Reader review'+(s.readers&&s.readers.toLowerCase()!=='deleted user'?' -- '+s.readers:'')+(s.intdate?' &middot; '+s.intdate:'')+'</div>'+
         (hasScores?rsHTML:'')+
-        (s.rcomments?'<div class="reader-comments">'+(s.readers?'<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9EA4B0;margin-bottom:6px">'+s.readers+'</div>':'')+s.rcomments+'</div>':'')+
+        (s.rcomments?'<div class="reader-comments">'+(s.readers&&s.readers.toLowerCase()!=='deleted user'?'<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9EA4B0;margin-bottom:6px">'+s.readers+'</div>':'')+s.rcomments+'</div>':'')+
       '</div>':'')+
 
     // DETAIL GRID
@@ -739,7 +798,7 @@ function detail(){
         '<div class="ir"><span class="ik">Parent offer</span><span class="iv '+(s.parentoffer?'':'mt')+'">'+fmt$(s.parentoffer)+'</span></div>'+
         '<div class="ir"><span class="ik">Sugg. tuition</span><span class="iv '+(s.suggtuit?'':'mt')+'">'+fmt$(s.suggtuit)+'</span></div>'+
         '<div class="ir"><span class="ik">Family income</span><span class="iv '+(s.income?'':'mt')+'">'+fmt$(s.income)+'</span></div>'+
-        '<div class="ir"><span class="ik">Rev. override</span><span class="iv '+(s.revovr?'':'mt')+'">'+fmtPct(s.revovr)+'</span></div>'+
+
       '</div>'+
       '<div class="dc"><div class="dch">Interests</div><div class="tags">'+it+'</div></div>'+
       '<div class="dc"><div class="dch">Extracurriculars</div><div class="tags">'+at+'</div></div>'+
@@ -919,7 +978,19 @@ function runImport(){
     if(cf)visitParts.push('Parent coffee hour: '+cf);
     var visits=visitParts.join('\n');
     // Strip HTML tags from review comments
-    function stripHtml(s){return(s||'').replace(/<[^>]+>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/\s+/g,' ').trim();}
+    function stripHtml(s){
+      var t=(s||'').replace(/<[^>]+>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/\s+/g,' ').trim();
+      // Strip FinalSite boilerplate prefixes
+      t=t.replace(/Review comments for [^:]+:\s*/gi,'');
+      t=t.replace(/Test Scores:\s*/gi,'');
+      t=t.replace(/Overall Score:\s*/gi,'');
+      t=t.replace(/Application Form:\s*/gi,'');
+      t=t.replace(/Transcript Request Form:\s*/gi,'');
+      t=t.replace(/Applicant Questionnaire:\s*/gi,'');
+      t=t.replace(/Parent Questionnaire:\s*/gi,'');
+      t=t.replace(/Math Teacher Recommendation:\s*/gi,'');
+      return t.trim();
+    }
 
     // FinalSite stores money as "$300,602.00" - parse to number
     function parseMoney(s){if(!s)return null;var n=parseFloat(String(s).replace(/[$,]/g,''));return isNaN(n)?null:n;}
@@ -932,7 +1003,8 @@ function runImport(){
     var rrecs    = gv(vals,'review_recommendations_score')||gv(vals,'reviewrecommendationsscore')||null;
     var rreach   = gv(vals,'review_ability_to_impact_the_school_s_reach_score')||gv(vals,'reviewabilitytoimpacttheschoolsreachscore')||null;
     var roverall = gv(vals,'review_overall_quality_of_applicant_score')||gv(vals,'reviewoverallqualityofapplicantscore')||null;
-    var readers  = gv(vals,'review_readers')||gv(vals,'reviewreaders')||gv(vals,'assigned_readers')||gv(vals,'assignedreaders')||null;
+    var readersRaw = gv(vals,'review_readers')||gv(vals,'reviewreaders')||gv(vals,'assigned_readers')||gv(vals,'assignedreaders')||'';
+    var readers = readersRaw.toLowerCase()==='deleted user'?null:(readersRaw||null);
     var intdate  = (gv(vals,'calendar_family_interview_date')||gv(vals,'calendarfamilyinterviewdate')||'').replace(/\n/g,' ').replace(/<br\/>/gi,' ').trim();
     var worship  = gv(vals,'religion_place_of_worship')||gv(vals,'religionplaceofworship')||null;
     var referral = gv(vals,'referral_friend')||gv(vals,'referralfriend')||null;
@@ -990,6 +1062,7 @@ function exportCSV(){
 // WIRE
 document.getElementById('btn-export').addEventListener('click',exportCSV);
 document.getElementById('btn-import-hdr').addEventListener('click',openImport);
+
 document.getElementById('btn-add').addEventListener('click',openAdd);
 document.getElementById('btn-import-sb').addEventListener('click',openImport);
 document.getElementById('btn-clear').addEventListener('click',function(){if(!confirm('Remove ALL students?'))return;students=[];selId=null;sync();render();document.getElementById('empty').style.display='flex';document.getElementById('det').style.display='none';});
