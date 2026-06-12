@@ -939,11 +939,53 @@ function runImport(){
     if(ms)visitParts.push('Middle school visit: '+ms);
     if(cf)visitParts.push('Parent coffee hour: '+cf);
     var visits=visitParts.join('\n');
-    var data={first:first,last:last,school:school,gpa:gpa||null,p1name:p1name||null,p1rel:p1rel||null,p1email:p1email||null,p1phone:p1phone||null,p2name:p2name||null,p2rel:p2rel||null,p2email:p2email||null,p2phone:p2phone||null,interests:uInts,activities:[],status:status,aid:aid,idate:gv(vals,'inquirydate')||gv(vals,'inquiry_date')||gv(vals,'date')||'',src:gv(vals,'source')||gv(vals,'heardfromus')||'',visits:visits||null};
+    // Strip HTML tags from review comments
+    function stripHtml(s){return(s||'').replace(/<[^>]+>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/\s+/g,' ').trim();}
+
+    // FinalSite stores money as "$300,602.00" - parse to number
+    function parseMoney(s){if(!s)return null;var n=parseFloat(String(s).replace(/[$,]/g,''));return isNaN(n)?null:n;}
+
+    var rcomments = stripHtml(gv(vals,'review_comments')||gv(vals,'reviewcomments')||'');
+    var racad    = gv(vals,'review_academic_ability_score')||gv(vals,'reviewacademicabilityscore')||null;
+    var rmission = gv(vals,'review_mission_fit_score')||gv(vals,'reviewmissionfitscore')||null;
+    var rextra   = gv(vals,'review_extracurricular_interest_score')||gv(vals,'reviewextracurricularinterestscore')||null;
+    var rsocial  = gv(vals,'review_social_fit_score')||gv(vals,'reviewsocialfitscore')||null;
+    var rrecs    = gv(vals,'review_recommendations_score')||gv(vals,'reviewrecommendationsscore')||null;
+    var rreach   = gv(vals,'review_ability_to_impact_the_school_s_reach_score')||gv(vals,'reviewabilitytoimpacttheschoolsreachscore')||null;
+    var roverall = gv(vals,'review_overall_quality_of_applicant_score')||gv(vals,'reviewoverallqualityofapplicantscore')||null;
+    var readers  = gv(vals,'review_readers')||gv(vals,'reviewreaders')||gv(vals,'assigned_readers')||gv(vals,'assignedreaders')||null;
+    var intdate  = (gv(vals,'calendar_family_interview_date')||gv(vals,'calendarfamilyinterviewdate')||'').replace(/\n/g,' ').replace(/<br\/>/gi,' ').trim();
+    var worship  = gv(vals,'religion_place_of_worship')||gv(vals,'religionplaceofworship')||null;
+    var referral = gv(vals,'referral_friend')||gv(vals,'referralfriend')||null;
+    var income   = parseMoney(gv(vals,'family_income_cur')||gv(vals,'familyincomecur'));
+    var parentoffer = parseMoney(gv(vals,'amount_aid_requested_num')||gv(vals,'amountaidrequestednum'));
+    var suggtuit = parseMoney(gv(vals,'suggested_tuition_amount_cur')||gv(vals,'suggestedtuitionamountcur'));
+    // gpa_num is the actual GPA from FinalSite
+    var actualgpa = gv(vals,'gpa_num')||gv(vals,'gpanum')||null;
+
+    var data={first:first,last:last,school:school,
+      gpa:gpa||null,
+      actualgpa:actualgpa||null,
+      worship:worship||null,
+      referral:referral||null,
+      p1name:p1name||null,p1rel:p1rel||null,p1email:p1email||null,p1phone:p1phone||null,
+      p2name:p2name||null,p2rel:p2rel||null,p2email:p2email||null,p2phone:p2phone||null,
+      interests:uInts,activities:[],status:status,aid:aid,
+      idate:gv(vals,'inquirydate')||gv(vals,'inquiry_date')||gv(vals,'date')||'',
+      src:gv(vals,'source')||gv(vals,'heardfromus')||'',
+      visits:visits||null,
+      rcomments:rcomments||null,
+      racad:racad||null,rmission:rmission||null,rextra:rextra||null,
+      rsocial:rsocial||null,rrecs:rrecs||null,rreach:rreach||null,roverall:roverall||null,
+      readers:readers||null,intdate:intdate||null,
+      income:income||null,parentoffer:parentoffer||null,suggtuit:suggtuit||null
+    };
     var ex=-1;for(var si=0;si<students.length;si++){if(students[si].first.toLowerCase()===first.toLowerCase()&&students[si].last.toLowerCase()===last.toLowerCase()){ex=si;break;}}
     if(ex>=0){
       // preserve manually entered data on re-import
-      var keep=['photo','notes','decision','t100','racad','rmission','rextra','rsocial','rrecs','rreach','roverall','rcomments','readers','intdate','parentoffer','suggtuit','income','revovr','actualgpa','worship','referral','appform','appfee','trans','grades8th','recadmin','receng','recmath','interview','appphoto','isee'];
+      // On re-import: preserve photo, manual notes/decision/t100, and revovr (manual override)
+      // But DO update reader scores, FA data, worship, referral from FinalSite since they may be newer
+      var keep=['photo','notes','decision','t100','revovr','appform','appfee','trans','grades8th','recadmin','receng','recmath','interview','appphoto','isee'];
       keep.forEach(function(k){if(students[ex][k])data[k]=students[ex][k];});
       Object.assign(students[ex],data);updated++;
     } else{students.push(Object.assign({id:uid()},data));added++;}
