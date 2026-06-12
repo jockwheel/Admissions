@@ -926,131 +926,164 @@ function parseFullCSV(text){
 
 function runImport(){
   var raw=(document.getElementById('csv-area').value||'').trim();
-  if(!raw){showIR('Paste or choose a CSV file first.',false);return;}
-  // For large CSVs show a processing message
-  if(raw.length>100000){showIR('Processing large file...', true);}
-  var rows=parseFullCSV(raw);
-  if(rows.length<2){showIR('Need a header row and one data row.',false);return;}
-  var row1=rows[0],row2=rows[1],dataStart=1,headers=row1.map(nh);
-  var isDouble=row1[0]&&(nh(row1[0])==='contact'||nh(row1[0])==='name');
-  if(isDouble&&row2.length>1){
-    var group='';
-    headers=row1.map(function(g,i){var gn=nh(g);if(gn==='contact')group='';else if(gn==='parent1')group='p1';else if(gn==='parent2')group='p2';return group+nh(row2[i]);});
-    dataStart=2;
-  }
-  function gv(vals,name){var key=nh(name);var i=headers.indexOf(key);return(i>=0&&vals[i])?vals[i].trim():'';}
-  var added=0,updated=0,skipped=0;
-  for(var li=dataStart;li<rows.length;li++){
-    var vals=rows[li];if(!vals.join('').trim())continue;
-    var first=gv(vals,'first_name')||gv(vals,'first')||gv(vals,'firstname');
-    var last=gv(vals,'last_name')||gv(vals,'last')||gv(vals,'lastname');
-    if(!first&&!last){var nr=gv(vals,'name');if(nr&&nr.indexOf(',')>-1){var pt=nr.split(',');last=pt[0].trim();first=pt.slice(1).join(',').trim();}else if(nr&&nr.indexOf(' ')>-1){var sp=nr.trim().split(/\s+/);first=sp[0];last=sp.slice(1).join(' ');}}
-    var pref=gv(vals,'preferred_name')||gv(vals,'preferredname');if(pref)first=pref;
-    if(!first||!last){skipped++;continue;}
-    var school=gv(vals,'current_school_ss')||gv(vals,'currentschoolss')||gv(vals,'school')||'';
-    var schoolOther=gv(vals,'current_school')||gv(vals,'currentschool')||'';
-    if(school.toLowerCase()==='other'&&schoolOther)school=schoolOther;
-    if(!school&&schoolOther)school=schoolOther;
-    var gpa=gv(vals,'gpa_ss')||gv(vals,'estimatedgpa')||gv(vals,'gpa')||null;
-    var intParts=[gv(vals,'inquiry_interests'),gv(vals,'inquiryinterests'),gv(vals,'sports_inquiry_interests_ms'),gv(vals,'sportsinquiryinterestsms'),gv(vals,'sports_inquiry_interests'),gv(vals,'inquiry_interests_other_txt'),gv(vals,'interests')];
-    var allInts=[];intParts.forEach(function(s){if(s)s.split(/[;,|]+/).forEach(function(x){var t=x.trim();if(t)allInts.push(t);});});
-    var uInts=allInts.filter(function(v,i,a){return a.indexOf(v)===i;});
-    var status=gv(vals,'status')||'Inquiry';
-    var grade=gv(vals,'apply_grade')||gv(vals,'applygrade')||null;
-    var aidRaw=gv(vals,'financial_aid_requested')||gv(vals,'financialaidrequested')||gv(vals,'aid')||'';
-    var aid=aidRaw.toLowerCase()==='yes'||aidRaw.toLowerCase()==='true'?'yes':aidRaw.toLowerCase()==='no'||aidRaw.toLowerCase()==='false'?'no':'unknown';
-    // Parent 1
-    var p1first=gv(vals,'p1first_name')||gv(vals,'p1firstname')||'';
-    var p1last=gv(vals,'p1last_name')||gv(vals,'p1lastname')||'';
-    var p1name=(p1first+' '+p1last).trim();
-    var p1email=gv(vals,'p1email')||gv(vals,'email')||gv(vals,'primaryemail')||'';
-    var p1phone=(gv(vals,'p1phone_1_number')||gv(vals,'p1phone1number')||gv(vals,'phone_1_number')||gv(vals,'phone')||'').replace(/\.0$/,'');
-    var p1rel=gv(vals,'p1relationship')||gv(vals,'relationship')||'';
-    // Parent 2
-    var p2first=gv(vals,'p2first_name')||gv(vals,'p2firstname')||'';
-    var p2last=gv(vals,'p2last_name')||gv(vals,'p2lastname')||'';
-    var p2name=(p2first+' '+p2last).trim();
-    var p2email=gv(vals,'p2email')||gv(vals,'email.1')||'';
-    var p2phone=(gv(vals,'p2phone_1_number')||gv(vals,'p2phone1number')||gv(vals,'phone_1_number.1')||'').replace(/\.0$/,'');
-    var p2rel=gv(vals,'p2relationship')||gv(vals,'relationship.1')||'';
-    // Events
-    var visitParts=[];
-    var pd=gv(vals,'calendar_visit_pacifica_day_date')||gv(vals,'visitpacificadaydate')||'';
-    var oh=gv(vals,'activity_open_house_date')||gv(vals,'openhousedate')||'';
-    var ms=gv(vals,'activity_attended_middle_school_visit_date')||'';
-    var cf=gv(vals,'activity_attended_parent_coffee_hour_date')||'';
-    if(pd)visitParts.push('Pacifica Day: '+pd.replace(/\n/g,' ').trim());
-    if(oh)visitParts.push('Open house: '+oh);
-    if(ms)visitParts.push('Middle school visit: '+ms);
-    if(cf)visitParts.push('Parent coffee hour: '+cf);
-    var visits=visitParts.join('\n');
-    // Strip HTML tags from review comments
-    function stripHtml(s){
-      var t=(s||'').replace(/<[^>]+>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/\s+/g,' ').trim();
-      // Strip FinalSite boilerplate prefixes
-      t=t.replace(/Review comments for [^:]+:\s*/gi,'');
-      t=t.replace(/Test Scores:\s*/gi,'');
-      t=t.replace(/Overall Score:\s*/gi,'');
-      t=t.replace(/Application Form:\s*/gi,'');
-      t=t.replace(/Transcript Request Form:\s*/gi,'');
-      t=t.replace(/Applicant Questionnaire:\s*/gi,'');
-      t=t.replace(/Parent Questionnaire:\s*/gi,'');
-      t=t.replace(/Math Teacher Recommendation:\s*/gi,'');
-      return t.trim();
+  if(!raw){showIR('Choose a CSV file or paste data first.',false);return;}
+
+  var ir=document.getElementById('ires');
+  ir.textContent='Parsing...';
+  ir.className='ires ok';
+  ir.style.display='block';
+
+  // Use setTimeout to let the UI update before heavy processing
+  setTimeout(function(){
+    var rows=parseFullCSV(raw);
+    if(rows.length<2){showIR('Need a header row and one data row.',false);return;}
+
+    var row1=rows[0],row2=rows[1],dataStart=1,headers=row1.map(nh);
+    var isDouble=row1[0]&&(nh(row1[0])==='contact'||nh(row1[0])==='name');
+    if(isDouble&&row2.length>1){
+      var group='';
+      headers=row1.map(function(g,i){
+        var gn=nh(g);
+        if(gn==='contact')group='';
+        else if(gn==='parent1')group='p1';
+        else if(gn==='parent2')group='p2';
+        return group+nh(row2[i]);
+      });
+      dataStart=2;
     }
 
-    // FinalSite stores money as "$300,602.00" - parse to number
-    function parseMoney(s){if(!s)return null;var n=parseFloat(String(s).replace(/[$,]/g,''));return isNaN(n)?null:n;}
+    function gv(vals,name){
+      var key=nh(name);
+      var i=headers.indexOf(key);
+      return(i>=0&&vals[i])?vals[i].trim():'';
+    }
 
-    var rcomments = stripHtml(gv(vals,'review_comments')||gv(vals,'reviewcomments')||'');
-    var racad    = gv(vals,'review_academic_ability_score')||gv(vals,'reviewacademicabilityscore')||null;
-    var rmission = gv(vals,'review_mission_fit_score')||gv(vals,'reviewmissionfitscore')||null;
-    var rextra   = gv(vals,'review_extracurricular_interest_score')||gv(vals,'reviewextracurricularinterestscore')||null;
-    var rsocial  = gv(vals,'review_social_fit_score')||gv(vals,'reviewsocialfitscore')||null;
-    var rrecs    = gv(vals,'review_recommendations_score')||gv(vals,'reviewrecommendationsscore')||null;
-    var rreach   = gv(vals,'review_ability_to_impact_the_school_s_reach_score')||gv(vals,'reviewabilitytoimpacttheschoolsreachscore')||null;
-    var roverall = gv(vals,'review_overall_quality_of_applicant_score')||gv(vals,'reviewoverallqualityofapplicantscore')||null;
-    var readersRaw = gv(vals,'review_readers')||gv(vals,'reviewreaders')||gv(vals,'assigned_readers')||gv(vals,'assignedreaders')||'';
-    var readers = readersRaw.toLowerCase()==='deleted user'?null:(readersRaw||null);
-    var intdate  = (gv(vals,'calendar_family_interview_date')||gv(vals,'calendarfamilyinterviewdate')||'').replace(/\n/g,' ').replace(/<br\/>/gi,' ').trim();
-    var worship  = gv(vals,'religion_place_of_worship')||gv(vals,'religionplaceofworship')||null;
-    var referral = gv(vals,'referral_friend')||gv(vals,'referralfriend')||null;
-    var income   = parseMoney(gv(vals,'family_income_cur')||gv(vals,'familyincomecur'));
-    var parentoffer = parseMoney(gv(vals,'amount_aid_requested_num')||gv(vals,'amountaidrequestednum'));
-    var suggtuit = parseMoney(gv(vals,'suggested_tuition_amount_cur')||gv(vals,'suggestedtuitionamountcur'));
-    // gpa_num is the actual GPA from FinalSite
-    var actualgpa = gv(vals,'gpa_num')||gv(vals,'gpanum')||null;
+    var added=0,updated=0,skipped=0;
 
-    var data={first:first,last:last,school:school,
-      gpa:gpa||null,
-      actualgpa:actualgpa||null,
-      grade:grade||null,
-      worship:worship||null,
-      referral:referral||null,
-      p1name:p1name||null,p1rel:p1rel||null,p1email:p1email||null,p1phone:p1phone||null,
-      p2name:p2name||null,p2rel:p2rel||null,p2email:p2email||null,p2phone:p2phone||null,
-      interests:uInts,activities:[],status:status,aid:aid,
-      idate:gv(vals,'inquirydate')||gv(vals,'inquiry_date')||gv(vals,'date')||'',
-      src:gv(vals,'source')||gv(vals,'heardfromus')||'',
-      visits:visits||null,
-      rcomments:rcomments||null,
-      racad:racad||null,rmission:rmission||null,rextra:rextra||null,
-      rsocial:rsocial||null,rrecs:rrecs||null,rreach:rreach||null,roverall:roverall||null,
-      readers:readers||null,intdate:intdate||null,
-      income:income||null,parentoffer:parentoffer||null,suggtuit:suggtuit||null
-    };
-    var ex=-1;for(var si=0;si<students.length;si++){if(students[si].first.toLowerCase()===first.toLowerCase()&&students[si].last.toLowerCase()===last.toLowerCase()){ex=si;break;}}
-    if(ex>=0){
-      // preserve manually entered data on re-import
-      // On re-import: preserve photo, manual notes/decision/t100, and revovr (manual override)
-      // But DO update reader scores, FA data, worship, referral from FinalSite since they may be newer
-      var keep=['photo','notes','decision','star'];
-      keep.forEach(function(k){if(students[ex][k])data[k]=students[ex][k];});
-      Object.assign(students[ex],data);updated++;
-    } else{students.push(Object.assign({id:uid()},data));added++;}
-  }
-  sync();render();showIR('Done -- '+added+' added, '+updated+' updated'+(skipped?' ('+skipped+' skipped)':'.'),true);
+    for(var li=dataStart;li<rows.length;li++){
+      var vals=rows[li];
+      if(!vals.join('').trim())continue;
+
+      var first=gv(vals,'first_name')||gv(vals,'first')||gv(vals,'firstname');
+      var last=gv(vals,'last_name')||gv(vals,'last')||gv(vals,'lastname');
+      if(!first&&!last){
+        var nr=gv(vals,'name');
+        if(nr&&nr.indexOf(',')>-1){var pt=nr.split(',');last=pt[0].trim();first=pt.slice(1).join(',').trim();}
+        else if(nr&&nr.indexOf(' ')>-1){var sp=nr.trim().split(/\s+/);first=sp[0];last=sp.slice(1).join(' ');}
+      }
+      var pref=gv(vals,'preferred_name')||gv(vals,'preferredname');
+      if(pref)first=pref;
+      if(!first||!last){skipped++;continue;}
+
+      var school=gv(vals,'current_school_ss')||gv(vals,'currentschoolss')||gv(vals,'school')||'';
+      var schoolOther=gv(vals,'current_school')||gv(vals,'currentschool')||'';
+      if(school.toLowerCase()==='other'&&schoolOther)school=schoolOther;
+      if(!school&&schoolOther)school=schoolOther;
+
+      var gpa=gv(vals,'gpa_ss')||gv(vals,'estimatedgpa')||gv(vals,'gpa')||null;
+      var actualgpa=gv(vals,'gpa_num')||gv(vals,'gpanum')||null;
+
+      var intParts=[gv(vals,'inquiry_interests'),gv(vals,'inquiryinterests'),
+        gv(vals,'sports_inquiry_interests_ms'),gv(vals,'sportsinquiryinterestsms'),
+        gv(vals,'sports_inquiry_interests'),gv(vals,'inquiry_interests_other_txt'),gv(vals,'interests')];
+      var allInts=[];
+      intParts.forEach(function(s){if(s)s.split(/[;,|]+/).forEach(function(x){var t=x.trim();if(t)allInts.push(t);});});
+      var uInts=allInts.filter(function(v,i,a){return a.indexOf(v)===i;});
+
+      var status=gv(vals,'status')||'Inquiry';
+      var grade=gv(vals,'apply_grade')||gv(vals,'applygrade')||null;
+
+      var aidRaw=gv(vals,'financial_aid_requested')||gv(vals,'financialaidrequested')||gv(vals,'aid')||'';
+      var aid=aidRaw.toLowerCase()==='yes'||aidRaw.toLowerCase()==='true'?'yes':
+              aidRaw.toLowerCase()==='no'||aidRaw.toLowerCase()==='false'?'no':'unknown';
+
+      var p1first=gv(vals,'p1first_name')||gv(vals,'p1firstname')||'';
+      var p1last=gv(vals,'p1last_name')||gv(vals,'p1lastname')||'';
+      var p1name=(p1first+' '+p1last).trim();
+      var p1email=gv(vals,'p1email')||gv(vals,'email')||'';
+      var p1phone=(gv(vals,'p1phone_1_number')||gv(vals,'p1phone1number')||gv(vals,'phone_1_number')||gv(vals,'phone')||'').replace(/\.0$/,'');
+      var p1rel=gv(vals,'p1relationship')||gv(vals,'relationship')||'';
+
+      var p2first=gv(vals,'p2first_name')||gv(vals,'p2firstname')||'';
+      var p2last=gv(vals,'p2last_name')||gv(vals,'p2lastname')||'';
+      var p2name=(p2first+' '+p2last).trim();
+      var p2email=gv(vals,'p2email')||gv(vals,'email.1')||'';
+      var p2phone=(gv(vals,'p2phone_1_number')||gv(vals,'p2phone1number')||gv(vals,'phone_1_number.1')||'').replace(/\.0$/,'');
+      var p2rel=gv(vals,'p2relationship')||gv(vals,'relationship.1')||'';
+
+      var visitParts=[];
+      var pd=(gv(vals,'calendar_visit_pacifica_day_date')||'').replace(/\n/g,' ').trim();
+      var oh=gv(vals,'activity_open_house_date')||'';
+      var ms=gv(vals,'activity_attended_middle_school_visit_date')||'';
+      var cf=gv(vals,'activity_attended_parent_coffee_hour_date')||'';
+      if(pd)visitParts.push('Pacifica Day: '+pd);
+      if(oh)visitParts.push('Open house: '+oh);
+      if(ms)visitParts.push('Middle school visit: '+ms);
+      if(cf)visitParts.push('Parent coffee hour: '+cf);
+
+      function stripHtmlInline(s){
+        return(s||'').replace(/<[^>]+>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&#39;/g,"'").replace(/&quot;/g,'"')
+          .replace(/Review comments for [^:]+:\s*/gi,'').replace(/Test Scores:\s*/gi,'').replace(/Overall Score:\s*/gi,'')
+          .replace(/Application Form:\s*/gi,'').replace(/\s+/g,' ').trim();
+      }
+
+      var rcomments=stripHtmlInline(gv(vals,'review_comments')||gv(vals,'reviewcomments')||'');
+      var racad=gv(vals,'review_academic_ability_score')||null;
+      var rmission=gv(vals,'review_mission_fit_score')||null;
+      var rextra=gv(vals,'review_extracurricular_interest_score')||null;
+      var rsocial=gv(vals,'review_social_fit_score')||null;
+      var rrecs=gv(vals,'review_recommendations_score')||null;
+      var rreach=gv(vals,'review_ability_to_impact_the_school_s_reach_score')||null;
+      var roverall=gv(vals,'review_overall_quality_of_applicant_score')||null;
+      var readersRaw=gv(vals,'review_readers')||gv(vals,'reviewreaders')||'';
+      var readers=readersRaw.toLowerCase()==='deleted user'?null:(readersRaw||null);
+      var intdate=(gv(vals,'calendar_family_interview_date')||'').replace(/\n/g,' ').replace(/<br\/>/gi,' ').trim();
+      var worship=gv(vals,'religion_place_of_worship')||null;
+      var referral=gv(vals,'referral_friend')||null;
+
+      function parseMoney(s){if(!s)return null;var n=parseFloat(String(s).replace(/[$,]/g,''));return isNaN(n)?null:n;}
+      var income=parseMoney(gv(vals,'family_income_cur'));
+      var parentoffer=parseMoney(gv(vals,'amount_aid_requested_num'));
+      var suggtuit=parseMoney(gv(vals,'suggested_tuition_amount_cur'));
+
+      var data={
+        first:first,last:last,school:school,gpa:gpa||null,actualgpa:actualgpa||null,
+        grade:grade||null,worship:worship||null,referral:referral||null,
+        p1name:p1name||null,p1rel:p1rel||null,p1email:p1email||null,p1phone:p1phone||null,
+        p2name:p2name||null,p2rel:p2rel||null,p2email:p2email||null,p2phone:p2phone||null,
+        interests:uInts,activities:[],status:status,aid:aid,
+        idate:gv(vals,'inquirydate')||gv(vals,'inquiry_date')||gv(vals,'date')||'',
+        src:gv(vals,'source')||gv(vals,'heardfromus')||'',
+        visits:visitParts.join('\n')||null,
+        rcomments:rcomments||null,
+        racad:racad||null,rmission:rmission||null,rextra:rextra||null,
+        rsocial:rsocial||null,rrecs:rrecs||null,rreach:rreach||null,roverall:roverall||null,
+        readers:readers||null,intdate:intdate||null,
+        income:income||null,parentoffer:parentoffer||null,suggtuit:suggtuit||null
+      };
+
+      var ex=-1;
+      for(var si=0;si<students.length;si++){
+        if(students[si].first.toLowerCase()===first.toLowerCase()&&
+           students[si].last.toLowerCase()===last.toLowerCase()){ex=si;break;}
+      }
+      if(ex>=0){
+        var keep=['photo','notes','decision','star'];
+        keep.forEach(function(k){if(students[ex][k])data[k]=students[ex][k];});
+        Object.assign(students[ex],data);
+        updated++;
+      } else {
+        students.push(Object.assign({id:uid()},data));
+        added++;
+      }
+    }
+
+    sync();render();
+    showIR('Done -- '+added+' added, '+updated+' updated'+(skipped?' ('+skipped+' skipped)':'.'),true);
+  },50);
 }
+
+
 function showIR(msg,ok){var e=document.getElementById('ires');e.textContent=msg;e.className='ires '+(ok?'ok':'err');e.style.display='block';}
 
 // PHOTO IMPORT
