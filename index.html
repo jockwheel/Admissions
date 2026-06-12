@@ -542,10 +542,12 @@ function setSd(cls,txt){document.getElementById('sdot').className='sdot '+(cls||
 
 function push(){
   setSd('busy','Saving...');
+  // Strip photos before sending to cloud (photos stay local only)
+  var toSync=students.map(function(s){var c=Object.assign({},s);delete c.photo;return c;});
   fetch('https://api.jsonbin.io/v3/b/'+BIN_ID,{
     method:'PUT',
     headers:{'Content-Type':'application/json','X-Master-Key':API_KEY},
-    body:JSON.stringify({s:students})
+    body:JSON.stringify({s:toSync})
   })
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(){setSd('ok','Saved');setTimeout(function(){setSd('ok','');},2000);})
