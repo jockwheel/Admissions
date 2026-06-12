@@ -921,7 +921,9 @@ function parseFullCSV(text){
 
 function runImport(){
   var raw=(document.getElementById('csv-area').value||'').trim();
-  if(!raw){showIR('Paste CSV data first.',false);return;}
+  if(!raw){showIR('Paste or choose a CSV file first.',false);return;}
+  // For large CSVs show a processing message
+  if(raw.length>100000){showIR('Processing large file...', true);}
   var rows=parseFullCSV(raw);
   if(rows.length<2){showIR('Need a header row and one data row.',false);return;}
   var row1=rows[0],row2=rows[1],dataStart=1,headers=row1.map(nh);
@@ -1167,6 +1169,25 @@ document.getElementById('btn-del').addEventListener('click',delStudent);
 document.getElementById('mx-import').addEventListener('click',closeImport);
 document.getElementById('btn-cancel-import').addEventListener('click',closeImport);
 document.getElementById('btn-run-import').addEventListener('click',runImport);
+
+// CSV file picker
+document.getElementById('btn-pick-csv').addEventListener('click',function(){
+  document.getElementById('fi-csv').click();
+});
+document.getElementById('fi-csv').addEventListener('change',function(){
+  var file=this.files[0];
+  if(!file)return;
+  var fn=document.getElementById('csv-filename');
+  fn.textContent=file.name+' ('+Math.round(file.size/1024)+'KB)';
+  fn.style.display='block';
+  var reader=new FileReader();
+  reader.onload=function(e){
+    document.getElementById('csv-area').value=e.target.result;
+    showIR('File loaded -- click Import to process.',true);
+  };
+  reader.readAsText(file);
+  this.value='';
+});
 document.getElementById('q').addEventListener('input',render);
 document.getElementById('f1').addEventListener('change',render);
 document.getElementById('f2').addEventListener('change',render);
