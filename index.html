@@ -166,16 +166,7 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
 .nbox.mt{color:#9EA4B0;font-style:italic;}
 
 /* CHECKLIST */
-.chklist{display:flex;flex-direction:column;gap:6px;}
-.chk{display:flex;align-items:center;gap:9px;padding:6px 9px;border-radius:5px;border:1px solid #E4E6EA;cursor:pointer;}
-.chk:hover{background:#F2F5FA;}
-.chk.done{border-color:#E6F4ED;background:#E6F4ED;}
-.cbox{width:16px;height:16px;border-radius:3px;border:2px solid #9EA4B0;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.chk.done .cbox{background:#2A6B4A;border-color:#2A6B4A;}
-.clbl{font-size:11px;font-weight:600;flex:1;}
-.chk.done .clbl{color:#2A6B4A;}
-.cst{font-size:9px;font-weight:700;color:#9EA4B0;text-transform:uppercase;letter-spacing:.06em;}
-.chk.done .cst{color:#2A6B4A;}
+
 
 /* OVERLAY / MODAL */
 .ov{display:none;position:fixed;inset:0;background:rgba(0,20,50,.5);z-index:99000;align-items:center;justify-content:center;}
@@ -435,49 +426,7 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
     </div>
     <div class="fi full"><label>Visit / event notes</label><textarea id="e-visits" placeholder="Pacifica Day, open house dates, campus visits..."></textarea></div>
 
-    <div id="app-sec" style="display:none">
-      <div class="msep">Application checklist</div>
-      <div class="fr">
-        <div class="fi"><label>Application form</label>
-          <select id="e-appform"><option value="">--</option><option>Not submitted</option><option>Submitted</option></select>
-        </div>
-        <div class="fi"><label>Application fee</label>
-          <select id="e-appfee"><option value="">--</option><option>Not paid</option><option>Paid</option></select>
-        </div>
-      </div>
-      <div class="fr">
-        <div class="fi"><label>Transcript</label>
-          <select id="e-trans"><option value="">--</option><option>Not requested</option><option>Requested</option><option>Received</option></select>
-        </div>
-        <div class="fi"><label>8th grade grades</label>
-          <select id="e-8thgrades"><option value="">--</option><option>Not received</option><option>Received</option></select>
-        </div>
-      </div>
-      <div class="fr">
-        <div class="fi"><label>School admin rec</label>
-          <select id="e-rec-admin"><option value="">--</option><option>Not requested</option><option>Requested</option><option>Received</option></select>
-        </div>
-        <div class="fi"><label>English teacher rec</label>
-          <select id="e-rec-eng"><option value="">--</option><option>Not requested</option><option>Requested</option><option>Received</option></select>
-        </div>
-      </div>
-      <div class="fr">
-        <div class="fi"><label>Math teacher rec</label>
-          <select id="e-rec-math"><option value="">--</option><option>Not requested</option><option>Requested</option><option>Received</option></select>
-        </div>
-        <div class="fi"><label>Family interview</label>
-          <select id="e-interview"><option value="">--</option><option>Not scheduled</option><option>Scheduled</option><option>Complete</option></select>
-        </div>
-      </div>
-      <div class="fr">
-        <div class="fi"><label>Applicant photo</label>
-          <select id="e-appphoto"><option value="">--</option><option>Not submitted</option><option>Submitted</option></select>
-        </div>
-        <div class="fi"><label>ISEE/HSPT</label>
-          <select id="e-isee"><option value="">--</option><option>Not submitted</option><option>Submitted</option></select>
-        </div>
-      </div>
-    </div>
+
   </div>
   <div class="mf">
     <button class="bdel" id="btn-del" style="display:none">Remove</button>
@@ -512,8 +461,9 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
 
 <script>
 (function(){
-var SK='pca_v8', BIN_SK='pca_bin8';
+var SK='pca_v8';
 var API_KEY='$2a$10$iUdtSGo4J9aBaBvDeIXfOeV3OsFG5KY0lLIErpqxeO.w/WIX/iJVi';
+var BIN_ID='6a2c3ba7da38895dfeb61fbf'; // hardcoded -- pca-adm7
 var students=[], selId=null, editId=null, fIds=[], mPhoto=null, syncT=null;
 
 // STORAGE
@@ -527,39 +477,21 @@ function sync(){
 function setSd(cls,txt){document.getElementById('sdot').className='sdot '+(cls||'');document.getElementById('slbl').textContent=txt||'';}
 
 function push(){
-  var bin=localStorage.getItem(BIN_SK)||'';
-  var url=bin?'https://api.jsonbin.io/v3/b/'+bin:'https://api.jsonbin.io/v3/b';
-  var method=bin?'PUT':'POST';
-  var h={'Content-Type':'application/json','X-Master-Key':API_KEY};
-  if(!bin){h['X-Bin-Name']='pca-adm8';h['X-Bin-Private']='true';}
   setSd('busy','Saving...');
-  fetch(url,{method:method,headers:h,body:JSON.stringify({s:students})})
-    .then(function(r){
-      if(!r.ok)throw new Error('HTTP '+r.status);
-      return r.json();
-    })
-    .then(function(d){
-      if(!bin&&d.metadata&&d.metadata.id){
-        localStorage.setItem(BIN_SK,d.metadata.id);
-        // Update key to new bin name
-        localStorage.setItem('pca_bin8',d.metadata.id);
-      }
-      setSd('ok','Saved');
-      setTimeout(function(){setSd('ok','');},2000);
-    })
-    .catch(function(e){
-      setSd('err','Offline - saved locally');
-      // Retry once after 3s
-      setTimeout(function(){
-        if(navigator&&navigator.onLine)push();
-      },3000);
-    });
+  fetch('https://api.jsonbin.io/v3/b/'+BIN_ID,{
+    method:'PUT',
+    headers:{'Content-Type':'application/json','X-Master-Key':API_KEY},
+    body:JSON.stringify({s:students})
+  })
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(function(){setSd('ok','Saved');setTimeout(function(){setSd('ok','');},2000);})
+  .catch(function(e){console.error('Push failed:',e);setSd('err','Saved locally');});
 }
 
 function pull(){
   // Step 1: always load & render from localStorage immediately
   loadLocal();render();
-  var bin=localStorage.getItem(BIN_SK)||'';
+  var bin=localStorage.getItem(BIN_ID)||'';
   if(!bin){
     // First time -- if we have local data push it to create the bin
     if(students.length>0){push();}
@@ -728,19 +660,7 @@ function detail(){
   var it=(s.interests||[]).map(function(x){return'<span class="ti">'+x+'</span>';}).join('')||'<span class="notag">None listed</span>';
   var at=(s.activities||[]).map(function(x){return'<span class="ta">'+x+'</span>';}).join('')||'<span class="notag">None listed</span>';
 
-  // Checklist
-  var chkItems=[
-    {k:'appform',lbl:'Application form'},{k:'appfee',lbl:'Application fee'},
-    {k:'trans',lbl:'Transcript'},{k:'grades8th',lbl:'8th grade grades'},
-    {k:'recadmin',lbl:'Admin rec'},{k:'receng',lbl:'English teacher rec'},
-    {k:'recmath',lbl:'Math teacher rec'},{k:'interview',lbl:'Family interview'},
-    {k:'appphoto',lbl:'Applicant photo'},{k:'isee',lbl:'ISEE/HSPT'}
-  ];
-  var chkH='';
-  for(var ci=0;ci<chkItems.length;ci++){
-    var ck=chkItems[ci];var done=s[ck.k]==='Submitted'||s[ck.k]==='Paid'||s[ck.k]==='Received'||s[ck.k]==='Complete';
-    chkH+='<div class="chk'+(done?' done':'')+'" data-sid="'+s.id+'" data-key="'+ck.k+'"><div class="cbox">'+(done?'<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':'')+'</div><span class="clbl">'+ck.lbl+'</span><span class="cst">'+(s[ck.k]||'--')+'</span></div>';
-  }
+
 
   el.innerHTML=
     '<div class="dnav"><button class="nb" id="bnp"'+(idx<=0?' disabled':'')+'>&#8249; Previous</button><span class="np">'+(idx+1)+' of '+tot+'</span><button class="nb" id="bnn"'+(idx>=tot-1?' disabled':'')+'>Next &#8250;</button></div>'+
@@ -824,7 +744,7 @@ function detail(){
       '<div class="dc"><div class="dch">Interests</div><div class="tags">'+it+'</div></div>'+
       '<div class="dc"><div class="dch">Extracurriculars</div><div class="tags">'+at+'</div></div>'+
       (s.visits?'<div class="dc full"><div class="dch">Campus visits &amp; events</div><div class="nbox">'+s.visits+'</div></div>':'')+
-      (app?'<div class="dc full"><div class="dch">Application checklist</div><div class="chklist">'+chkH+'</div></div>':'')+
+
     '</div>';
 
   // Wire dynamic buttons
@@ -865,16 +785,7 @@ function detail(){
     ne.addEventListener('keydown',function(e){if(e.key==='Escape')ne.blur();});
   }
 
-  // Checklist items
-  var chks=el.querySelectorAll('.chk');
-  for(var ci2=0;ci2<chks.length;ci2++){
-    chks[ci2].addEventListener('click',function(){
-      var sid=this.getAttribute('data-sid'),k=this.getAttribute('data-key');
-      var cyc={'':'Submitted','Not submitted':'Submitted','Not requested':'Requested','Requested':'Received','Received':'','Not paid':'Paid','Paid':'','Not scheduled':'Scheduled','Scheduled':'Complete','Complete':''};
-      for(var i=0;i<students.length;i++){if(students[i].id===sid){students[i][k]=cyc[students[i][k]||'']||'';break;}}
-      sync();detail();
-    });
-  }
+
 }
 
 // MODAL EDIT
@@ -902,7 +813,7 @@ function openEdit(id){
   var sm={'e-status':s.status||'Inquiry','e-decision':s.decision||'','e-aid':s.aid||'unknown','e-grade':s.grade||'','e-src':s.src||'','e-appform':s.appform||'','e-appfee':s.appfee||'','e-trans':s.trans||'','e-8thgrades':s.grades8th||'','e-rec-admin':s.recadmin||'','e-rec-eng':s.receng||'','e-rec-math':s.recmath||'','e-interview':s.interview||'','e-appphoto':s.appphoto||'','e-isee':s.isee||''};
   Object.keys(sm).forEach(function(k){var e=document.getElementById(k);if(e)e.value=sm[k];});
   if(mPhoto){document.getElementById('pp').innerHTML='<img src="'+mPhoto+'"/>';document.getElementById('rm-photo').style.display='block';}else resetPP();
-  document.getElementById('app-sec').style.display=isApp(s)?'block':'none';
+
   document.getElementById('ov-edit').classList.add('open');
 }
 
@@ -915,7 +826,7 @@ function saveStudent(){
   if(!first||!last){alert('First and last name are required.');return;}
   var status=document.getElementById('e-status').value;
   var d={first:first,last:last,school:document.getElementById('e-school').value.trim(),worship:document.getElementById('e-worship').value.trim(),gpa:document.getElementById('e-gpa').value||null,actualgpa:document.getElementById('e-actualgpa').value||null,referral:document.getElementById('e-referral').value.trim(),grade:document.getElementById('e-grade').value,notes:document.getElementById('e-notes').value.trim(),parentoffer:document.getElementById('e-parentoffer').value||null,suggtuit:document.getElementById('e-suggtuit').value||null,income:document.getElementById('e-income').value||null,p1name:document.getElementById('e-p1name').value.trim(),p1rel:document.getElementById('e-p1rel').value.trim(),p1email:document.getElementById('e-p1email').value.trim(),p1phone:document.getElementById('e-p1phone').value.trim(),p2name:document.getElementById('e-p2name').value.trim(),p2rel:document.getElementById('e-p2rel').value.trim(),p2email:document.getElementById('e-p2email').value.trim(),p2phone:document.getElementById('e-p2phone').value.trim(),interests:tags(document.getElementById('e-int').value),activities:tags(document.getElementById('e-act').value),readers:document.getElementById('e-readers').value.trim(),intdate:document.getElementById('e-intdate').value.trim(),racad:document.getElementById('e-r-acad').value||null,rmission:document.getElementById('e-r-mission').value||null,rextra:document.getElementById('e-r-extra').value||null,rsocial:document.getElementById('e-r-social').value||null,rrecs:document.getElementById('e-r-recs').value||null,rreach:document.getElementById('e-r-reach').value||null,roverall:document.getElementById('e-r-overall').value||null,rcomments:document.getElementById('e-rcomments').value.trim(),status:status,decision:document.getElementById('e-decision').value,aid:document.getElementById('e-aid').value,idate:document.getElementById('e-idate').value.trim(),src:document.getElementById('e-src').value,visits:document.getElementById('e-visits').value.trim(),photo:mPhoto||null};
-  if(isApp({status:status})){d.appform=document.getElementById('e-appform').value;d.appfee=document.getElementById('e-appfee').value;d.trans=document.getElementById('e-trans').value;d.grades8th=document.getElementById('e-8thgrades').value;d.recadmin=document.getElementById('e-rec-admin').value;d.receng=document.getElementById('e-rec-eng').value;d.recmath=document.getElementById('e-rec-math').value;d.interview=document.getElementById('e-interview').value;d.appphoto=document.getElementById('e-appphoto').value;d.isee=document.getElementById('e-isee').value;}
+
   if(editId){for(var i=0;i<students.length;i++){if(students[i].id===editId){Object.assign(students[i],d);break;}}selId=editId;}
   else{var ns=Object.assign({id:uid()},d);students.push(ns);selId=ns.id;}
   sync();closeEdit();render();detail();
@@ -1054,7 +965,7 @@ function runImport(){
       // preserve manually entered data on re-import
       // On re-import: preserve photo, manual notes/decision/t100, and revovr (manual override)
       // But DO update reader scores, FA data, worship, referral from FinalSite since they may be newer
-      var keep=['photo','notes','decision','star','appform','appfee','trans','grades8th','recadmin','receng','recmath','interview','appphoto','isee'];
+      var keep=['photo','notes','decision','star'];
       keep.forEach(function(k){if(students[ex][k])data[k]=students[ex][k];});
       Object.assign(students[ex],data);updated++;
     } else{students.push(Object.assign({id:uid()},data));added++;}
