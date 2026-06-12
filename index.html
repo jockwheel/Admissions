@@ -55,7 +55,7 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
 .spill{font-size:9px;font-weight:700;padding:2px 5px;border-radius:99px;flex-shrink:0;white-space:nowrap;}
 .sgpa{font-size:11px;font-weight:700;flex-shrink:0;}
 .gh{color:#2A6B4A;}.gm{color:#003260;}.gl{color:#A8302A;}
-.t100-dot{width:6px;height:6px;border-radius:50%;background:#C49A3C;flex-shrink:0;}
+
 .sb-bot{padding:.7rem .85rem;border-top:1px solid #E4E6EA;display:flex;flex-direction:column;gap:5px;}
 .abtn{width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;border-radius:5px;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border:none;cursor:pointer;}
 .abtn-nv{background:#003260;color:#fff;}.abtn-nv:hover{background:#004080;}
@@ -250,7 +250,10 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
       <option value="">All students</option>
       <option value="inquiry">Inquiries</option>
       <option value="applicant">Applicants</option>
-      <option value="t100">T100 only</option>
+      <option value="review">In Review</option>
+      <option value="decision">Decision</option>
+      <option value="enrolled">Enrolled</option>
+      <option value="star">&#9733; Starred</option>
     </select>
     <select class="fsel" id="f2">
       <option value="">All decisions</option>
@@ -379,7 +382,7 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
       <div class="fi"><label>Suggested tuition ($)</label><input type="number" id="e-suggtuit" placeholder="e.g. 28000"/></div>
       <div class="fi"><label>Family income ($)</label><input type="number" id="e-income" placeholder="e.g. 120000"/></div>
     </div>
-    <div class="fi full"><label>Revenue override %</label><input type="number" id="e-revovr" placeholder="e.g. 0.85" min="0" max="1" step="0.001"/></div>
+
 
     <div class="msep">Parent / Guardian</div>
     <div class="fr">
@@ -548,7 +551,21 @@ var PALS=[['#EDF1F8','#003260'],['#E6F4ED','#2A6B4A'],['#FAF3E0','#8A5C00'],['#F
 function pal(s){return PALS[((s.last||'A').charCodeAt(0)+(s.first||'A').charCodeAt(0))%PALS.length];}
 function ini(s){return((s.first||'?')[0]+(s.last||'?')[0]).toUpperCase();}
 function gpc(g){if(!g)return'';var n=parseFloat(g);return n>=3.7?'gh':n>=3.0?'gm':'gl';}
-function isApp(s){var app=['Applicant','Application On Hold','Application Complete','Review In Progress','Waitlisted','Denied','Accepted','Did Not Enroll','Financial Aid Waitlist','Parent Declined','Enrollment In Progress','Enrolled','Deferred','Application Withdrawn'];return app.indexOf(s.status||'')>-1;}
+function statusBucket(s){
+  var st=s.status||'';
+  var inq=['Inquiry','Inquiry Completed','Inactive Inquiry'];
+  var app=['Applicant','Application On Hold','Application Withdrawn','Deferred','Inactive App','Interview Not Granted'];
+  var rev=['Application Complete','Review In Progress'];
+  var dec=['Waitlisted','Denied','Accepted','Financial Aid Waitlist','Financial Aid Waitlisting','Parent Declined','Did Not Enroll'];
+  var enr=['Enrollment In Progress','Enrolled','Unenrolling'];
+  if(inq.indexOf(st)>-1)return'inquiry';
+  if(app.indexOf(st)>-1)return'applicant';
+  if(rev.indexOf(st)>-1)return'review';
+  if(dec.indexOf(st)>-1)return'decision';
+  if(enr.indexOf(st)>-1)return'enrolled';
+  return'inquiry';
+}
+function isApp(s){return statusBucket(s)!=='inquiry';}
 function tags(str){return(str||'').split(',').map(function(x){return x.trim();}).filter(Boolean);}
 function fmt$(n){if(!n&&n!==0)return'--';return'$'+Number(n).toLocaleString();}
 function fmtPct(n){if(!n)return'--';return(parseFloat(n)*100).toFixed(1)+'%';}
@@ -579,9 +596,8 @@ function filtered(){
   return sorted().filter(function(s){
     var blob=[s.first,s.last,s.school,s.p1name,s.p2name,s.readers].concat(s.interests||[]).join(' ').toLowerCase();
     if(q&&blob.indexOf(q)<0)return false;
-    if(f1==='inquiry'&&isApp(s))return false;
-    if(f1==='applicant'&&!isApp(s))return false;
-    if(f1==='t100'&&s.t100!=='yes')return false;
+    if(f1&&f1!=='star'&&statusBucket(s)!==f1)return false;
+    if(f1==='star'&&s.star!=='yes')return false;
     if(f2&&(s.decision||'').indexOf(f2)<0)return false;
     if(f3==='yes'&&s.aid!=='yes')return false;
     if(f3==='no'&&s.aid!=='no')return false;
@@ -594,12 +610,12 @@ function render(){
   var list=filtered();fIds=list.map(function(s){return s.id;});
   var inq=list.filter(function(s){return!isApp(s);}).length;
   var app=list.filter(function(s){return isApp(s);}).length;
-  var t100=list.filter(function(s){return s.t100==='yes';}).length;
+  var t100=list.filter(function(s){return s.star==='yes';}).length;
   var fa=list.filter(function(s){return s.aid==='yes';}).length;
   document.getElementById('stats').innerHTML=
     '<div class="sc"><div class="n">'+inq+'</div><div class="l">Inquiries</div></div>'+
     '<div class="sc"><div class="n">'+app+'</div><div class="l">Applicants</div></div>'+
-    '<div class="sc"><div class="n">'+t100+'</div><div class="l">T100</div></div>'+
+    '<div class="sc"><div class="n">'+t100+'</div><div class="l">Starred</div></div>'+
     '<div class="sc"><div class="n">'+fa+'</div><div class="l">Aid req.</div></div>';
   var el=document.getElementById('slist');
   if(!list.length){el.innerHTML='<div style="padding:1rem;color:#9EA4B0;text-align:center;font-size:12px">No results</div>';return;}
@@ -611,11 +627,11 @@ function render(){
     var gpa=s.actualgpa||s.gpa;
     var gc=gpa?gpc(gpa):'';
     var gpaH=gpa?'<span class="sgpa '+gc+'">'+parseFloat(gpa).toFixed(1)+'</span>':'';
-    var t100dot=s.t100==='yes'?'<div class="t100-dot"></div>':'';
+    var starH=s.star==='yes'?'<span style="color:#C49A3C;font-size:13px;line-height:1;flex-shrink:0">&#9733;</span>':'';
     // decision pill
     var decColors={'In':'#2A6B4A','Win':'#1A5CA8','Need to Win':'#8A5C00','Deny':'#A8302A','Waitlist':'#5A3A8A'};
     var dec=s.decision&&decColors[s.decision]?'<span class="spill" style="background:'+decColors[s.decision]+'22;color:'+decColors[s.decision]+'">'+s.decision.split(' ')[0]+'</span>':'';
-    h+='<div class="srow'+act+'" data-id="'+s.id+'">'+avEl(s)+t100dot+'<span class="sn">'+s.last+', '+s.first+'</span>'+dec+gpaH+'</div>';
+    h+='<div class="srow'+act+'" data-id="'+s.id+'">'+avEl(s)+starH+'<span class="sn">'+s.last+', '+s.first+'</span>'+dec+gpaH+'</div>';
   }
   el.innerHTML=h;
   var rows=el.querySelectorAll('.srow');
@@ -697,13 +713,13 @@ function detail(){
       '<div class="hero-top">'+ph+
         '<div>'+
           '<div class="hname">'+s.last+', '+s.first+'</div>'+
-          '<div class="hschool">'+(s.school||'School not provided')+(s.worship?' &middot; '+s.worship:'')+'</div>'+
+          '<div class="hschool">'+(s.school||'School not provided')+(s.worship?' &middot; '+s.worship:'')+(s.grade?' &middot; <strong>'+s.grade+'</strong>':'')+'</div>'+
           (s.p1name?'<div class="hcontact">'+s.p1name+(s.p1rel?' ('+s.p1rel+')':'')+'&nbsp;&middot;&nbsp;'+(s.p1email||s.p1phone||'')+'</div>':'')+
           (s.p2name?'<div class="hcontact">'+s.p2name+(s.p2rel?' ('+s.p2rel+')':'')+'&nbsp;&middot;&nbsp;'+(s.p2email||s.p2phone||'')+'</div>':'')+
           '<div class="hbdgs">'+
             '<span class="b '+statusBadgeClass(stl)+'">'+stl+'</span>'+
             '<span class="b '+aidcls+'">'+aidl+'</span>'+
-            (s.t100==='yes'?'<span class="b bt100">T100</span>':'')+
+            '<button id="hstar" style="padding:4px 10px;border-radius:99px;font-size:14px;border:1px solid '+(s.star==='yes'?'#C49A3C':'rgba(255,255,255,.2)')+';background:'+(s.star==='yes'?'rgba(196,154,60,.25)':'transparent')+';color:'+(s.star==='yes'?'#C49A3C':'rgba(255,255,255,.4)')+';cursor:pointer" data-sid="'+s.id+'">'+(s.star==='yes'?'&#9733;':'&#9734;')+'</button>'+
             (s.readers?'<span class="b bs-review">'+s.readers+'</span>':'')+
           '</div>'+
           '<div class="decision-row">'+decBtns+'</div>'+
@@ -725,20 +741,28 @@ function detail(){
       '</div>'+
     '</div>'+
 
-    // FA STRIP
-    '<div class="fa-strip">'+
-      '<div class="fa-cell"><div class="fl">Parent offer</div><div class="fn">'+fmt$(s.parentoffer)+'</div></div>'+
-      '<div class="fa-cell"><div class="fl">Sugg. tuition</div><div class="fn">'+fmt$(s.suggtuit)+'</div></div>'+
-      '<div class="fa-cell"><div class="fl">Family income</div><div class="fn">'+fmt$(s.income)+'</div></div>'+
-      '<div class="fa-cell"><div class="fl">Rev. override</div><div class="fn">'+fmtPct(s.revovr)+'</div></div>'+
-    '</div>'+
+    // FA STRIP - Full Pay or Aid
+    (s.aid==='no'?
+      '<div class="fa-strip" style="grid-template-columns:1fr">'+
+        '<div class="fa-cell" style="background:#FAF3E0;display:flex;align-items:center;gap:10px">'+
+          '<span style="font-size:22px">&#9679;</span>'+
+          '<div><div class="fn" style="color:#8A5C00;font-size:22px">Full Pay</div><div class="fl">No financial aid requested</div></div>'+
+        '</div>'+
+      '</div>':
+      '<div class="fa-strip">'+
+        '<div class="fa-cell"><div class="fl">Parent offer</div><div class="fn">'+fmt$(s.parentoffer)+'</div></div>'+
+        '<div class="fa-cell"><div class="fl">Sugg. tuition</div><div class="fn">'+fmt$(s.suggtuit)+'</div></div>'+
+        '<div class="fa-cell"><div class="fl">Family income</div><div class="fn">'+fmt$(s.income)+'</div></div>'+
+        '<div class="fa-cell"><div class="fl">Aid requested</div><div class="fn" style="color:'+(s.aid==='yes'?'#8A5C00':'#9EA4B0')+'">'+(s.aid==='yes'?'Yes':'Unknown')+'</div></div>'+
+      '</div>'
+    )+''+
 
     // READER CARD
     (hasScores||s.rcomments?
       '<div class="reader-card">'+
-        '<div class="dch">Reader review'+(s.readers?' &mdash; '+s.readers:'')+(s.intdate?' &middot; '+s.intdate:'')+'</div>'+
+        '<div class="dch">Reader review'+(s.intdate?' &mdash; '+s.intdate:'')+'</div>'+
         (hasScores?rsHTML:'')+
-        (s.rcomments?'<div class="reader-comments">'+s.rcomments+'</div>':'')+
+        (s.rcomments?'<div class="reader-comments">'+(s.readers?'<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9EA4B0;margin-bottom:6px">'+s.readers+'</div>':'')+s.rcomments+'</div>':'')+
       '</div>':'')+
 
     // DETAIL GRID
@@ -770,6 +794,11 @@ function detail(){
   w('bnp',function(){var i=fIds.indexOf(selId);if(fIds[i-1])pick(fIds[i-1]);});
   w('bnn',function(){var i=fIds.indexOf(selId);if(fIds[i+1])pick(fIds[i+1]);});
   w('bhe',function(){openEdit(selId);});
+  w('hstar',function(){
+    var sid=this.getAttribute('data-sid');
+    for(var i=0;i<students.length;i++){if(students[i].id===sid){students[i].star=students[i].star==='yes'?'':'yes';break;}}
+    sync();render();detail();
+  });
   w('bpr',function(){if(confirm('Move to Applicant?')){for(var i=0;i<students.length;i++){if(students[i].id===selId){students[i].status='Applicant';break;}}sync();render();detail();}});
   w('hpbtn',function(){document.getElementById('fi-hero').setAttribute('data-sid',selId);document.getElementById('fi-hero').click();});
 
@@ -830,9 +859,9 @@ function openEdit(id){
   mPhoto=s.photo||null;
   document.getElementById('et').textContent='Edit profile';
   document.getElementById('btn-del').style.display='block';
-  var fm={'e-first':s.first,'e-last':s.last,'e-school':s.school,'e-worship':s.worship,'e-gpa':s.gpa,'e-actualgpa':s.actualgpa,'e-referral':s.referral,'e-notes':s.notes,'e-parentoffer':s.parentoffer,'e-suggtuit':s.suggtuit,'e-income':s.income,'e-revovr':s.revovr,'e-p1name':s.p1name,'e-p1rel':s.p1rel,'e-p1email':s.p1email,'e-p1phone':s.p1phone,'e-p2name':s.p2name,'e-p2rel':s.p2rel,'e-p2email':s.p2email,'e-p2phone':s.p2phone,'e-int':(s.interests||[]).join(', '),'e-act':(s.activities||[]).join(', '),'e-readers':s.readers,'e-intdate':s.intdate,'e-r-acad':s.racad,'e-r-mission':s.rmission,'e-r-extra':s.rextra,'e-r-social':s.rsocial,'e-r-recs':s.rrecs,'e-r-reach':s.rreach,'e-r-overall':s.roverall,'e-rcomments':s.rcomments,'e-idate':s.idate,'e-visits':s.visits};
+  var fm={'e-first':s.first,'e-last':s.last,'e-school':s.school,'e-worship':s.worship,'e-gpa':s.gpa,'e-actualgpa':s.actualgpa,'e-referral':s.referral,'e-notes':s.notes,'e-parentoffer':s.parentoffer,'e-suggtuit':s.suggtuit,'e-income':s.income,'e-p1name':s.p1name,'e-p1rel':s.p1rel,'e-p1email':s.p1email,'e-p1phone':s.p1phone,'e-p2name':s.p2name,'e-p2rel':s.p2rel,'e-p2email':s.p2email,'e-p2phone':s.p2phone,'e-int':(s.interests||[]).join(', '),'e-act':(s.activities||[]).join(', '),'e-readers':s.readers,'e-intdate':s.intdate,'e-r-acad':s.racad,'e-r-mission':s.rmission,'e-r-extra':s.rextra,'e-r-social':s.rsocial,'e-r-recs':s.rrecs,'e-r-reach':s.rreach,'e-r-overall':s.roverall,'e-rcomments':s.rcomments,'e-idate':s.idate,'e-visits':s.visits};
   Object.keys(fm).forEach(function(k){var e=document.getElementById(k);if(e)e.value=fm[k]||'';});
-  var sm={'e-status':s.status||'Inquiry','e-decision':s.decision||'','e-aid':s.aid||'unknown','e-t100':s.t100||'','e-src':s.src||'','e-appform':s.appform||'','e-appfee':s.appfee||'','e-trans':s.trans||'','e-8thgrades':s.grades8th||'','e-rec-admin':s.recadmin||'','e-rec-eng':s.receng||'','e-rec-math':s.recmath||'','e-interview':s.interview||'','e-appphoto':s.appphoto||'','e-isee':s.isee||''};
+  var sm={'e-status':s.status||'Inquiry','e-decision':s.decision||'','e-aid':s.aid||'unknown','e-grade':s.grade||'','e-src':s.src||'','e-appform':s.appform||'','e-appfee':s.appfee||'','e-trans':s.trans||'','e-8thgrades':s.grades8th||'','e-rec-admin':s.recadmin||'','e-rec-eng':s.receng||'','e-rec-math':s.recmath||'','e-interview':s.interview||'','e-appphoto':s.appphoto||'','e-isee':s.isee||''};
   Object.keys(sm).forEach(function(k){var e=document.getElementById(k);if(e)e.value=sm[k];});
   if(mPhoto){document.getElementById('pp').innerHTML='<img src="'+mPhoto+'"/>';document.getElementById('rm-photo').style.display='block';}else resetPP();
   document.getElementById('app-sec').style.display=isApp(s)?'block':'none';
@@ -847,7 +876,7 @@ function saveStudent(){
   var last=(document.getElementById('e-last').value||'').trim();
   if(!first||!last){alert('First and last name are required.');return;}
   var status=document.getElementById('e-status').value;
-  var d={first:first,last:last,school:document.getElementById('e-school').value.trim(),worship:document.getElementById('e-worship').value.trim(),gpa:document.getElementById('e-gpa').value||null,actualgpa:document.getElementById('e-actualgpa').value||null,referral:document.getElementById('e-referral').value.trim(),t100:document.getElementById('e-t100').value,notes:document.getElementById('e-notes').value.trim(),parentoffer:document.getElementById('e-parentoffer').value||null,suggtuit:document.getElementById('e-suggtuit').value||null,income:document.getElementById('e-income').value||null,revovr:document.getElementById('e-revovr').value||null,p1name:document.getElementById('e-p1name').value.trim(),p1rel:document.getElementById('e-p1rel').value.trim(),p1email:document.getElementById('e-p1email').value.trim(),p1phone:document.getElementById('e-p1phone').value.trim(),p2name:document.getElementById('e-p2name').value.trim(),p2rel:document.getElementById('e-p2rel').value.trim(),p2email:document.getElementById('e-p2email').value.trim(),p2phone:document.getElementById('e-p2phone').value.trim(),interests:tags(document.getElementById('e-int').value),activities:tags(document.getElementById('e-act').value),readers:document.getElementById('e-readers').value.trim(),intdate:document.getElementById('e-intdate').value.trim(),racad:document.getElementById('e-r-acad').value||null,rmission:document.getElementById('e-r-mission').value||null,rextra:document.getElementById('e-r-extra').value||null,rsocial:document.getElementById('e-r-social').value||null,rrecs:document.getElementById('e-r-recs').value||null,rreach:document.getElementById('e-r-reach').value||null,roverall:document.getElementById('e-r-overall').value||null,rcomments:document.getElementById('e-rcomments').value.trim(),status:status,decision:document.getElementById('e-decision').value,aid:document.getElementById('e-aid').value,idate:document.getElementById('e-idate').value.trim(),src:document.getElementById('e-src').value,visits:document.getElementById('e-visits').value.trim(),photo:mPhoto||null};
+  var d={first:first,last:last,school:document.getElementById('e-school').value.trim(),worship:document.getElementById('e-worship').value.trim(),gpa:document.getElementById('e-gpa').value||null,actualgpa:document.getElementById('e-actualgpa').value||null,referral:document.getElementById('e-referral').value.trim(),grade:document.getElementById('e-grade').value,notes:document.getElementById('e-notes').value.trim(),parentoffer:document.getElementById('e-parentoffer').value||null,suggtuit:document.getElementById('e-suggtuit').value||null,income:document.getElementById('e-income').value||null,p1name:document.getElementById('e-p1name').value.trim(),p1rel:document.getElementById('e-p1rel').value.trim(),p1email:document.getElementById('e-p1email').value.trim(),p1phone:document.getElementById('e-p1phone').value.trim(),p2name:document.getElementById('e-p2name').value.trim(),p2rel:document.getElementById('e-p2rel').value.trim(),p2email:document.getElementById('e-p2email').value.trim(),p2phone:document.getElementById('e-p2phone').value.trim(),interests:tags(document.getElementById('e-int').value),activities:tags(document.getElementById('e-act').value),readers:document.getElementById('e-readers').value.trim(),intdate:document.getElementById('e-intdate').value.trim(),racad:document.getElementById('e-r-acad').value||null,rmission:document.getElementById('e-r-mission').value||null,rextra:document.getElementById('e-r-extra').value||null,rsocial:document.getElementById('e-r-social').value||null,rrecs:document.getElementById('e-r-recs').value||null,rreach:document.getElementById('e-r-reach').value||null,roverall:document.getElementById('e-r-overall').value||null,rcomments:document.getElementById('e-rcomments').value.trim(),status:status,decision:document.getElementById('e-decision').value,aid:document.getElementById('e-aid').value,idate:document.getElementById('e-idate').value.trim(),src:document.getElementById('e-src').value,visits:document.getElementById('e-visits').value.trim(),photo:mPhoto||null};
   if(isApp({status:status})){d.appform=document.getElementById('e-appform').value;d.appfee=document.getElementById('e-appfee').value;d.trans=document.getElementById('e-trans').value;d.grades8th=document.getElementById('e-8thgrades').value;d.recadmin=document.getElementById('e-rec-admin').value;d.receng=document.getElementById('e-rec-eng').value;d.recmath=document.getElementById('e-rec-math').value;d.interview=document.getElementById('e-interview').value;d.appphoto=document.getElementById('e-appphoto').value;d.isee=document.getElementById('e-isee').value;}
   if(editId){for(var i=0;i<students.length;i++){if(students[i].id===editId){Object.assign(students[i],d);break;}}selId=editId;}
   else{var ns=Object.assign({id:uid()},d);students.push(ns);selId=ns.id;}
@@ -912,6 +941,7 @@ function runImport(){
     var allInts=[];intParts.forEach(function(s){if(s)s.split(/[;,|]+/).forEach(function(x){var t=x.trim();if(t)allInts.push(t);});});
     var uInts=allInts.filter(function(v,i,a){return a.indexOf(v)===i;});
     var status=gv(vals,'status')||'Inquiry';
+    var grade=gv(vals,'apply_grade')||gv(vals,'applygrade')||null;
     var aidRaw=gv(vals,'financial_aid_requested')||gv(vals,'financialaidrequested')||gv(vals,'aid')||'';
     var aid=aidRaw.toLowerCase()==='yes'||aidRaw.toLowerCase()==='true'?'yes':aidRaw.toLowerCase()==='no'||aidRaw.toLowerCase()==='false'?'no':'unknown';
     // Parent 1
@@ -966,6 +996,7 @@ function runImport(){
     var data={first:first,last:last,school:school,
       gpa:gpa||null,
       actualgpa:actualgpa||null,
+      grade:grade||null,
       worship:worship||null,
       referral:referral||null,
       p1name:p1name||null,p1rel:p1rel||null,p1email:p1email||null,p1phone:p1phone||null,
@@ -985,7 +1016,7 @@ function runImport(){
       // preserve manually entered data on re-import
       // On re-import: preserve photo, manual notes/decision/t100, and revovr (manual override)
       // But DO update reader scores, FA data, worship, referral from FinalSite since they may be newer
-      var keep=['photo','notes','decision','t100','revovr','appform','appfee','trans','grades8th','recadmin','receng','recmath','interview','appphoto','isee'];
+      var keep=['photo','notes','decision','star','appform','appfee','trans','grades8th','recadmin','receng','recmath','interview','appphoto','isee'];
       keep.forEach(function(k){if(students[ex][k])data[k]=students[ex][k];});
       Object.assign(students[ex],data);updated++;
     } else{students.push(Object.assign({id:uid()},data));added++;}
@@ -997,8 +1028,8 @@ function showIR(msg,ok){var e=document.getElementById('ires');e.textContent=msg;
 // EXPORT
 function exportCSV(){
   if(!students.length){alert('No students to export.');return;}
-  var cols=['last','first','school','gpa','actualgpa','status','decision','t100','aid','parentoffer','suggtuit','income','revovr','p1name','p1rel','p1email','p1phone','p2name','p2rel','p2email','p2phone','interests','activities','notes','idate','src','worship','referral','readers','intdate','racad','rmission','rextra','rsocial','rrecs','rreach','roverall','rcomments','visits'];
-  var hdrs=['last_name','first_name','school','est_gpa','actual_gpa','status','decision','t100','aid_requested','parent_offer','suggested_tuition','family_income','rev_override','parent1_name','parent1_relation','parent1_email','parent1_phone','parent2_name','parent2_relation','parent2_email','parent2_phone','interests','activities','meeting_notes','inquiry_date','source','place_of_worship','referral_friend','assigned_readers','interview_date','academic_ability','mission_fit','extracurricular','social_fit','recommendations','school_reach','overall_quality','reader_comments','campus_visits'];
+  var cols=['last','first','school','gpa','actualgpa','grade','status','decision','star','aid','parentoffer','suggtuit','income','p1name','p1rel','p1email','p1phone','p2name','p2rel','p2email','p2phone','interests','activities','notes','idate','src','worship','referral','readers','intdate','racad','rmission','rextra','rsocial','rrecs','rreach','roverall','rcomments','visits'];
+  var hdrs=['last_name','first_name','school','est_gpa','actual_gpa','grade','status','decision','starred','aid_requested','parent_offer','suggested_tuition','family_income','parent1_name','parent1_relation','parent1_email','parent1_phone','parent2_name','parent2_relation','parent2_email','parent2_phone','interests','activities','meeting_notes','inquiry_date','source','place_of_worship','referral_friend','assigned_readers','interview_date','academic_ability','mission_fit','extracurricular','social_fit','recommendations','school_reach','overall_quality','reader_comments','campus_visits'];
   var rows=[hdrs.join(',')];
   sorted().forEach(function(s){var row=cols.map(function(k){var v=Array.isArray(s[k])?s[k].join('; '):(s[k]||'');v=String(v).replace(/"/g,'""');if(v.indexOf(',')>-1||v.indexOf('"')>-1||v.indexOf('\n')>-1)v='"'+v+'"';return v;});rows.push(row.join(','));});
   var blob=new Blob([rows.join('\n')],{type:'text/csv'});
