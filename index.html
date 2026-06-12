@@ -88,7 +88,7 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
 .hschool{font-size:11px;color:rgba(255,255,255,.5);margin-top:3px;}
 .hcontact{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px;}
 .hbdgs{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;}
-.b{font-size:9px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap;letter-spacing:.06em;text-transform:uppercase;}
+.b{font-size:9px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap;letter-spacing:.06em;text-transform:uppercase;display:inline-block;}
 /* Status badges */
 .bs-inquiry{background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);}
 .bs-applicant{background:rgba(196,154,60,.3);color:#C49A3C;}
@@ -519,7 +519,11 @@ var students=[], selId=null, editId=null, fIds=[], mPhoto=null, syncT=null;
 // STORAGE
 function loadLocal(){try{students=JSON.parse(localStorage.getItem(SK))||[];}catch(e){students=[];}}
 function saveLocal(){localStorage.setItem(SK,JSON.stringify(students));}
-function sync(){saveLocal();clearTimeout(syncT);syncT=setTimeout(push,900);}
+function sync(){
+  saveLocal(); // always save local immediately -- this is what survives refresh
+  clearTimeout(syncT);
+  syncT=setTimeout(push,900);
+}
 function setSd(cls,txt){document.getElementById('sdot').className='sdot '+(cls||'');document.getElementById('slbl').textContent=txt||'';}
 
 function push(){
@@ -553,28 +557,29 @@ function push(){
 }
 
 function pull(){
+  // Step 1: always load & render from localStorage immediately
+  loadLocal();render();
   var bin=localStorage.getItem(BIN_SK)||'';
-  // Always load local first so page renders immediately
-  loadLocal();
-  render();
   if(!bin){
-    // No bin yet -- push local data to create one
-    if(students.length>0)push();
+    // First time -- if we have local data push it to create the bin
+    if(students.length>0){push();}
     return;
   }
-  setSd('busy','Loading...');
+  // Step 2: silently fetch cloud in background and merge if newer/bigger
   fetch('https://api.jsonbin.io/v3/b/'+bin+'/latest',{headers:{'X-Master-Key':API_KEY}})
-    .then(function(r){return r.json();})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
     .then(function(d){
-      if(d.record&&d.record.s&&d.record.s.length>0){
-        // Use cloud data if it has more students, otherwise keep local
-        if(d.record.s.length>=students.length){
-          students=d.record.s;saveLocal();
+      if(d.record&&d.record.s&&Array.isArray(d.record.s)){
+        var cloud=d.record.s;
+        // Merge: cloud wins unless local has more students (user just imported)
+        if(cloud.length>0&&cloud.length>=students.length){
+          students=cloud;saveLocal();render();
+          if(selId)detail();
         }
       }
-      setSd('ok','Live');setTimeout(function(){setSd('ok','');},2000);render();
+      setSd('ok','');
     })
-    .catch(function(){setSd('err','Offline');render();});
+    .catch(function(){setSd('err','Offline');});
 }
 
 // HELPERS
@@ -743,18 +748,19 @@ function detail(){
     // HERO
     '<div class="hero">'+
       '<div class="hero-top">'+ph+
-        '<div>'+
+        '<div style="flex:1;min-width:0">'+
           '<div class="hname">'+s.last+', '+s.first+'</div>'+
-          '<div class="hschool">'+(s.school||'School not provided')+(s.worship?' &middot; '+s.worship:'')+(s.grade?' &middot; <strong>'+s.grade+'</strong>':'')+'</div>'+
-          (s.p1name?'<div class="hcontact">'+s.p1name+(s.p1rel?' ('+s.p1rel+')':'')+'&nbsp;&middot;&nbsp;'+(s.p1email||s.p1phone||'')+'</div>':'')+
-          (s.p2name?'<div class="hcontact">'+s.p2name+(s.p2rel?' ('+s.p2rel+')':'')+'&nbsp;&middot;&nbsp;'+(s.p2email||s.p2phone||'')+'</div>':'')+
-          '<div class="hbdgs">'+
-            '<span class="b '+statusBadgeClass(stl)+'">'+stl+'</span>'+
-            '<span class="b '+aidcls+'">'+aidl+'</span>'+
-            '<button id="hstar" style="padding:4px 10px;border-radius:99px;font-size:14px;border:1px solid '+(s.star==='yes'?'#C49A3C':'rgba(255,255,255,.2)')+';background:'+(s.star==='yes'?'rgba(196,154,60,.25)':'transparent')+';color:'+(s.star==='yes'?'#C49A3C':'rgba(255,255,255,.4)')+';cursor:pointer" data-sid="'+s.id+'">'+(s.star==='yes'?'&#9733;':'&#9734;')+'</button>'+
-            (s.readers?'<span class="b bs-review">'+s.readers+'</span>':'')+
+          '<div class="hschool">'+(s.school||'School not provided')+(s.grade?' &nbsp;&middot;&nbsp;<strong style="color:rgba(255,255,255,.9)">'+s.grade+'</strong>':'')+'</div>'+
+          (s.p1name?'<div class="hcontact">'+s.p1name+(s.p1email?' &middot; '+s.p1email:'')+(s.p1phone&&!s.p1email?' &middot; '+s.p1phone:'')+'</div>':'')+
+          (s.p2name?'<div class="hcontact">'+s.p2name+(s.p2email?' &middot; '+s.p2email:'')+(s.p2phone&&!s.p2email?' &middot; '+s.p2phone:'')+'</div>':'')+
+          '<div style="display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap">'+
+            '<span class="b '+statusBadgeClass(stl)+'" style="font-size:10px;letter-spacing:.07em">'+stl+'</span>'+
+            (s.aid==='yes'?'<span class="b baid" style="font-size:10px">Aid requested</span>':'')+
+            (s.aid==='no'?'<span class="b" style="font-size:10px;background:rgba(196,154,60,.2);color:#C49A3C;padding:3px 8px;border-radius:99px">Full Pay</span>':'')+
+            '<button id="hstar" style="margin-left:2px;padding:3px 9px;border-radius:99px;font-size:15px;line-height:1;border:1px solid '+(s.star==='yes'?'#C49A3C':'rgba(255,255,255,.25)')+';background:'+(s.star==='yes'?'rgba(196,154,60,.2)':'transparent')+';color:'+(s.star==='yes'?'#C49A3C':'rgba(255,255,255,.3)')+';cursor:pointer" data-sid="'+s.id+'">'+(s.star==='yes'?'&#9733;':'&#9734;')+'</button>'+
+            '<button class="beh" id="bhe" style="margin-left:auto">Edit</button>'+
           '</div>'+
-          '<div class="decision-row">'+decBtns+'</div>'+
+          '<div class="decision-row" style="margin-top:8px">'+decBtns+'</div>'+
         '</div>'+
         '<div class="hr-right">'+
           '<div class="gpa-block">'+
@@ -762,7 +768,7 @@ function detail(){
             '<div class="gpa-lbl">'+(hasActual?'Actual GPA':'Est. GPA')+'</div>'+
             (hasActual&&estgpa?'<div class="gpa-sub">Est. '+estgpa.toFixed(1)+'</div>':'')+
           '</div>'+
-          '<div class="hacts"><button class="beh" id="bhe">Edit</button>'+(app?'':'<button class="beh" id="bpr" style="background:rgba(196,154,60,.15);border-color:rgba(196,154,60,.5);color:#C49A3C">Move to applicant</button>')+'</div>'+
+          (app?'':'<button class="beh" id="bpr" style="background:rgba(196,154,60,.15);border-color:rgba(196,154,60,.5);color:#C49A3C;font-size:9px">Move to applicant</button>')+
         '</div>'+
       '</div>'+
       // NOTES BAR
