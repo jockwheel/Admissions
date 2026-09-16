@@ -617,8 +617,7 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
 <script>
 (function(){
 var SK='pca_v8';
-var API_KEY='$2a$10$iUdtSGo4J9aBaBvDeIXfOeV3OsFG5KY0lLIErpqxeO.w/WIX/iJVi';
-var BIN_ID='6a2c3ba7da38895dfeb61fbf'; // hardcoded -- pca-adm7
+var PROXY_URL='https://pca-admissions-proxy.jweill.workers.dev/'; // Cloudflare Worker -- holds the real JSONBin key server-side, never here
 var students=[], selId=null, editId=null, fIds=[], mPhoto=null, syncT=null;
 var activeView='roster';
 
@@ -690,9 +689,9 @@ function push(){
   setSd('busy','Saving...');
   // Strip photos before sending to cloud (photos stay local only)
   var toSync=students.map(function(s){var c=Object.assign({},s);delete c.photo;return c;});
-  fetch('https://api.jsonbin.io/v3/b/'+BIN_ID,{
-    method:'PUT',
-    headers:{'Content-Type':'application/json','X-Master-Key':API_KEY},
+  fetch(PROXY_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
     body:JSON.stringify({s:toSync,cfg:CFG})
   })
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
@@ -703,11 +702,8 @@ function push(){
 function pull(){
   // Step 1: always load & render from localStorage immediately
   loadLocal();render();
-  // Step 2: fetch the shared cloud copy and merge if newer/bigger.
-  // (Previously this looked up a bin id under localStorage key BIN_ID, which was
-  // never set, so this fetch never ran and teammates never saw each other's data
-  // after the first load -- fixed to just hit BIN_ID directly, every load.)
-  fetch('https://api.jsonbin.io/v3/b/'+BIN_ID+'/latest',{headers:{'X-Master-Key':API_KEY}})
+  // Step 2: fetch the shared cloud copy (via the Worker proxy) and merge if newer/bigger.
+  fetch(PROXY_URL)
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
     .then(function(d){
       var changed=false;
