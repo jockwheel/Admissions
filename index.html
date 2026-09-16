@@ -623,6 +623,7 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
 var SK='pca_v8';
 var PROXY_URL='https://pca-admissions-proxy.jweill.workers.dev/'; // Cloudflare Worker -- holds the real JSONBin key server-side, never here
 var students=[], selId=null, editId=null, fIds=[], mPhoto=null, syncT=null;
+var lastKnownCloudCount=0;
 var activeView='roster';
 
 // DASHBOARD SETTINGS -- the "yellow cells" from the workbook: goals, tuition,
@@ -690,16 +691,25 @@ function sync(){
 function setSd(cls,txt){document.getElementById('sdot').className='sdot '+(cls||'');document.getElementById('slbl').textContent=txt||'';}
 
 function push(){
-  setSd('busy','Saving...');
-  // Strip photos before sending to cloud (photos stay local only)
+  // Guard against a stale/background tab silently wiping the shared roster --
+  // this requires a live human click to confirm, which a background tab firing
+  // a delayed/throttled save on its own can never produce, so the push just
+  // stalls harmlessly instead of erasing everyone's data.
   var toSync=students.map(function(s){var c=Object.assign({},s);delete c.photo;return c;});
+  if(toSync.length===0&&lastKnownCloudCount>0){
+    if(!confirm('This would erase all '+lastKnownCloudCount+' students from the SHARED roster for everyone. Are you sure you want to do this?')){
+      setSd('err','Push blocked');setTimeout(function(){setSd('ok','');},2000);
+      return;
+    }
+  }
+  setSd('busy','Saving...');
   fetch(PROXY_URL,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({s:toSync,cfg:CFG})
   })
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
-  .then(function(){setSd('ok','Saved');setTimeout(function(){setSd('ok','');},2000);})
+  .then(function(){lastKnownCloudCount=toSync.length;setSd('ok','Saved');setTimeout(function(){setSd('ok','');},2000);})
   .catch(function(e){console.error('Push failed:',e);setSd('ok','Saved');setTimeout(function(){setSd('ok','');},2000);});
 }
 
@@ -713,6 +723,7 @@ function pull(){
       var changed=false;
       if(d.record&&d.record.s&&Array.isArray(d.record.s)){
         var cloud=d.record.s;
+        if(cloud.length>0)lastKnownCloudCount=cloud.length;
         // Merge: cloud wins unless local has more students (user just imported)
         if(cloud.length>0&&cloud.length>=students.length){
           students=cloud;changed=true;
