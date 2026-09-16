@@ -1671,7 +1671,7 @@ function runImport(){
         p1name:p1name||null,p1rel:p1rel||null,p1email:p1email||null,p1phone:p1phone||null,
         p2name:p2name||null,p2rel:p2rel||null,p2email:p2email||null,p2phone:p2phone||null,
         interests:uInts,activities:[],status:status,aid:aid,
-        idate:gv(vals,'inquirydate')||gv(vals,'inquiry_date')||gv(vals,'date')||'',
+        idate:gv(vals,'inquiry_submit_date')||gv(vals,'inquirydate')||gv(vals,'inquiry_date')||gv(vals,'date')||'',
         src:gv(vals,'source')||gv(vals,'heardfromus')||gv(vals,'bsr_referral_method_ss')||'',
         visits:visitParts.join('\n')||null,
         rcomments:rcomments||null,
