@@ -1283,18 +1283,22 @@ function runImport(){
       var p2last=gv(vals,'p2last_name')||gv(vals,'p2lastname')||'';
       var p2name=(p2first+' '+p2last).trim();
       var p2email=gv(vals,'p2email')||gv(vals,'email.1')||'';
-      var p2phone=(gv(vals,'p2phone_1_number')||gv(vals,'p2phone1number')||gv(vals,'phone_1_number.1')||'').replace(/\.0$/,'');
+      var p2phone=(gv(vals,'p2phone_1_number')||gv(vals,'p2phone1number')||gv(vals,'p2phone_numbers')||gv(vals,'phone_1_number.1')||'').replace(/\.0$/,'');
       var p2rel=gv(vals,'p2relationship')||gv(vals,'relationship.1')||'';
 
+      // Visit/event date columns -- Finalsite names two of these generically
+      // (calendar_calendar_1_date, calendar_information_session_date), so which
+      // specific event type they represent is an ASSUMPTION below. Confirm with
+      // Jack what these two actually are in the PCHS admissions calendar and
+      // adjust the openHouse/hosTour lines just below if wrong.
+      var vpdDate=(gv(vals,'calendar_visit_pacifica_day_date')||'').replace(/\n/g,' ').trim();
+      var cal1Date=(gv(vals,'calendar_calendar_1_date')||'').replace(/\n/g,' ').trim(); // ASSUMED = Open House
+      var infoSessDate=(gv(vals,'calendar_information_session_date')||'').replace(/\n/g,' ').trim(); // ASSUMED = HOS Tour
+
       var visitParts=[];
-      var pd=(gv(vals,'calendar_visit_pacifica_day_date')||'').replace(/\n/g,' ').trim();
-      var oh=gv(vals,'activity_open_house_date')||'';
-      var ms=gv(vals,'activity_attended_middle_school_visit_date')||'';
-      var cf=gv(vals,'activity_attended_parent_coffee_hour_date')||'';
-      if(pd)visitParts.push('Pacifica Day: '+pd);
-      if(oh)visitParts.push('Open house: '+oh);
-      if(ms)visitParts.push('Middle school visit: '+ms);
-      if(cf)visitParts.push('Parent coffee hour: '+cf);
+      if(vpdDate)visitParts.push('Visit Pacifica Day: '+vpdDate);
+      if(cal1Date)visitParts.push('Open house (assumed): '+cal1Date);
+      if(infoSessDate)visitParts.push('Information session (assumed HOS tour): '+infoSessDate);
 
       function stripHtmlInline(s){
         return(s||'').replace(/<[^>]+>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&#39;/g,"'").replace(/&quot;/g,'"')
@@ -1328,7 +1332,7 @@ function runImport(){
         p2name:p2name||null,p2rel:p2rel||null,p2email:p2email||null,p2phone:p2phone||null,
         interests:uInts,activities:[],status:status,aid:aid,
         idate:gv(vals,'inquirydate')||gv(vals,'inquiry_date')||gv(vals,'date')||'',
-        src:gv(vals,'source')||gv(vals,'heardfromus')||'',
+        src:gv(vals,'source')||gv(vals,'heardfromus')||gv(vals,'bsr_referral_method_ss')||'',
         visits:visitParts.join('\n')||null,
         rcomments:rcomments||null,
         racad:racad||null,rmission:rmission||null,rextra:rextra||null,
@@ -1336,6 +1340,12 @@ function runImport(){
         readers:readers||null,intdate:intdate||null,
         income:income||null,parentoffer:parentoffer||null,suggtuit:suggtuit||null
       };
+      // Only set engagement flags to true -- never write false, so a manually
+      // checked box on re-import never gets clobbered just because this export
+      // doesn't repeat that date column.
+      if(vpdDate){data.vpd=true;data.visitedCampus=true;}
+      if(cal1Date){data.openHouse=true;data.visitedCampus=true;}
+      if(infoSessDate){data.hosTour=true;data.visitedCampus=true;}
 
       var ex=-1;
       for(var si=0;si<students.length;si++){
