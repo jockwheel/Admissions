@@ -204,6 +204,45 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
 .ires{font-size:12px;padding:8px 12px;border-radius:5px;display:none;margin-top:4px;}
 .ires.ok{background:#E6F4ED;color:#2A6B4A;}
 .ires.err{background:#FAEAEA;color:#A8302A;}
+
+/* VIEW TABS */
+.vtabs{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.07);border-radius:6px;padding:3px;}
+.vtab{padding:6px 14px;border-radius:4px;border:none;background:transparent;color:rgba(255,255,255,.55);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;}
+.vtab:hover{color:#fff;}
+.vtab.on{background:#C49A3C;color:#003260;}
+
+/* DASHBOARD VIEW */
+#dash{padding:1.5rem;display:none;}
+.dash-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem;}
+.dash-title{font-family:'EB Garamond',serif;font-size:22px;font-weight:600;color:#003260;}
+.dash-sub{font-size:11px;color:#9EA4B0;margin-top:2px;}
+.dsec{background:#fff;border-radius:8px;padding:1.1rem 1.25rem;margin-bottom:1rem;}
+.dsec-hd{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #E8EDF5;padding-bottom:8px;margin-bottom:10px;}
+.dsec-t{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#003260;}
+.dsec-note{font-size:10px;color:#9EA4B0;font-style:italic;}
+.dtable{width:100%;border-collapse:collapse;font-size:11.5px;}
+.dtable th{text-align:right;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#9EA4B0;padding:5px 8px;border-bottom:1px solid #E4E6EA;}
+.dtable th:first-child{text-align:left;}
+.dtable td{text-align:right;padding:5px 8px;border-bottom:1px solid #F4F5F7;font-weight:600;color:#1A1D25;}
+.dtable td:first-child{text-align:left;font-weight:500;color:#5A6070;}
+.dtable tr.strong td{font-weight:800;color:#003260;background:#F8FAFD;}
+.dtable td.goodpct{color:#2A6B4A;}
+.dtable td.badpct{color:#A8302A;}
+.dtable input.ginput{width:56px;padding:4px 5px;border:1px solid #E4E6EA;border-radius:4px;font-family:'Montserrat',sans-serif;font-size:11px;text-align:right;background:#FFFBEE;color:#1A1D25;outline:none;}
+.dtable input.ginput:focus{border-color:#C49A3C;}
+.dgrid4{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#E4E6EA;border-radius:8px;overflow:hidden;margin-bottom:1rem;}
+.dgrid4 .dc4{background:#fff;padding:12px 16px;}
+.dc4 .dn{font-size:22px;font-weight:700;color:#003260;font-family:'EB Garamond',serif;}
+.dc4 .dl{font-size:9px;font-weight:600;letter-spacing:.07em;color:#9EA4B0;text-transform:uppercase;margin-top:1px;}
+.dc4 .dsub{font-size:10px;color:#5A6070;margin-top:2px;}
+.dkeyinp{padding:5px 8px;border:1px solid #E4E6EA;border-radius:5px;font-family:'Montserrat',sans-serif;font-size:12px;background:#FFFBEE;outline:none;color:#1A1D25;}
+.dkeyinp:focus{border-color:#C49A3C;}
+.dkey-row{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+.dkey-fi{display:flex;flex-direction:column;gap:3px;}
+.dkey-fi label{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#5A6070;}
+.echk-row{display:flex;flex-wrap:wrap;gap:14px;padding:6px 0;}
+.echk{display:flex;align-items:center;gap:5px;font-size:11px;color:#5A6070;cursor:pointer;}
+.echk input{cursor:pointer;}
 </style>
 </head>
 <body>
@@ -215,6 +254,10 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
     <div class="htitle">Admissions Tracker</div>
   </div>
   <div class="hbtns">
+    <div class="vtabs">
+      <button class="vtab on" id="vtab-roster">Roster</button>
+      <button class="vtab" id="vtab-dash">Dashboard</button>
+    </div>
     <div class="sync-wrap"><div class="sdot" id="sdot"></div><span class="slbl" id="slbl"></span></div>
     <button class="hbtn hbtn-w" id="btn-export">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -296,6 +339,8 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
 </div>
 </div>
 
+<div id="dash"></div>
+
 <input type="file" id="fi-modal" accept="image/*" style="display:none"/>
 <input type="file" id="fi-hero" accept="image/*" style="display:none"/>
 
@@ -321,6 +366,20 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
     <div class="fr">
       <div class="fi"><label>Current school</label><input type="text" id="e-school" placeholder="Middle school"/></div>
       <div class="fi"><label>Place of worship</label><input type="text" id="e-worship" placeholder="Church / parish..."/></div>
+    </div>
+    <div class="fr">
+      <div class="fi"><label>Grade applying for</label>
+        <select id="e-grade">
+          <option value="">-- Select</option>
+          <option value="9">9th</option>
+          <option value="10">10th</option>
+          <option value="11">11th</option>
+          <option value="12">12th</option>
+        </select>
+      </div>
+      <div class="fi"><label>Legacy family</label>
+        <select id="e-legacy"><option value="">No</option><option value="yes">Yes -- legacy</option></select>
+      </div>
     </div>
     <div class="fr">
       <div class="fi"><label>Estimated GPA</label><input type="number" id="e-gpa" placeholder="e.g. 3.8" min="0" max="4.5" step="0.01"/></div>
@@ -433,7 +492,17 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
       </div>
     </div>
     <div class="fi full"><label>Visit / event notes</label><textarea id="e-visits" placeholder="Pacifica Day, open house dates, campus visits..."></textarea></div>
-
+    <div class="fi full">
+      <label>Engagement (drives the Dashboard funnel counts)</label>
+      <div class="echk-row">
+        <label class="echk"><input type="checkbox" id="e-visited"/> Visited campus</label>
+        <label class="echk"><input type="checkbox" id="e-hostour"/> HOS tour</label>
+        <label class="echk"><input type="checkbox" id="e-vpd"/> Visit Pacifica Day</label>
+        <label class="echk"><input type="checkbox" id="e-openhouse"/> Open house</label>
+        <label class="echk"><input type="checkbox" id="e-privatetour"/> Private tour</label>
+        <label class="echk"><input type="checkbox" id="e-shadowday"/> Shadow day</label>
+      </div>
+    </div>
 
   </div>
   <div class="mf">
@@ -511,11 +580,31 @@ var SK='pca_v8';
 var API_KEY='$2a$10$iUdtSGo4J9aBaBvDeIXfOeV3OsFG5KY0lLIErpqxeO.w/WIX/iJVi';
 var BIN_ID='6a2c3ba7da38895dfeb61fbf'; // hardcoded -- pca-adm7
 var students=[], selId=null, editId=null, fIds=[], mPhoto=null, syncT=null;
+var activeView='roster';
+
+// DASHBOARD SETTINGS -- the "yellow cells" from the workbook: goals, tuition,
+// key dates. Nothing here can come from Finalsite; it's typed in, same as Excel.
+var CFG_SK='pca_cfg_v1';
+var CFG_DEFAULTS={
+  janDeadline:'2027-01-22',
+  statedTuition:34650, // placeholder = 2026-27 stated tuition + 5%, per the workbook -- replace with board-approved figure
+  goals:{
+    9:{inquiry:400,app:240,enroll:100,fpEnroll:62},
+    10:{inquiry:35,app:15,enroll:8,fpEnroll:5},
+    11:{inquiry:30,app:14,enroll:6,fpEnroll:4},
+    12:{inquiry:10,app:3,enroll:1,fpEnroll:1}
+  }
+};
+var CFG=JSON.parse(JSON.stringify(CFG_DEFAULTS));
 
 // STORAGE
 var PHOTO_SK='pca_photos_v1';
 function loadLocal(){
   try{students=JSON.parse(localStorage.getItem(SK))||[];}catch(e){students=[];}
+  try{
+    var savedCfg=JSON.parse(localStorage.getItem(CFG_SK));
+    if(savedCfg)CFG=Object.assign({},CFG_DEFAULTS,savedCfg,{goals:Object.assign({},CFG_DEFAULTS.goals,savedCfg.goals)});
+  }catch(e){}
   // Load photos from separate storage and merge
   try{
     var photos=JSON.parse(localStorage.getItem(PHOTO_SK))||{};
@@ -528,6 +617,7 @@ function saveLocal(){
     var c=Object.assign({},s);delete c.photo;return c;
   });
   localStorage.setItem(SK,JSON.stringify(stripped));
+  localStorage.setItem(CFG_SK,JSON.stringify(CFG));
   // Save photos separately in localStorage only
   var photos={};
   students.forEach(function(s){if(s.photo)photos[s.id]=s.photo;});
@@ -547,7 +637,7 @@ function push(){
   fetch('https://api.jsonbin.io/v3/b/'+BIN_ID,{
     method:'PUT',
     headers:{'Content-Type':'application/json','X-Master-Key':API_KEY},
-    body:JSON.stringify({s:toSync})
+    body:JSON.stringify({s:toSync,cfg:CFG})
   })
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(){setSd('ok','Saved');setTimeout(function(){setSd('ok','');},2000);})
@@ -557,27 +647,35 @@ function push(){
 function pull(){
   // Step 1: always load & render from localStorage immediately
   loadLocal();render();
-  var bin=localStorage.getItem(BIN_ID)||'';
-  if(!bin){
-    // First time -- if we have local data push it to create the bin
-    if(students.length>0){push();}
-    return;
-  }
-  // Step 2: silently fetch cloud in background and merge if newer/bigger
-  fetch('https://api.jsonbin.io/v3/b/'+bin+'/latest',{headers:{'X-Master-Key':API_KEY}})
+  // Step 2: fetch the shared cloud copy and merge if newer/bigger.
+  // (Previously this looked up a bin id under localStorage key BIN_ID, which was
+  // never set, so this fetch never ran and teammates never saw each other's data
+  // after the first load -- fixed to just hit BIN_ID directly, every load.)
+  fetch('https://api.jsonbin.io/v3/b/'+BIN_ID+'/latest',{headers:{'X-Master-Key':API_KEY}})
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
     .then(function(d){
+      var changed=false;
       if(d.record&&d.record.s&&Array.isArray(d.record.s)){
         var cloud=d.record.s;
         // Merge: cloud wins unless local has more students (user just imported)
         if(cloud.length>0&&cloud.length>=students.length){
-          students=cloud;saveLocal();render();
-          if(selId)detail();
+          students=cloud;changed=true;
+        }else if(students.length>cloud.length){
+          push(); // local is ahead (e.g. just imported) -- push it up
         }
       }
+      if(d.record&&d.record.cfg){
+        CFG=Object.assign({},CFG_DEFAULTS,d.record.cfg,{goals:Object.assign({},CFG_DEFAULTS.goals,d.record.cfg.goals)});
+        changed=true;
+      }
+      if(changed){saveLocal();render();if(selId)detail();if(activeView==='dash')renderDash();}
       setSd('ok','');
     })
-    .catch(function(){setSd('err','Offline');});
+    .catch(function(){
+      // No bin yet, or offline -- if we have local data, push to create/update it
+      if(students.length>0)push();
+      setSd('err','Offline');
+    });
 }
 
 // HELPERS
@@ -638,6 +736,178 @@ function filtered(){
     if(f3==='no'&&s.aid!=='no')return false;
     return true;
   });
+}
+
+// ============ DASHBOARD ============
+// Mirrors the Dashboard tab of the 2027-28 Excel workbook. Everything below is
+// computed live from the same `students` array the roster uses -- there is no
+// separate pipeline/applicant split like the workbook's tabs, because a single
+// record already carries a student from inquiry through enrollment here.
+//
+// ASSUMPTIONS (documented per the workbook's own "Sources and Assumptions" tab):
+//  - "Inquiries (all records)" = every record for that grade, since every
+//    applicant was necessarily an inquiry first.
+//  - Full-Pay / Financial-Aid split uses the `aid` field ('no' = full pay).
+//  - Accepted/Admits = status in Accepted, Enrollment In Progress, Enrolled,
+//    or Did Not Enroll (all imply an offer was made).
+//  - Declined Our Offer = Did Not Enroll or Parent Declined.
+//  - Net tuition per enrolled student = Parent Offer if set, else Stated Tuition
+//    (i.e. full-pay families are assumed to pay the stated rate).
+// Adjust the logic below if any of these don't match how PCHS actually codes things.
+
+function gradeOf(s){var m=(s.grade||'').match(/\d+/);var n=m?parseInt(m[0],10):null;return[9,10,11,12].indexOf(n)>-1?n:null;}
+
+var FUNNEL_STAGES=[
+  {key:'inq',label:'Inquiries (all records)',goalKey:'inquiry',calc:function(l){return l.length;}},
+  {key:'inact',label:'Inactive / Withdrawn',calc:function(l){return l.filter(function(s){return['Inactive Inquiry','Application Withdrawn','Inactive App'].indexOf(s.status)>-1;}).length;}},
+  {key:'visit',label:'Visited Campus',calc:function(l){return l.filter(function(s){return!!s.visitedCampus;}).length;}},
+  {key:'hos',label:'HOS Tours',calc:function(l){return l.filter(function(s){return!!s.hosTour;}).length;}},
+  {key:'vpd',label:'Visit Pacifica Day',calc:function(l){return l.filter(function(s){return!!s.vpd;}).length;}},
+  {key:'oh',label:'Open House',calc:function(l){return l.filter(function(s){return!!s.openHouse;}).length;}},
+  {key:'pt',label:'Private Tours',calc:function(l){return l.filter(function(s){return!!s.privateTour;}).length;}},
+  {key:'sd',label:'Shadow Days',calc:function(l){return l.filter(function(s){return!!s.shadowDay;}).length;}},
+  {key:'appsub',label:'Applications Submitted',calc:function(l){return l.filter(isApp).length;}},
+  {key:'fpapp',label:'Full-Pay Applicants',calc:function(l){return l.filter(function(s){return isApp(s)&&s.aid==='no';}).length;}},
+  {key:'faapp',label:'Financial-Aid Applicants',calc:function(l){return l.filter(function(s){return isApp(s)&&s.aid==='yes';}).length;}},
+  {key:'totapp',label:'TOTAL APPLICANTS',goalKey:'app',strong:true,calc:function(l){return l.filter(isApp).length;}},
+  {key:'acc',label:'Accepted / Admits',calc:function(l){return l.filter(function(s){return['Accepted','Enrollment In Progress','Enrolled','Did Not Enroll'].indexOf(s.status)>-1;}).length;}},
+  {key:'wait',label:'Waitlisted',calc:function(l){return l.filter(function(s){return['Waitlisted','Financial Aid Waitlist'].indexOf(s.status)>-1;}).length;}},
+  {key:'notacc',label:'Not Accepted',calc:function(l){return l.filter(function(s){return s.status==='Denied';}).length;}},
+  {key:'decl',label:'Declined Our Offer',calc:function(l){return l.filter(function(s){return['Did Not Enroll','Parent Declined'].indexOf(s.status)>-1;}).length;}},
+  {key:'fpenr',label:'Full-Pay Enrolled',goalKey:'fpEnroll',calc:function(l){return l.filter(function(s){return s.status==='Enrolled'&&s.aid==='no';}).length;}},
+  {key:'faenr',label:'Financial-Aid Enrolled',calc:function(l){return l.filter(function(s){return s.status==='Enrolled'&&s.aid==='yes';}).length;}},
+  {key:'totenr',label:'TOTAL ENROLLED',goalKey:'enroll',strong:true,calc:function(l){return l.filter(function(s){return s.status==='Enrolled';}).length;}}
+];
+var GRADES=[9,10,11,12];
+
+function funnelData(){
+  var byGrade={};
+  GRADES.forEach(function(g){byGrade[g]=students.filter(function(s){return gradeOf(s)===g;});});
+  var all=students.slice();
+  var rows=FUNNEL_STAGES.map(function(st){
+    var r={key:st.key,label:st.label,strong:!!st.strong,vals:{},total:0,goal:null};
+    GRADES.forEach(function(g){var v=st.calc(byGrade[g]);r.vals[g]=v;r.total+=v;});
+    // recompute total straight from all records for accuracy (not a per-grade sum, in case gradeOf is null for some)
+    r.total=st.calc(all);
+    if(st.goalKey){r.goal=GRADES.reduce(function(sum,g){return sum+((CFG.goals[g]||{})[st.goalKey]||0);},0);}
+    return r;
+  });
+  return{rows:rows,byGrade:byGrade,all:all};
+}
+
+function dashTuition(){
+  var enrolled=students.filter(function(s){return s.status==='Enrolled';});
+  var revenue=0,aidAwarded=0,parentOfferTotal=0;
+  enrolled.forEach(function(s){
+    var stated=CFG.statedTuition||0;
+    var offer=s.parentoffer!=null&&s.parentoffer!==''?parseFloat(s.parentoffer):null;
+    var net=(s.aid==='yes'&&offer!=null)?offer:stated;
+    revenue+=net;
+    parentOfferTotal+=offer!=null?offer:0;
+    if(s.aid==='yes'){var sugg=s.suggtuit!=null&&s.suggtuit!==''?parseFloat(s.suggtuit):stated;aidAwarded+=Math.max(0,sugg-(offer!=null?offer:sugg));}
+  });
+  var declined=students.filter(function(s){return['Did Not Enroll','Parent Declined'].indexOf(s.status)>-1;});
+  var lostTuition=declined.length*(CFG.statedTuition||0);
+  var avg=enrolled.length?revenue/enrolled.length:0;
+  var discountRate=(CFG.statedTuition&&aidAwarded)?aidAwarded/(CFG.statedTuition*enrolled.length):0;
+  return{revenue:revenue,aidAwarded:aidAwarded,parentOfferTotal:parentOfferTotal,lostTuition:lostTuition,avg:avg,enrolledCount:enrolled.length,discountRate:discountRate};
+}
+
+function pctOfGoal(v,g){if(!g)return null;return v/g;}
+function pctCell(v,g){
+  var p=pctOfGoal(v,g);
+  if(p===null)return'<td>--</td>';
+  var cls=p>=0.9?'goodpct':(p<0.5?'badpct':'');
+  return'<td class="'+cls+'">'+(p*100).toFixed(0)+'%</td>';
+}
+
+function renderDash(){
+  var fd=funnelData();
+  var tui=dashTuition();
+  var totalInq=fd.rows[0].total, totalApp=fd.rows.filter(function(r){return r.key==='totapp';})[0].total;
+  var totalAcc=fd.rows.filter(function(r){return r.key==='acc';})[0].total;
+  var totalEnr=fd.rows.filter(function(r){return r.key==='totenr';})[0].total;
+  var totalVisit=fd.rows.filter(function(r){return r.key==='visit';})[0].total;
+  var pctAccepted=totalApp?totalAcc/totalApp:0;
+  var pctEnrolled=totalAcc?totalEnr/totalAcc:0;
+  var inqToVisit=totalInq?totalVisit/totalInq:0;
+  var inqToApplied=totalInq?totalApp/totalInq:0;
+  var inqToEnrolled=totalInq?totalEnr/totalInq:0;
+  var fpEnr=fd.rows.filter(function(r){return r.key==='fpenr';})[0].total;
+  var fpPctOfEnrolled=totalEnr?fpEnr/totalEnr:0;
+
+  var h='';
+  h+='<div class="dash-hdr"><div><div class="dash-title">Admissions Dashboard</div><div class="dash-sub">Live -- computed from the roster. Yellow-style fields below are yours to edit.</div></div></div>';
+
+  // KEY DATES / GOALS
+  h+='<div class="dsec"><div class="dsec-hd"><div class="dsec-t">Key Dates &amp; Tuition</div></div>';
+  h+='<div class="dkey-row">';
+  h+='<div class="dkey-fi"><label>January Application Deadline</label><input class="dkeyinp" type="date" id="cfg-jandeadline" value="'+(CFG.janDeadline||'')+'"/></div>';
+  h+='<div class="dkey-fi"><label>Stated Tuition 2027-28 ($)</label><input class="dkeyinp" type="number" id="cfg-tuition" value="'+(CFG.statedTuition||'')+'" style="width:100px"/></div>';
+  h+='</div></div>';
+
+  // GOALS TABLE
+  h+='<div class="dsec"><div class="dsec-hd"><div class="dsec-t">Goals -- 2027-2028</div><div class="dsec-note">Type directly into the grade columns</div></div>';
+  h+='<table class="dtable"><tr><th>Metric</th>'+GRADES.map(function(g){return'<th>'+g+'th</th>';}).join('')+'<th>Total</th></tr>';
+  [['inquiry','Inquiry Goal'],['app','Application Goal'],['enroll','Enrollment Goal'],['fpEnroll','Full-Pay Enrolled Goal']].forEach(function(pair){
+    var gk=pair[0],lbl=pair[1],tot=0;
+    h+='<tr><td>'+lbl+'</td>';
+    GRADES.forEach(function(g){var v=(CFG.goals[g]||{})[gk]||0;tot+=v;h+='<td><input class="ginput" type="number" min="0" data-goalgrade="'+g+'" data-goalkey="'+gk+'" value="'+v+'"/></td>';});
+    h+='<td><strong>'+tot+'</strong></td></tr>';
+  });
+  h+='</table></div>';
+
+  // FUNNEL TABLE
+  h+='<div class="dsec"><div class="dsec-hd"><div class="dsec-t">New Student Funnel -- live</div></div>';
+  h+='<table class="dtable"><tr><th>Stage</th>'+GRADES.map(function(g){return'<th>'+g+'th</th>';}).join('')+'<th>Total</th><th>Goal</th><th>% of Goal</th></tr>';
+  fd.rows.forEach(function(r){
+    h+='<tr'+(r.strong?' class="strong"':'')+'><td>'+r.label+'</td>';
+    GRADES.forEach(function(g){h+='<td>'+r.vals[g]+'</td>';});
+    h+='<td>'+r.total+'</td><td>'+(r.goal!=null?r.goal:'--')+'</td>'+pctCell(r.total,r.goal)+'</tr>';
+  });
+  h+='</table></div>';
+
+  // CONVERSION
+  h+='<div class="dsec"><div class="dsec-hd"><div class="dsec-t">Conversion &amp; Percentages</div></div>';
+  h+='<table class="dtable"><tr><th>Measure</th><th>Rate</th></tr>';
+  [['Percentage Accepted (accepted \u00f7 applicants)',pctAccepted],['Percentage Enrolled (enrolled \u00f7 accepted)',pctEnrolled],
+   ['Inquiry \u2192 Campus Visit',inqToVisit],['Inquiry \u2192 Applied',inqToApplied],['Inquiry \u2192 Enrolled',inqToEnrolled],
+   ['Full-Pay % of Enrolled',fpPctOfEnrolled]].forEach(function(pair){
+    h+='<tr><td>'+pair[0]+'</td><td>'+(pair[1]*100).toFixed(1)+'%</td></tr>';
+  });
+  h+='</table></div>';
+
+  // TUITION
+  h+='<div class="dgrid4">';
+  h+='<div class="dc4"><div class="dn">'+fmt$(tui.revenue)+'</div><div class="dl">Total Tuition Revenue</div><div class="dsub">'+tui.enrolledCount+' enrolled</div></div>';
+  h+='<div class="dc4"><div class="dn">'+fmt$(tui.aidAwarded)+'</div><div class="dl">Financial Aid Awarded</div></div>';
+  h+='<div class="dc4"><div class="dn">'+fmt$(Math.round(tui.avg))+'</div><div class="dl">Avg. Tuition / Enrolled</div></div>';
+  h+='<div class="dc4"><div class="dn">'+fmt$(tui.lostTuition)+'</div><div class="dl">Lost Tuition (declined)</div><div class="dsub">'+(tui.discountRate?(tui.discountRate*100).toFixed(1)+'% discount rate':'')+'</div></div>';
+  h+='</div>';
+
+  document.getElementById('dash').innerHTML=h;
+
+  // WIRE inline edits
+  document.getElementById('cfg-jandeadline').addEventListener('change',function(){CFG.janDeadline=this.value;sync();});
+  document.getElementById('cfg-tuition').addEventListener('change',function(){CFG.statedTuition=parseFloat(this.value)||0;sync();renderDash();});
+  var ginputs=document.querySelectorAll('#dash .ginput');
+  for(var gi=0;gi<ginputs.length;gi++){
+    ginputs[gi].addEventListener('change',function(){
+      var g=this.getAttribute('data-goalgrade'),k=this.getAttribute('data-goalkey');
+      if(!CFG.goals[g])CFG.goals[g]={};
+      CFG.goals[g][k]=parseFloat(this.value)||0;
+      sync();renderDash();
+    });
+  }
+}
+
+function switchView(v){
+  activeView=v;
+  document.getElementById('vtab-roster').className='vtab'+(v==='roster'?' on':'');
+  document.getElementById('vtab-dash').className='vtab'+(v==='dash'?' on':'');
+  document.querySelector('.layout').style.display=v==='roster'?'grid':'none';
+  document.getElementById('dash').style.display=v==='dash'?'block':'none';
+  if(v==='dash')renderDash();
 }
 
 // RENDER SIDEBAR
@@ -859,11 +1129,12 @@ function openAdd(){
   editId=null;mPhoto=null;
   document.getElementById('et').textContent='Add student';
   document.getElementById('btn-del').style.display='none';
-  var flds=['e-first','e-last','e-school','e-worship','e-gpa','e-actualgpa','e-referral','e-notes','e-parentoffer','e-suggtuit','e-income','e-revovr','e-p1name','e-p1rel','e-p1email','e-p1phone','e-p2name','e-p2rel','e-p2email','e-p2phone','e-int','e-act','e-readers','e-intdate','e-r-acad','e-r-mission','e-r-extra','e-r-social','e-r-recs','e-r-reach','e-r-overall','e-rcomments','e-idate','e-visits'];
+  var flds=['e-first','e-last','e-school','e-worship','e-gpa','e-actualgpa','e-referral','e-notes','e-parentoffer','e-suggtuit','e-income','e-revovr','e-p1name','e-p1rel','e-p1email','e-p1phone','e-p2name','e-p2rel','e-p2email','e-p2phone','e-int','e-act','e-readers','e-intdate','e-r-acad','e-r-mission','e-r-extra','e-r-social','e-r-recs','e-r-reach','e-r-overall','e-rcomments','e-idate','e-visits','e-grade','e-legacy'];
   flds.forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
   ['e-status','e-decision','e-aid','e-t100','e-src','e-appform','e-appfee','e-trans','e-8thgrades','e-rec-admin','e-rec-eng','e-rec-math','e-interview','e-appphoto','e-isee'].forEach(function(id){var e=document.getElementById(id);if(!e)return;if(id==='e-status')e.value='Inquiry';else if(id==='e-aid')e.value='unknown';else e.value='';});
+  ['e-visited','e-hostour','e-vpd','e-openhouse','e-privatetour','e-shadowday'].forEach(function(id){var e=document.getElementById(id);if(e)e.checked=false;});
   resetPP();
-  document.getElementById('app-sec').style.display='none';
+  var appSec=document.getElementById('app-sec');if(appSec)appSec.style.display='none';
   document.getElementById('ov-edit').classList.add('open');
 }
 
@@ -876,8 +1147,10 @@ function openEdit(id){
   document.getElementById('btn-del').style.display='block';
   var fm={'e-first':s.first,'e-last':s.last,'e-school':s.school,'e-worship':s.worship,'e-gpa':s.gpa,'e-actualgpa':s.actualgpa,'e-referral':s.referral,'e-notes':s.notes,'e-parentoffer':s.parentoffer,'e-suggtuit':s.suggtuit,'e-income':s.income,'e-p1name':s.p1name,'e-p1rel':s.p1rel,'e-p1email':s.p1email,'e-p1phone':s.p1phone,'e-p2name':s.p2name,'e-p2rel':s.p2rel,'e-p2email':s.p2email,'e-p2phone':s.p2phone,'e-int':(s.interests||[]).join(', '),'e-act':(s.activities||[]).join(', '),'e-readers':s.readers,'e-intdate':s.intdate,'e-r-acad':s.racad,'e-r-mission':s.rmission,'e-r-extra':s.rextra,'e-r-social':s.rsocial,'e-r-recs':s.rrecs,'e-r-reach':s.rreach,'e-r-overall':s.roverall,'e-rcomments':s.rcomments,'e-idate':s.idate,'e-visits':s.visits};
   Object.keys(fm).forEach(function(k){var e=document.getElementById(k);if(e)e.value=fm[k]||'';});
-  var sm={'e-status':s.status||'Inquiry','e-decision':s.decision||'','e-aid':s.aid||'unknown','e-grade':s.grade||'','e-src':s.src||'','e-appform':s.appform||'','e-appfee':s.appfee||'','e-trans':s.trans||'','e-8thgrades':s.grades8th||'','e-rec-admin':s.recadmin||'','e-rec-eng':s.receng||'','e-rec-math':s.recmath||'','e-interview':s.interview||'','e-appphoto':s.appphoto||'','e-isee':s.isee||''};
+  var sm={'e-status':s.status||'Inquiry','e-decision':s.decision||'','e-aid':s.aid||'unknown','e-grade':s.grade||'','e-legacy':s.legacy||'','e-src':s.src||'','e-appform':s.appform||'','e-appfee':s.appfee||'','e-trans':s.trans||'','e-8thgrades':s.grades8th||'','e-rec-admin':s.recadmin||'','e-rec-eng':s.receng||'','e-rec-math':s.recmath||'','e-interview':s.interview||'','e-appphoto':s.appphoto||'','e-isee':s.isee||''};
   Object.keys(sm).forEach(function(k){var e=document.getElementById(k);if(e)e.value=sm[k];});
+  var cm={'e-visited':s.visitedCampus,'e-hostour':s.hosTour,'e-vpd':s.vpd,'e-openhouse':s.openHouse,'e-privatetour':s.privateTour,'e-shadowday':s.shadowDay};
+  Object.keys(cm).forEach(function(k){var e=document.getElementById(k);if(e)e.checked=!!cm[k];});
   if(mPhoto){document.getElementById('pp').innerHTML='<img src="'+mPhoto+'"/>';document.getElementById('rm-photo').style.display='block';}else resetPP();
 
   document.getElementById('ov-edit').classList.add('open');
@@ -891,7 +1164,7 @@ function saveStudent(){
   var last=(document.getElementById('e-last').value||'').trim();
   if(!first||!last){alert('First and last name are required.');return;}
   var status=document.getElementById('e-status').value;
-  var d={first:first,last:last,school:document.getElementById('e-school').value.trim(),worship:document.getElementById('e-worship').value.trim(),gpa:document.getElementById('e-gpa').value||null,actualgpa:document.getElementById('e-actualgpa').value||null,referral:document.getElementById('e-referral').value.trim(),grade:document.getElementById('e-grade').value,notes:document.getElementById('e-notes').value.trim(),parentoffer:document.getElementById('e-parentoffer').value||null,suggtuit:document.getElementById('e-suggtuit').value||null,income:document.getElementById('e-income').value||null,p1name:document.getElementById('e-p1name').value.trim(),p1rel:document.getElementById('e-p1rel').value.trim(),p1email:document.getElementById('e-p1email').value.trim(),p1phone:document.getElementById('e-p1phone').value.trim(),p2name:document.getElementById('e-p2name').value.trim(),p2rel:document.getElementById('e-p2rel').value.trim(),p2email:document.getElementById('e-p2email').value.trim(),p2phone:document.getElementById('e-p2phone').value.trim(),interests:tags(document.getElementById('e-int').value),activities:tags(document.getElementById('e-act').value),readers:document.getElementById('e-readers').value.trim(),intdate:document.getElementById('e-intdate').value.trim(),racad:document.getElementById('e-r-acad').value||null,rmission:document.getElementById('e-r-mission').value||null,rextra:document.getElementById('e-r-extra').value||null,rsocial:document.getElementById('e-r-social').value||null,rrecs:document.getElementById('e-r-recs').value||null,rreach:document.getElementById('e-r-reach').value||null,roverall:document.getElementById('e-r-overall').value||null,rcomments:document.getElementById('e-rcomments').value.trim(),status:status,decision:document.getElementById('e-decision').value,aid:document.getElementById('e-aid').value,idate:document.getElementById('e-idate').value.trim(),src:document.getElementById('e-src').value,visits:document.getElementById('e-visits').value.trim(),photo:mPhoto||null};
+  var d={first:first,last:last,school:document.getElementById('e-school').value.trim(),worship:document.getElementById('e-worship').value.trim(),gpa:document.getElementById('e-gpa').value||null,actualgpa:document.getElementById('e-actualgpa').value||null,referral:document.getElementById('e-referral').value.trim(),grade:document.getElementById('e-grade').value,notes:document.getElementById('e-notes').value.trim(),parentoffer:document.getElementById('e-parentoffer').value||null,suggtuit:document.getElementById('e-suggtuit').value||null,income:document.getElementById('e-income').value||null,p1name:document.getElementById('e-p1name').value.trim(),p1rel:document.getElementById('e-p1rel').value.trim(),p1email:document.getElementById('e-p1email').value.trim(),p1phone:document.getElementById('e-p1phone').value.trim(),p2name:document.getElementById('e-p2name').value.trim(),p2rel:document.getElementById('e-p2rel').value.trim(),p2email:document.getElementById('e-p2email').value.trim(),p2phone:document.getElementById('e-p2phone').value.trim(),interests:tags(document.getElementById('e-int').value),activities:tags(document.getElementById('e-act').value),readers:document.getElementById('e-readers').value.trim(),intdate:document.getElementById('e-intdate').value.trim(),racad:document.getElementById('e-r-acad').value||null,rmission:document.getElementById('e-r-mission').value||null,rextra:document.getElementById('e-r-extra').value||null,rsocial:document.getElementById('e-r-social').value||null,rrecs:document.getElementById('e-r-recs').value||null,rreach:document.getElementById('e-r-reach').value||null,roverall:document.getElementById('e-r-overall').value||null,rcomments:document.getElementById('e-rcomments').value.trim(),status:status,decision:document.getElementById('e-decision').value,aid:document.getElementById('e-aid').value,idate:document.getElementById('e-idate').value.trim(),src:document.getElementById('e-src').value,visits:document.getElementById('e-visits').value.trim(),legacy:document.getElementById('e-legacy').value,visitedCampus:document.getElementById('e-visited').checked,hosTour:document.getElementById('e-hostour').checked,vpd:document.getElementById('e-vpd').checked,openHouse:document.getElementById('e-openhouse').checked,privateTour:document.getElementById('e-privatetour').checked,shadowDay:document.getElementById('e-shadowday').checked,photo:mPhoto||null};
 
   if(editId){for(var i=0;i<students.length;i++){if(students[i].id===editId){Object.assign(students[i],d);break;}}selId=editId;}
   else{var ns=Object.assign({id:uid()},d);students.push(ns);selId=ns.id;}
@@ -905,7 +1178,7 @@ document.getElementById('up-photo').addEventListener('click',function(){document
 document.getElementById('rm-photo').addEventListener('click',resetPP);
 document.getElementById('fi-modal').addEventListener('change',function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){mPhoto=e.target.result;document.getElementById('pp').innerHTML='<img src="'+mPhoto+'"/>';document.getElementById('rm-photo').style.display='block';};r.readAsDataURL(f);this.value='';});
 document.getElementById('fi-hero').addEventListener('change',function(){var f=this.files[0];if(!f)return;var sid=this.getAttribute('data-sid');var r=new FileReader();r.onload=function(e){for(var i=0;i<students.length;i++){if(students[i].id===sid){students[i].photo=e.target.result;break;}}sync();render();detail();};r.readAsDataURL(f);this.value='';});
-document.getElementById('e-status').addEventListener('change',function(){document.getElementById('app-sec').style.display=isApp({status:this.value})?'block':'none';});
+document.getElementById('e-status').addEventListener('change',function(){var appSec=document.getElementById('app-sec');if(appSec)appSec.style.display=isApp({status:this.value})?'block':'none';});
 
 // IMPORT
 function openImport(){document.getElementById('csv-area').value='';var r=document.getElementById('ires');r.style.display='none';document.getElementById('ov-import').classList.add('open');}
@@ -1196,6 +1469,8 @@ function exportCSV(){
 }
 
 // WIRE
+document.getElementById('vtab-roster').addEventListener('click',function(){switchView('roster');});
+document.getElementById('vtab-dash').addEventListener('click',function(){switchView('dash');});
 document.getElementById('btn-export').addEventListener('click',exportCSV);
 document.getElementById('btn-import-hdr').addEventListener('click',openImport);
 
