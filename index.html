@@ -708,9 +708,20 @@ function push(){
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({s:toSync,cfg:CFG})
   })
-  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(function(r){
+    if(!r.ok){
+      return r.json().catch(function(){return{};}).then(function(errBody){
+        throw new Error((errBody&&errBody.message)?errBody.message:('HTTP '+r.status));
+      });
+    }
+    return r.json();
+  })
   .then(function(){lastKnownCloudCount=toSync.length;setSd('ok','Saved');setTimeout(function(){setSd('ok','');},2000);})
-  .catch(function(e){console.error('Push failed:',e);setSd('ok','Saved');setTimeout(function(){setSd('ok','');},2000);});
+  .catch(function(e){
+    console.error('Push failed:',e);
+    // Stays red and visible -- does NOT auto-clear -- until a save actually succeeds.
+    setSd('err','NOT SAVED: '+e.message);
+  });
 }
 
 function pull(){
