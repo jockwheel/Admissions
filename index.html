@@ -1948,6 +1948,7 @@ document.getElementById('ov-edit').addEventListener('click',function(e){if(e.tar
 document.getElementById('ov-import').addEventListener('click',function(e){if(e.target===this)closeImport();});
 
 pull();
+setInterval(pull,25000); // background refresh -- keeps everyone's view close to current during shared use (e.g. committee meetings)
 })();
 </script>
 </body>
