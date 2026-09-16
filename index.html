@@ -292,6 +292,10 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       Import CSV
     </button>
+    <button class="hbtn" id="btn-sync-finalsite">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      Sync Finalsite
+    </button>
   </div>
 </div>
 
@@ -1707,6 +1711,72 @@ function runImport(){
 
 function showIR(msg,ok){var e=document.getElementById('ires');e.textContent=msg;e.className='ires '+(ok?'ok':'err');e.style.display='block';}
 
+// FINALSITE LIVE SYNC
+// Converts Finalsite's snake_case status values ("inquiry_completed") into the
+// same Title Case strings the app's own status dropdown already uses
+// ("Inquiry Completed") -- this only works because they happen to line up
+// word-for-word; if Finalsite adds a new status this won't recognize, it will
+// still render a readable label, just possibly outside the known bucket lists.
+function titleizeStatus(s){
+  if(!s)return'Inquiry';
+  return s.split('_').map(function(w){return w.charAt(0).toUpperCase()+w.slice(1);}).join(' ');
+}
+
+function runFinalsiteSync(){
+  var btn=document.getElementById('btn-sync-finalsite');
+  var origText=btn.innerHTML;
+  btn.disabled=true;btn.style.opacity='.6';
+  btn.innerHTML=btn.innerHTML.replace('Sync Finalsite','Syncing...');
+
+  fetch(PROXY_URL+'finalsite/contacts')
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(function(d){
+      var contacts=d.contacts||[];
+      var added=0,updated=0,skipped=0;
+      contacts.forEach(function(c){
+        if(!c.first_name||!c.last_name){skipped++;return;}
+        if(c.status==='not_in_workflow'){skipped++;return;} // not part of this cycle's active pipeline
+
+        var data={
+          first:c.preferred_name||c.first_name,
+          last:c.last_name,
+          grade:c.grade||null,
+          status:titleizeStatus(c.status)
+        };
+        if(c.gender)data.gender=c.gender;
+        if(c.previous_school)data.school=c.previous_school;
+        if(c.inquiry_submit_date)data.idate=c.inquiry_submit_date;
+        if(c.financial_aid_requested===true)data.aid='yes';
+        else if(c.financial_aid_requested===false)data.aid='no';
+        var aidAmt=c.financial_aid_amount_requested!=null?parseFloat(c.financial_aid_amount_requested):0;
+        if(aidAmt>0)data.parentoffer=aidAmt;
+        var parents=(c.relationships||[]).filter(function(r){return r.type==='parent';});
+        if(parents[0])data.p1name=parents[0].name;
+        if(parents[1])data.p2name=parents[1].name;
+
+        var ex=-1;
+        for(var si=0;si<students.length;si++){
+          if(students[si].first.toLowerCase()===data.first.toLowerCase()&&
+             students[si].last.toLowerCase()===data.last.toLowerCase()){ex=si;break;}
+        }
+        if(ex>=0){
+          Object.assign(students[ex],data);
+          updated++;
+        }else{
+          students.push(Object.assign({id:uid()},data));
+          added++;
+        }
+      });
+      sync();render();if(selId)detail();
+      btn.disabled=false;btn.style.opacity='';btn.innerHTML=origText;
+      alert('Finalsite sync done -- '+added+' added, '+updated+' updated'+(skipped?' ('+skipped+' skipped).':'.'));
+    })
+    .catch(function(e){
+      btn.disabled=false;btn.style.opacity='';btn.innerHTML=origText;
+      alert('Finalsite sync failed: '+e.message);
+    });
+}
+
 // PHOTO IMPORT
 function openPhotoImport(){
   document.getElementById('ov-photos').classList.add('open');
@@ -1825,6 +1895,7 @@ document.getElementById('vtab-snap').addEventListener('click',function(){switchV
 document.getElementById('vtab-review').addEventListener('click',function(){switchView('review');});
 document.getElementById('btn-export').addEventListener('click',exportCSV);
 document.getElementById('btn-import-hdr').addEventListener('click',openImport);
+document.getElementById('btn-sync-finalsite').addEventListener('click',runFinalsiteSync);
 
 document.getElementById('btn-add').addEventListener('click',openAdd);
 document.getElementById('btn-import-sb').addEventListener('click',openImport);
