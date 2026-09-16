@@ -1959,7 +1959,24 @@ document.getElementById('ov-edit').addEventListener('click',function(e){if(e.tar
 document.getElementById('ov-import').addEventListener('click',function(e){if(e.target===this)closeImport();});
 
 pull();
-setInterval(pull,25000); // background refresh -- keeps everyone's view close to current during shared use (e.g. committee meetings)
+// Background refresh -- only while the tab is actually visible, so a
+// forgotten/backgrounded tab stops polling entirely instead of quietly
+// hammering the API (and risking a stale push) indefinitely. 90s instead of
+// 25s to stay well clear of JSONBin's free-tier rate limit even with several
+// tabs open at once.
+var refreshTimer=null;
+function startAutoRefresh(){
+  if(refreshTimer)return;
+  refreshTimer=setInterval(pull,90000);
+}
+function stopAutoRefresh(){
+  clearInterval(refreshTimer);refreshTimer=null;
+}
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden){stopAutoRefresh();}
+  else{pull();startAutoRefresh();}
+});
+if(!document.hidden)startAutoRefresh();
 })();
 </script>
 </body>
