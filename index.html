@@ -206,13 +206,26 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
 .ires.err{background:#FAEAEA;color:#A8302A;}
 
 /* VIEW TABS */
-.vtabs{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.07);border-radius:6px;padding:3px;}
+.vtabs{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.07);border-radius:6px;padding:3px;flex-wrap:wrap;}
 .vtab{padding:6px 14px;border-radius:4px;border:none;background:transparent;color:rgba(255,255,255,.55);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;}
 .vtab:hover{color:#fff;}
 .vtab.on{background:#C49A3C;color:#003260;}
 
 /* DASHBOARD VIEW */
 #dash{padding:1.5rem;display:none;}
+#feeder{padding:1.5rem;display:none;}
+#fa{padding:1.5rem;display:none;}
+#monthly{padding:1.5rem;display:none;}
+#yoy{padding:1.5rem;display:none;}
+#snap{padding:1.5rem;display:none;}
+#review{padding:1.5rem;display:none;}
+.snap-btn{padding:8px 16px;border-radius:5px;border:none;background:#003260;color:#fff;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;}
+.snap-btn:hover{background:#004080;}
+.delta-up{color:#2A6B4A;}.delta-down{color:#A8302A;}.delta-flat{color:#9EA4B0;}
+.watch-list{display:flex;flex-direction:column;gap:1px;background:#E4E6EA;border-radius:6px;overflow:hidden;}
+.watch-row{background:#fff;padding:8px 12px;display:grid;grid-template-columns:1.6fr .8fr 1fr .8fr .8fr .8fr;gap:8px;align-items:center;font-size:11.5px;}
+.watch-row.hd{background:#F8FAFD;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9EA4B0;}
+.watch-name{font-weight:700;color:#003260;}
 .dash-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem;}
 .dash-title{font-family:'EB Garamond',serif;font-size:22px;font-weight:600;color:#003260;}
 .dash-sub{font-size:11px;color:#9EA4B0;margin-top:2px;}
@@ -257,6 +270,12 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
     <div class="vtabs">
       <button class="vtab on" id="vtab-roster">Roster</button>
       <button class="vtab" id="vtab-dash">Dashboard</button>
+      <button class="vtab" id="vtab-feeder">Feeder Schools</button>
+      <button class="vtab" id="vtab-fa">Financial Aid</button>
+      <button class="vtab" id="vtab-monthly">Monthly Tracker</button>
+      <button class="vtab" id="vtab-yoy">Year-over-Year</button>
+      <button class="vtab" id="vtab-snap">Weekly Snapshot</button>
+      <button class="vtab" id="vtab-review">Committee Review</button>
     </div>
     <div class="sync-wrap"><div class="sdot" id="sdot"></div><span class="slbl" id="slbl"></span></div>
     <button class="hbtn hbtn-w" id="btn-export">
@@ -340,6 +359,12 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
 </div>
 
 <div id="dash"></div>
+<div id="feeder"></div>
+<div id="fa"></div>
+<div id="monthly"></div>
+<div id="yoy"></div>
+<div id="snap"></div>
+<div id="review"></div>
 
 <input type="file" id="fi-modal" accept="image/*" style="display:none"/>
 <input type="file" id="fi-hero" accept="image/*" style="display:none"/>
@@ -593,7 +618,15 @@ var CFG_DEFAULTS={
     10:{inquiry:35,app:15,enroll:8,fpEnroll:5},
     11:{inquiry:30,app:14,enroll:6,fpEnroll:4},
     12:{inquiry:10,app:3,enroll:1,fpEnroll:1}
-  }
+  },
+  aidBudget:{9:0,10:0,11:0,12:0}, // no figures in the workbook to seed from -- enter the Business Office allocation
+  monthly:{
+    // 2027-28 cumulative entries -- Aug/Sep seeded from what was already in the
+    // workbook when this was built; enter the rest at each month's end.
+    inquiries:{aug:180,sep:210,oct:null,nov:null,dec:null,jan:null,feb:null,mar:null,apr:null,may:null,jun:null,jul:null},
+    applications:{aug:21,sep:30,oct:null,nov:null,dec:null,jan:null,feb:null,mar:null,apr:null,may:null,jun:null,jul:null}
+  },
+  snapshots:[] // weekly log entries -- {date, inq, app, acc, enr}, newest last
 };
 var CFG=JSON.parse(JSON.stringify(CFG_DEFAULTS));
 
@@ -603,7 +636,15 @@ function loadLocal(){
   try{students=JSON.parse(localStorage.getItem(SK))||[];}catch(e){students=[];}
   try{
     var savedCfg=JSON.parse(localStorage.getItem(CFG_SK));
-    if(savedCfg)CFG=Object.assign({},CFG_DEFAULTS,savedCfg,{goals:Object.assign({},CFG_DEFAULTS.goals,savedCfg.goals)});
+    if(savedCfg)CFG=Object.assign({},CFG_DEFAULTS,savedCfg,{
+      goals:Object.assign({},CFG_DEFAULTS.goals,savedCfg.goals),
+      aidBudget:Object.assign({},CFG_DEFAULTS.aidBudget,savedCfg.aidBudget),
+      monthly:{
+        inquiries:Object.assign({},CFG_DEFAULTS.monthly.inquiries,(savedCfg.monthly||{}).inquiries),
+        applications:Object.assign({},CFG_DEFAULTS.monthly.applications,(savedCfg.monthly||{}).applications)
+      },
+      snapshots:savedCfg.snapshots||[]
+    });
   }catch(e){}
   // Load photos from separate storage and merge
   try{
@@ -665,10 +706,19 @@ function pull(){
         }
       }
       if(d.record&&d.record.cfg){
-        CFG=Object.assign({},CFG_DEFAULTS,d.record.cfg,{goals:Object.assign({},CFG_DEFAULTS.goals,d.record.cfg.goals)});
+        var rc=d.record.cfg;
+        CFG=Object.assign({},CFG_DEFAULTS,rc,{
+          goals:Object.assign({},CFG_DEFAULTS.goals,rc.goals),
+          aidBudget:Object.assign({},CFG_DEFAULTS.aidBudget,rc.aidBudget),
+          monthly:{
+            inquiries:Object.assign({},CFG_DEFAULTS.monthly.inquiries,(rc.monthly||{}).inquiries),
+            applications:Object.assign({},CFG_DEFAULTS.monthly.applications,(rc.monthly||{}).applications)
+          },
+          snapshots:rc.snapshots||[]
+        });
         changed=true;
       }
-      if(changed){saveLocal();render();if(selId)detail();if(activeView==='dash')renderDash();}
+      if(changed){saveLocal();render();if(selId)detail();renderActiveView();}
       setSd('ok','');
     })
     .catch(function(){
@@ -901,13 +951,289 @@ function renderDash(){
   }
 }
 
+function renderActiveView(){
+  if(activeView==='dash')renderDash();
+  else if(activeView==='feeder')renderFeeder();
+  else if(activeView==='fa')renderFA();
+  else if(activeView==='monthly')renderMonthly();
+  else if(activeView==='yoy')renderYoy();
+  else if(activeView==='snap')renderSnap();
+  else if(activeView==='review')renderReview();
+}
+
+// ============ FEEDER SCHOOLS ============
+// "Spell schools consistently" rule from the workbook applies here too -- this
+// groups on the exact school text, so 'St. Monica HS' and 'St. Monica Catholic
+// School' still count as two different schools.
+// ASSUMPTION: Yield = Enrolled ÷ Applications (the workbook doesn't specify
+// enrolled ÷ accepted vs. enrolled ÷ applications -- adjust if you want the former).
+function renderFeeder(){
+  var bySchool={};
+  students.forEach(function(s){
+    var name=(s.school||'').trim();
+    if(!name)return;
+    if(!bySchool[name])bySchool[name]={school:name,inq:0,app:0,enr:0};
+    bySchool[name].inq++;
+    if(isApp(s))bySchool[name].app++;
+    if(s.status==='Enrolled')bySchool[name].enr++;
+  });
+  var list=Object.keys(bySchool).map(function(k){return bySchool[k];}).sort(function(a,b){return b.inq-a.inq;});
+
+  var h='<div class="dash-hdr"><div><div class="dash-title">Feeder Schools</div><div class="dash-sub">'+list.length+' schools represented -- counted automatically from the roster</div></div></div>';
+  h+='<div class="dsec"><table class="dtable"><tr><th>School</th><th>Inquiries</th><th>Applications</th><th>Enrolled</th><th>App Rate</th><th>Yield</th></tr>';
+  list.forEach(function(r){
+    var appRate=r.inq?r.app/r.inq:0;
+    var yieldRate=r.app?r.enr/r.app:0;
+    h+='<tr><td>'+r.school+'</td><td>'+r.inq+'</td><td>'+r.app+'</td><td>'+r.enr+'</td><td>'+(appRate*100).toFixed(0)+'%</td><td>'+(yieldRate*100).toFixed(0)+'%</td></tr>';
+  });
+  if(!list.length)h+='<tr><td colspan="6" style="text-align:center;color:#9EA4B0;font-style:italic">No schools recorded yet -- import or add students with a school set.</td></tr>';
+  h+='</table></div>';
+  document.getElementById('feeder').innerHTML=h;
+}
+
+// ============ FINANCIAL AID ============
+// Committed = sum of (suggested tuition - parent offer) per student with aid
+// requested, same calc used on the Dashboard tuition summary.
+function aidCommittedByGrade(){
+  var out={9:0,10:0,11:0,12:0};
+  students.forEach(function(s){
+    if(s.aid!=='yes')return;
+    var g=gradeOf(s);if(!g)return;
+    var stated=CFG.statedTuition||0;
+    var sugg=s.suggtuit!=null&&s.suggtuit!==''?parseFloat(s.suggtuit):stated;
+    var offer=s.parentoffer!=null&&s.parentoffer!==''?parseFloat(s.parentoffer):null;
+    out[g]+=Math.max(0,sugg-(offer!=null?offer:sugg));
+  });
+  return out;
+}
+
+function renderFA(){
+  var committed=aidCommittedByGrade();
+  var h='<div class="dash-hdr"><div><div class="dash-title">Financial Aid</div><div class="dash-sub">Budget is yours to enter -- committed is computed from suggested tuition minus parent offer</div></div></div>';
+
+  h+='<div class="dsec"><div class="dsec-hd"><div class="dsec-t">Budget vs. Committed by Grade</div></div>';
+  h+='<table class="dtable"><tr><th>Grade</th><th>Budget</th><th>Committed</th><th>% Used</th></tr>';
+  var totBudget=0,totCommit=0;
+  GRADES.forEach(function(g){
+    var budget=(CFG.aidBudget||{})[g]||0;
+    var commit=committed[g]||0;
+    totBudget+=budget;totCommit+=commit;
+    var pct=budget?commit/budget:null;
+    h+='<tr><td>'+g+'th</td><td><input class="ginput" type="number" min="0" data-fabudgetgrade="'+g+'" value="'+budget+'" style="width:90px"/></td><td>'+fmt$(commit)+'</td>'+(pct===null?'<td>--</td>':'<td class="'+(pct>1?'badpct':'')+'">'+(pct*100).toFixed(0)+'%</td>')+'</tr>';
+  });
+  var totPct=totBudget?totCommit/totBudget:null;
+  h+='<tr class="strong"><td>Total</td><td>'+fmt$(totBudget)+'</td><td>'+fmt$(totCommit)+'</td>'+(totPct===null?'<td>--</td>':'<td class="'+(totPct>1?'badpct':'')+'">'+(totPct*100).toFixed(0)+'%</td>')+'</tr>';
+  h+='</table></div>';
+
+  // TOP FA FAMILIES WATCHLIST
+  var faStudents=students.filter(function(s){return s.aid==='yes';}).map(function(s){
+    var stated=CFG.statedTuition||0;
+    var sugg=s.suggtuit!=null&&s.suggtuit!==''?parseFloat(s.suggtuit):stated;
+    var offer=s.parentoffer!=null&&s.parentoffer!==''?parseFloat(s.parentoffer):null;
+    var need=Math.max(0,sugg-(offer!=null?offer:sugg));
+    return{s:s,need:need};
+  }).sort(function(a,b){return b.need-a.need;}).slice(0,15);
+
+  h+='<div class="dsec"><div class="dsec-hd"><div class="dsec-t">Top FA Families</div><div class="dsec-note">Top 15 by aid need</div></div>';
+  h+='<div class="watch-list"><div class="watch-row hd"><div>Student</div><div>Grade</div><div>School</div><div>Suggested</div><div>Offer</div><div>Need</div></div>';
+  faStudents.forEach(function(r){
+    var s=r.s;
+    h+='<div class="watch-row"><div class="watch-name">'+(s.last||'')+', '+(s.first||'')+'</div><div>'+(s.grade||'--')+'</div><div>'+(s.school||'--')+'</div><div>'+fmt$(s.suggtuit)+'</div><div>'+fmt$(s.parentoffer)+'</div><div>'+fmt$(r.need)+'</div></div>';
+  });
+  if(!faStudents.length)h+='<div class="watch-row"><div style="color:#9EA4B0;font-style:italic">No financial-aid requests recorded yet.</div></div>';
+  h+='</div></div>';
+
+  document.getElementById('fa').innerHTML=h;
+
+  document.querySelectorAll('#fa .ginput').forEach(function(inp){
+    inp.addEventListener('change',function(){
+      var g=this.getAttribute('data-fabudgetgrade');
+      if(!CFG.aidBudget)CFG.aidBudget={};
+      CFG.aidBudget[g]=parseFloat(this.value)||0;
+      sync();renderFA();
+    });
+  });
+}
+
+// ============ HISTORICAL REFERENCE DATA ============
+// Carried over verbatim from the 2026-27 workbook, same as the Excel tabs
+// document. Nothing here is computed -- it's fixed history, just like in Excel.
+var MONTH_LABELS=[['aug','August'],['sep','September'],['oct','October'],['nov','November'],['dec','December'],['jan','January'],['feb','February'],['mar','March'],['apr','April'],['may','May'],['jun','June'],['jul','July']];
+var HIST_YEARS=['2022-23','2023-24','2024-25','2025-26','2026-27'];
+var HIST_INQ={aug:[95,105,96,152,143],sep:[153,162,155,235,213],oct:[211,228,241,314,334],nov:[227,248,279,361,363],dec:[262,272,282,380,386],jan:[276,282,290,393,402],feb:[286,297,310,407,407],mar:[292,303,326,418,417],apr:[null,314,348,434,436],may:[null,319,357,449,439],jun:[null,335,367,456,null],jul:[null,null,null,null,null]};
+var HIST_APP={aug:[0,1,8,9,19],sep:[23,22,23,44,52],oct:[25,39,40,84,104],nov:[32,70,80,116,146],dec:[32,81,97,157,177],jan:[97,102,115,174,202],feb:[110,110,124,193,204],mar:[114,111,134,197,209],apr:[null,115,148,206,211],may:[null,120,152,217,212],jun:[null,124,154,221,212],jul:[null,127,157,null,null]};
+// Year-over-Year historical rows: [2026-27, 2025-26, 2024-25, 2023-24, 2022-23]. null = not recorded that year.
+var HIST_YOY_YEARS=['2026-2027','2025-2026','2024-2025','2023-2024','2022-2023'];
+var HIST_YOY_ROWS=[
+  {label:'Inquiries',vals:[442,466,379,356,384]},
+  {label:'Visited Campus',vals:[286,230,null,null,null]},
+  {label:'Applicants by Jan Deadline',vals:[210,195,121,125,100]},
+  {label:'Applicants by Add/Drop',vals:[242,228,167,171,142]},
+  {label:'Applicants Mid Year',vals:[5,null,null,10,2]},
+  {label:'Enrolled Mid Year',vals:[1,1,null,null,null]},
+  {label:'FP Applicants',vals:[108,108,null,null,null]},
+  {label:'FA Applicants',vals:[134,117,null,null,null]},
+  {label:'Total Applicants',vals:[242,228,167,171,142]},
+  {label:'Applications Complete',vals:[219,194,null,null,null]},
+  {label:'Not Accepted',vals:[null,13,null,null,null]},
+  {label:'Admits / Accepted',vals:[211,181,null,null,null]},
+  {label:'FP Enrolled',vals:[68,69,null,null,null]},
+  {label:'FA Enrolled',vals:[41,41,null,null,null]},
+  {label:'Total Enrolled',vals:[109,110,null,null,null]},
+  {label:'Average Tuition',vals:[22690,null,20827,18479,17389],money:true},
+  {label:'Total Tuition Revenue',vals:[2472100,null,5373397,4693811,4588122],money:true},
+  {label:'Stated Tuition',vals:[32995,null,31128,28298,25725],money:true}
+];
+
+function histCell(v,money){if(v===null||v===undefined)return'<td>--</td>';return'<td>'+(money?fmt$(v):v)+'</td>';}
+
+// ============ MONTHLY TRACKER ============
+function renderMonthly(){
+  var goalInq=GRADES.reduce(function(s,g){return s+((CFG.goals[g]||{}).inquiry||0);},0);
+  var goalApp=GRADES.reduce(function(s,g){return s+((CFG.goals[g]||{}).app||0);},0);
+  function section(title,hist,cfgKey,goal){
+    var h='<div class="dsec"><div class="dsec-hd"><div class="dsec-t">'+title+' -- cumulative</div><div class="dsec-note">Enter at each month\'s end</div></div>';
+    h+='<table class="dtable"><tr><th>Month</th>'+HIST_YEARS.map(function(y){return'<th>'+y+'</th>';}).join('')+'<th>2027-28</th><th>vs LY</th><th>% of Goal</th></tr>';
+    MONTH_LABELS.forEach(function(pair){
+      var mk=pair[0],lbl=pair[1];
+      var hv=hist[mk];
+      var cur=CFG.monthly[cfgKey][mk];
+      var ly=hv[4]; // 2026-27 is last in HIST_YEARS
+      var vsLy=(cur!=null&&ly!=null)?cur-ly:null;
+      var pctGoal=(cur!=null&&goal)?cur/goal:null;
+      h+='<tr><td>'+lbl+'</td>';
+      hv.forEach(function(v){h+=histCell(v,false);});
+      h+='<td><input class="ginput" type="number" min="0" data-monthkey="'+cfgKey+'" data-monthlabel="'+mk+'" value="'+(cur!=null?cur:'')+'" style="width:64px"/></td>';
+      h+=(vsLy===null?'<td>--</td>':'<td class="'+(vsLy>=0?'goodpct':'badpct')+'">'+(vsLy>=0?'+':'')+vsLy+'</td>');
+      h+=(pctGoal===null?'<td>--</td>':pctCell(cur,goal));
+      h+='</tr>';
+    });
+    h+='</table></div>';
+    return h;
+  }
+  var h='<div class="dash-hdr"><div><div class="dash-title">Monthly Tracker</div><div class="dash-sub">Historical columns carried over from the prior workbook -- 2027-28 is yours to log</div></div></div>';
+  h+=section('Inquiries',HIST_INQ,'inquiries',goalInq);
+  h+=section('Applications',HIST_APP,'applications',goalApp);
+  document.getElementById('monthly').innerHTML=h;
+  document.querySelectorAll('#monthly .ginput').forEach(function(inp){
+    inp.addEventListener('change',function(){
+      var k=this.getAttribute('data-monthkey'),m=this.getAttribute('data-monthlabel');
+      CFG.monthly[k][m]=this.value===''?null:(parseFloat(this.value)||0);
+      sync();renderMonthly();
+    });
+  });
+}
+
+// ============ YEAR-OVER-YEAR ============
+function renderYoy(){
+  var fd=funnelData();
+  var tui=dashTuition();
+  function rowLive(label){var r=fd.rows.filter(function(x){return x.label===label;})[0];return r?r.total:null;}
+  var liveMap={
+    'Inquiries':rowLive('Inquiries (all records)'),
+    'Visited Campus':rowLive('Visited Campus'),
+    'Applicants by Jan Deadline':null, // needs the Jan-deadline date cutoff -- not tracked as a point-in-time snapshot here
+    'Applicants by Add/Drop':null,
+    'Applicants Mid Year':null,
+    'Enrolled Mid Year':null,
+    'FP Applicants':rowLive('Full-Pay Applicants'),
+    'FA Applicants':rowLive('Financial-Aid Applicants'),
+    'Total Applicants':rowLive('TOTAL APPLICANTS'),
+    'Applications Complete':null,
+    'Not Accepted':rowLive('Not Accepted'),
+    'Admits / Accepted':rowLive('Accepted / Admits'),
+    'FP Enrolled':rowLive('Full-Pay Enrolled'),
+    'FA Enrolled':rowLive('Financial-Aid Enrolled'),
+    'Total Enrolled':rowLive('TOTAL ENROLLED'),
+    'Average Tuition':Math.round(tui.avg)||null,
+    'Total Tuition Revenue':tui.revenue||null,
+    'Stated Tuition':CFG.statedTuition||null
+  };
+  var h='<div class="dash-hdr"><div><div class="dash-title">Year-over-Year Summary</div><div class="dash-sub">2027-28 is live from the roster; earlier years are fixed history from the prior workbook</div></div></div>';
+  h+='<div class="dsec"><table class="dtable"><tr><th>Measure</th><th>2027-28</th>'+HIST_YOY_YEARS.map(function(y){return'<th>'+y+'</th>';}).join('')+'</tr>';
+  HIST_YOY_ROWS.forEach(function(r){
+    var live=liveMap[r.label];
+    h+='<tr><td>'+r.label+'</td>'+(live===null?'<td>--</td>':'<td><strong>'+(r.money?fmt$(live):live)+'</strong></td>');
+    r.vals.forEach(function(v){h+=histCell(v,r.money);});
+    h+='</tr>';
+  });
+  h+='</table><div class="dsec-note" style="margin-top:8px">Rows left blank under 2027-28 (Jan-deadline / Add-Drop / Mid-Year splits, Applications Complete) aren\'t tracked as point-in-time snapshots in this app yet -- ask if you want those added.</div></div>';
+  document.getElementById('yoy').innerHTML=h;
+}
+
+// ============ WEEKLY SNAPSHOT ============
+function renderSnap(){
+  var fd=funnelData();
+  var cur={
+    date:new Date().toISOString().slice(0,10),
+    inq:fd.rows.filter(function(r){return r.key==='inq';})[0].total,
+    app:fd.rows.filter(function(r){return r.key==='totapp';})[0].total,
+    acc:fd.rows.filter(function(r){return r.key==='acc';})[0].total,
+    enr:fd.rows.filter(function(r){return r.key==='totenr';})[0].total
+  };
+  var h='<div class="dash-hdr"><div><div class="dash-title">Weekly Snapshot</div><div class="dash-sub">Four headline numbers, logged whenever you click -- gives you a trend line over the season</div></div>';
+  h+='<button class="snap-btn" id="btn-log-snap">Log Today\'s Numbers</button></div>';
+  h+='<div class="dgrid4" style="margin-bottom:1.5rem">';
+  h+='<div class="dc4"><div class="dn">'+cur.inq+'</div><div class="dl">Inquiries</div></div>';
+  h+='<div class="dc4"><div class="dn">'+cur.app+'</div><div class="dl">Applicants</div></div>';
+  h+='<div class="dc4"><div class="dn">'+cur.acc+'</div><div class="dl">Accepted</div></div>';
+  h+='<div class="dc4"><div class="dn">'+cur.enr+'</div><div class="dl">Enrolled</div></div>';
+  h+='</div>';
+  h+='<div class="dsec"><div class="dsec-hd"><div class="dsec-t">Log</div></div>';
+  h+='<table class="dtable"><tr><th>Date</th><th>Inquiries</th><th>Applicants</th><th>Accepted</th><th>Enrolled</th></tr>';
+  var log=(CFG.snapshots||[]).slice().sort(function(a,b){return a.date<b.date?1:-1;});
+  if(!log.length)h+='<tr><td colspan="5" style="text-align:center;color:#9EA4B0;font-style:italic">No snapshots logged yet -- click the button above to start the trend line.</td></tr>';
+  log.forEach(function(entry,idx){
+    var prev=log[idx+1];
+    function delta(k){if(!prev)return'';var d=entry[k]-prev[k];if(d===0)return' <span class="delta-flat">(+0)</span>';return d>0?' <span class="delta-up">(+'+d+')</span>':' <span class="delta-down">('+d+')</span>';}
+    h+='<tr><td>'+entry.date+'</td><td>'+entry.inq+delta('inq')+'</td><td>'+entry.app+delta('app')+'</td><td>'+entry.acc+delta('acc')+'</td><td>'+entry.enr+delta('enr')+'</td></tr>';
+  });
+  h+='</table></div>';
+  document.getElementById('snap').innerHTML=h;
+  document.getElementById('btn-log-snap').addEventListener('click',function(){
+    if(!CFG.snapshots)CFG.snapshots=[];
+    // Replace today's entry if one already exists, rather than stacking duplicates
+    CFG.snapshots=CFG.snapshots.filter(function(e){return e.date!==cur.date;});
+    CFG.snapshots.push(cur);
+    sync();renderSnap();
+  });
+}
+
+// ============ COMMITTEE REVIEW ============
+// ASSUMPTION: Combined % = average of whichever of the 7 reader scores are
+// filled in (out of 5), not weighted -- adjust if PCHS weights certain scores.
+function renderReview(){
+  var scoreKeys=['racad','rmission','rextra','rsocial','rrecs','rreach','roverall'];
+  var apps=students.filter(isApp).map(function(s){
+    var vals=scoreKeys.map(function(k){return s[k]!=null&&s[k]!==''?parseFloat(s[k]):null;}).filter(function(v){return v!==null;});
+    var combined=vals.length?(vals.reduce(function(a,b){return a+b;},0)/vals.length/5*100):null;
+    return{s:s,combined:combined};
+  }).sort(function(a,b){return(b.combined||-1)-(a.combined||-1);});
+
+  var h='<div class="dash-hdr"><div><div class="dash-title">Committee Review</div><div class="dash-sub">'+apps.length+' applicants -- sorted by Combined %, computed from the reader scores already on each profile</div></div></div>';
+  h+='<div class="dsec"><table class="dtable"><tr><th>Student</th><th>Grade</th><th>School</th><th>GPA</th><th>Acad</th><th>Mission</th><th>Extra</th><th>Social</th><th>Recs</th><th>Reach</th><th>Overall</th><th>Combined %</th><th>Decision</th></tr>';
+  apps.forEach(function(r){
+    var s=r.s;
+    h+='<tr><td>'+(s.last||'')+', '+(s.first||'')+'</td><td>'+(s.grade||'--')+'</td><td>'+(s.school||'--')+'</td><td>'+(s.actualgpa||s.gpa||'--')+'</td>';
+    scoreKeys.forEach(function(k){h+='<td>'+(s[k]||'--')+'</td>';});
+    h+='<td><strong>'+(r.combined!==null?r.combined.toFixed(0)+'%':'--')+'</strong></td><td>'+(s.decision||'--')+'</td></tr>';
+  });
+  if(!apps.length)h+='<tr><td colspan="13" style="text-align:center;color:#9EA4B0;font-style:italic">No applicants yet.</td></tr>';
+  h+='</table></div>';
+  document.getElementById('review').innerHTML=h;
+}
+
 function switchView(v){
   activeView=v;
-  document.getElementById('vtab-roster').className='vtab'+(v==='roster'?' on':'');
-  document.getElementById('vtab-dash').className='vtab'+(v==='dash'?' on':'');
+  ['roster','dash','feeder','fa','monthly','yoy','snap','review'].forEach(function(name){
+    var tab=document.getElementById('vtab-'+name);
+    if(tab)tab.className='vtab'+(v===name?' on':'');
+  });
   document.querySelector('.layout').style.display=v==='roster'?'grid':'none';
-  document.getElementById('dash').style.display=v==='dash'?'block':'none';
-  if(v==='dash')renderDash();
+  ['dash','feeder','fa','monthly','yoy','snap','review'].forEach(function(name){
+    document.getElementById(name).style.display=v===name?'block':'none';
+  });
+  renderActiveView();
 }
 
 // RENDER SIDEBAR
@@ -1481,6 +1807,12 @@ function exportCSV(){
 // WIRE
 document.getElementById('vtab-roster').addEventListener('click',function(){switchView('roster');});
 document.getElementById('vtab-dash').addEventListener('click',function(){switchView('dash');});
+document.getElementById('vtab-feeder').addEventListener('click',function(){switchView('feeder');});
+document.getElementById('vtab-fa').addEventListener('click',function(){switchView('fa');});
+document.getElementById('vtab-monthly').addEventListener('click',function(){switchView('monthly');});
+document.getElementById('vtab-yoy').addEventListener('click',function(){switchView('yoy');});
+document.getElementById('vtab-snap').addEventListener('click',function(){switchView('snap');});
+document.getElementById('vtab-review').addEventListener('click',function(){switchView('review');});
 document.getElementById('btn-export').addEventListener('click',exportCSV);
 document.getElementById('btn-import-hdr').addEventListener('click',openImport);
 
