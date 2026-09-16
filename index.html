@@ -1628,18 +1628,17 @@ function runImport(){
       var p2rel=gv(vals,'p2relationship')||gv(vals,'relationship.1')||'';
 
       // Visit/event date columns -- Finalsite names two of these generically
-      // (calendar_calendar_1_date, calendar_information_session_date), so which
-      // specific event type they represent is an ASSUMPTION below. Confirm with
-      // Jack what these two actually are in the PCHS admissions calendar and
-      // adjust the openHouse/hosTour lines just below if wrong.
+      // (calendar_calendar_1_date, calendar_information_session_date). Confirmed
+      // with Jack: calendar_calendar_1_date = Open House, calendar_information_
+      // session_date = HOS tour.
       var vpdDate=(gv(vals,'calendar_visit_pacifica_day_date')||'').replace(/\n/g,' ').trim();
-      var cal1Date=(gv(vals,'calendar_calendar_1_date')||'').replace(/\n/g,' ').trim(); // ASSUMED = Open House
-      var infoSessDate=(gv(vals,'calendar_information_session_date')||'').replace(/\n/g,' ').trim(); // ASSUMED = HOS Tour
+      var cal1Date=(gv(vals,'calendar_calendar_1_date')||'').replace(/\n/g,' ').trim(); // = Open House
+      var infoSessDate=(gv(vals,'calendar_information_session_date')||'').replace(/\n/g,' ').trim(); // = HOS Tour
 
       var visitParts=[];
       if(vpdDate)visitParts.push('Visit Pacifica Day: '+vpdDate);
-      if(cal1Date)visitParts.push('Open house (assumed): '+cal1Date);
-      if(infoSessDate)visitParts.push('Information session (assumed HOS tour): '+infoSessDate);
+      if(cal1Date)visitParts.push('Open house: '+cal1Date);
+      if(infoSessDate)visitParts.push('HOS tour: '+infoSessDate);
 
       function stripHtmlInline(s){
         return(s||'').replace(/<[^>]+>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&#39;/g,"'").replace(/&quot;/g,'"')
