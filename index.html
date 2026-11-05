@@ -268,6 +268,11 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
 .echk-row{display:flex;flex-wrap:wrap;gap:14px;padding:6px 0;}
 .echk{display:flex;align-items:center;gap:5px;font-size:11px;color:#5A6070;cursor:pointer;}
 .echk input{cursor:pointer;}
+/* Committee view: hides family financials and parent contact info while presenting */
+body.cview .sens{display:none!important}
+#btn-cview.on{background:#C9A227;color:#0B1F3A;border-color:#C9A227}
+.cview-banner{display:none;background:#C9A227;color:#0B1F3A;font:600 11px Montserrat,sans-serif;letter-spacing:.08em;text-transform:uppercase;text-align:center;padding:4px 8px}
+body.cview .cview-banner{display:block}
 </style>
 </head>
 <body>
@@ -280,7 +285,8 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
   </div>
   <div class="hbtns">
     <div class="sync-wrap"><div class="sdot" id="sdot"></div><span class="slbl" id="slbl"></span></div>
-    <button class="hbtn hbtn-w" id="btn-export">
+    <button class="hbtn hbtn-w" id="btn-cview" title="Hide family income, parent offer, suggested tuition and parent contact info while presenting">Committee view</button>
+    <button class="hbtn hbtn-w sens" id="btn-export">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       Export CSV
     </button>
@@ -300,11 +306,12 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
 </div>
 
 <div id="subnav">
+  <div class="cview-banner">Committee view on: family financials and parent contact info hidden</div>
   <div class="vtabs">
     <button class="vtab on" id="vtab-roster">Roster</button>
     <button class="vtab" id="vtab-dash">Dashboard</button>
     <button class="vtab" id="vtab-feeder">Feeder Schools</button>
-    <button class="vtab" id="vtab-fa">Financial Aid</button>
+    <button class="vtab sens" id="vtab-fa">Financial Aid</button>
     <button class="vtab" id="vtab-monthly">Monthly Tracker</button>
     <button class="vtab" id="vtab-yoy">Year-over-Year</button>
     <button class="vtab" id="vtab-snap">Weekly Snapshot</button>
@@ -478,15 +485,15 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
       <div class="fi"><label>Aid requested</label>
         <select id="e-aid"><option value="unknown">Unknown</option><option value="yes">Yes</option><option value="no">No</option></select>
       </div>
-      <div class="fi"><label>Parent offer ($)</label><input type="number" id="e-parentoffer" placeholder="e.g. 15000"/></div>
+      <div class="fi sens"><label>Parent offer ($)</label><input type="number" id="e-parentoffer" placeholder="e.g. 15000"/></div>
     </div>
     <div class="fr">
-      <div class="fi"><label>Suggested tuition ($)</label><input type="number" id="e-suggtuit" placeholder="e.g. 28000"/></div>
-      <div class="fi"><label>Family income ($)</label><input type="number" id="e-income" placeholder="e.g. 120000"/></div>
+      <div class="fi sens"><label>Suggested tuition ($)</label><input type="number" id="e-suggtuit" placeholder="e.g. 28000"/></div>
+      <div class="fi sens"><label>Family income ($)</label><input type="number" id="e-income" placeholder="e.g. 120000"/></div>
     </div>
 
 
-    <div class="msep">Parent / Guardian</div>
+    <div class="sens"><div class="msep">Parent / Guardian</div>
     <div class="fr">
       <div class="fi"><label>Parent 1 name</label><input type="text" id="e-p1name" placeholder="Full name"/></div>
       <div class="fi"><label>Relationship</label><input type="text" id="e-p1rel" placeholder="Mother / Father / Guardian"/></div>
@@ -502,6 +509,7 @@ body{font-family:'Montserrat',sans-serif;background:#F4F5F7;color:#1A1D25;font-s
     <div class="fr">
       <div class="fi"><label>Parent 2 email</label><input type="email" id="e-p2email" placeholder="email@example.com"/></div>
       <div class="fi"><label>Parent 2 phone</label><input type="tel" id="e-p2phone" placeholder="(310) 000-0000"/></div>
+    </div>
     </div>
 
     <div class="msep">Profile</div>
@@ -1370,8 +1378,8 @@ function detail(){
         '<div style="flex:1;min-width:0">'+
           '<div class="hname">'+s.last+', '+s.first+'</div>'+
           '<div class="hschool">'+(s.school||'School not provided')+(s.grade?' &nbsp;&middot;&nbsp;<strong style="color:rgba(255,255,255,.9)">'+s.grade+'</strong>':'')+'</div>'+
-          (s.p1name?'<div class="hcontact">'+s.p1name+(s.p1email?' &middot; '+s.p1email:'')+(s.p1phone&&!s.p1email?' &middot; '+s.p1phone:'')+'</div>':'')+
-          (s.p2name?'<div class="hcontact">'+s.p2name+(s.p2email?' &middot; '+s.p2email:'')+(s.p2phone&&!s.p2email?' &middot; '+s.p2phone:'')+'</div>':'')+
+          (s.p1name?'<div class="hcontact sens">'+s.p1name+(s.p1email?' &middot; '+s.p1email:'')+(s.p1phone&&!s.p1email?' &middot; '+s.p1phone:'')+'</div>':'')+
+          (s.p2name?'<div class="hcontact sens">'+s.p2name+(s.p2email?' &middot; '+s.p2email:'')+(s.p2phone&&!s.p2email?' &middot; '+s.p2phone:'')+'</div>':'')+
           '<div style="display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap">'+
             '<span class="b '+statusBadgeClass(stl)+'" style="font-size:10px;letter-spacing:.07em">'+stl+'</span>'+
             (s.aid==='yes'?'<span class="b baid" style="font-size:10px">Aid requested</span>':'')+
@@ -1407,9 +1415,9 @@ function detail(){
         '</div>'+
       '</div>':
       '<div class="fa-strip">'+
-        '<div class="fa-cell"><div class="fl">Parent offer</div><div class="fn">'+fmt$(s.parentoffer)+'</div></div>'+
-        '<div class="fa-cell"><div class="fl">Sugg. tuition</div><div class="fn">'+fmt$(s.suggtuit)+'</div></div>'+
-        '<div class="fa-cell"><div class="fl">Family income</div><div class="fn">'+fmt$(s.income)+'</div></div>'+
+        '<div class="fa-cell sens"><div class="fl">Parent offer</div><div class="fn">'+fmt$(s.parentoffer)+'</div></div>'+
+        '<div class="fa-cell sens"><div class="fl">Sugg. tuition</div><div class="fn">'+fmt$(s.suggtuit)+'</div></div>'+
+        '<div class="fa-cell sens"><div class="fl">Family income</div><div class="fn">'+fmt$(s.income)+'</div></div>'+
         '<div class="fa-cell"><div class="fl">Aid requested</div><div class="fn" style="color:'+(s.aid==='yes'?'#8A5C00':'#9EA4B0')+'">'+(s.aid==='yes'?'Yes':'Unknown')+'</div></div>'+
       '</div>'
     )+''+
@@ -1435,9 +1443,9 @@ function detail(){
       '</div>'+
       '<div class="dc"><div class="dch">Financial aid</div>'+
         '<div class="ir"><span class="ik">Aid requested</span><span class="iv">'+({yes:'Yes',no:'No',unknown:'Unknown'}[s.aid]||'Unknown')+'</span></div>'+
-        '<div class="ir"><span class="ik">Parent offer</span><span class="iv '+(s.parentoffer?'':'mt')+'">'+fmt$(s.parentoffer)+'</span></div>'+
-        '<div class="ir"><span class="ik">Sugg. tuition</span><span class="iv '+(s.suggtuit?'':'mt')+'">'+fmt$(s.suggtuit)+'</span></div>'+
-        '<div class="ir"><span class="ik">Family income</span><span class="iv '+(s.income?'':'mt')+'">'+fmt$(s.income)+'</span></div>'+
+        '<div class="ir sens"><span class="ik">Parent offer</span><span class="iv '+(s.parentoffer?'':'mt')+'">'+fmt$(s.parentoffer)+'</span></div>'+
+        '<div class="ir sens"><span class="ik">Sugg. tuition</span><span class="iv '+(s.suggtuit?'':'mt')+'">'+fmt$(s.suggtuit)+'</span></div>'+
+        '<div class="ir sens"><span class="ik">Family income</span><span class="iv '+(s.income?'':'mt')+'">'+fmt$(s.income)+'</span></div>'+
 
       '</div>'+
       '<div class="dc"><div class="dch">Interests</div><div class="tags">'+it+'</div></div>'+
@@ -1969,6 +1977,17 @@ document.getElementById('f3').addEventListener('change',render);
 document.getElementById('ov-edit').addEventListener('click',function(e){if(e.target===this)closeEdit();});
 document.getElementById('ov-import').addEventListener('click',function(e){if(e.target===this)closeImport();});
 
+// COMMITTEE VIEW -- remembered per browser only; a presenting convenience, not access control
+function setCview(on){
+  document.body.classList.toggle('cview',on);
+  var b=document.getElementById('btn-cview');
+  b.classList.toggle('on',on);
+  b.textContent=on?'Committee view: On':'Committee view';
+  try{localStorage.setItem('pca_cview',on?'1':'0');}catch(e){}
+  if(on&&activeView==='fa')switchView('dash');
+}
+document.getElementById('btn-cview').addEventListener('click',function(){setCview(!document.body.classList.contains('cview'));});
+(function(){var on=false;try{on=localStorage.getItem('pca_cview')==='1';}catch(e){}setCview(on);})();
 pull();
 // Background refresh -- only while the tab is actually visible, so a
 // forgotten/backgrounded tab stops polling entirely instead of quietly
