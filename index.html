@@ -803,6 +803,15 @@ function statusBucket(s){
   if(enr.indexOf(st)>-1)return'enrolled';
   return'inquiry';
 }
+// CLARITY -- status and figures copied from Clarity (app.clarityapp.com) onto each aid applicant
+function clarityGap(s){var o=parseFloat(s.parentoffer),g=parseFloat(s.suggtuit);return(isNaN(o)||isNaN(g))?null:o-g;}
+function noClarity(s){return s.aid==='yes'&&!s.clarityStatus;}
+function clarityCell(s){
+  if(s.aid!=='yes')return'--';
+  if(!s.clarityStatus)return'<span class="rv-miss">No file</span>';
+  var c=s.clarityStatus==='Ready for Review'?'rv-in':(s.clarityStatus==='Awaiting Docs'?'rv-needtowin':'');
+  return'<span class="rv-dec '+c+'">'+s.clarityStatus+'</span>';
+}
 function isApp(s){return statusBucket(s)!=='inquiry';}
 function tags(str){return(str||'').split(',').map(function(x){return x.trim();}).filter(Boolean);}
 function fmt$(n){if(!n&&n!==0)return'--';return'$'+Number(n).toLocaleString();}
@@ -1272,7 +1281,8 @@ function renderReview(){
     var s=r.s;
     if(RV.grade==='9'&&g(s)!=='9')return false;
     if(RV.grade==='tr'&&!(g(s)&&g(s)!=='9'))return false;
-    if(RV.pay!=='all'&&pay(s)!==RV.pay)return false;
+    if(RV.pay==='noclar'){if(!noClarity(s))return false;}
+    else if(RV.pay!=='all'&&pay(s)!==RV.pay)return false;
     if(RV.dec==='none'&&s.decision)return false;
     if(RV.dec!=='all'&&RV.dec!=='none'&&s.decision!==RV.dec)return false;
     if(RV.q){var n=((s.first||'')+' '+(s.last||'')+' '+(s.school||'')).toLowerCase();if(n.indexOf(RV.q.toLowerCase())<0)return false;}
@@ -1281,7 +1291,7 @@ function renderReview(){
 
   // Summary of the filtered set
   var n=apps.length,c=function(f){return apps.filter(f).length;};
-  var fp=c(function(r){return pay(r.s)==='FP';}),fa=c(function(r){return pay(r.s)==='FA';});
+  var fp=c(function(r){return pay(r.s)==='FP';}),fa=c(function(r){return pay(r.s)==='FA';}),nocl=c(function(r){return noClarity(r.s);});
   var visited=c(function(r){return r.s.visitedCampus;}),shadow=c(function(r){return r.s.shadowDay;}),legacy=c(function(r){return r.s.legacy==='yes';});
   var readers=c(function(r){return r.s.readers&&String(r.s.readers).toLowerCase()!=='deleted user';}),interviews=c(function(r){return r.s.intdate;}),scored=c(function(r){return r.scored;});
   var decs=['In','Win','Need to Win','Waitlist','Deny'],tally={};decs.forEach(function(d){tally[d]=c(function(r){return r.s.decision===d;});});
@@ -1290,7 +1300,7 @@ function renderReview(){
 
   var h='<div class="dash-hdr"><div><div class="dash-title">Committee Review</div><div class="dash-sub">'+n+' of '+all.length+' applicants shown -- sorted by Combined %, then last name. Click a name to open the profile.</div></div></div>';
   h+='<div class="dgrid4">';
-  h+='<div class="dc4"><div class="dn">'+n+'</div><div class="dl">Applicants</div><div class="dsub">'+fp+' full pay &middot; '+fa+' aid'+(n-fp-fa?' &middot; '+(n-fp-fa)+' unknown':'')+'</div></div>';
+  h+='<div class="dc4"><div class="dn">'+n+'</div><div class="dl">Applicants</div><div class="dsub">'+fp+' full pay &middot; '+fa+' aid'+(n-fp-fa?' &middot; '+(n-fp-fa)+' unknown':'')+'</div>'+(nocl?'<div class="dsub" style="color:#A8302A">'+nocl+' aid with no Clarity file</div>':'')+'</div>';
   h+='<div class="dc4"><div class="dn">'+pct(visited)+'</div><div class="dl">Visited campus</div><div class="dsub">'+visited+' visited &middot; '+shadow+' shadowed &middot; '+legacy+' legacy</div></div>';
   h+='<div class="dc4"><div class="dn">'+readers+' / '+n+'</div><div class="dl">Readers assigned</div><div class="dsub">'+scored+' scored &middot; '+interviews+' interviews set</div></div>';
   h+='<div class="dc4"><div class="dn">'+undecided+'</div><div class="dl">Awaiting decision</div><div class="dsub">'+decs.map(function(d){return d+' '+tally[d];}).join(' &middot; ')+'</div></div>';
@@ -1299,19 +1309,19 @@ function renderReview(){
   function sel(id,cur,opts){return'<select class="rv-f" id="'+id+'">'+opts.map(function(o){return'<option value="'+o[0]+'"'+(cur===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>';}
   h+='<div class="rv-bar">'+
     sel('rv-grade',RV.grade,[['all','All grades'],['9','9th grade'],['tr','Transfers (10-12)']])+
-    sel('rv-pay',RV.pay,[['all','Full pay + aid'],['FP','Full pay'],['FA','Financial aid']])+
+    sel('rv-pay',RV.pay,[['all','Full pay + aid'],['FP','Full pay'],['FA','Financial aid'],['noclar','Aid, no Clarity file']])+
     sel('rv-dec',RV.dec,[['all','All decisions'],['none','No decision yet'],['In','In'],['Win','Win'],['Need to Win','Need to Win'],['Waitlist','Waitlist'],['Deny','Deny']])+
     '<input class="rv-f rv-q" id="rv-q" type="search" placeholder="Search name or school" value="'+esc(RV.q)+'"/></div>';
 
-  h+='<div class="dsec rv-wrap"><table class="dtable rv-table"><tr><th>Student</th><th>Gr</th><th>School</th><th>Pay</th><th>GPA</th><th title="Visited campus / Shadow day / Legacy">Visit</th><th>Readers</th><th>Interview</th><th>Acad</th><th>Mission</th><th>Extra</th><th>Social</th><th>Recs</th><th>Reach</th><th>Overall</th><th>Combined</th><th>Decision</th></tr>';
+  h+='<div class="dsec rv-wrap"><table class="dtable rv-table"><tr><th>Student</th><th>Gr</th><th>School</th><th>Pay</th><th>Clarity</th><th class="sens">Income</th><th class="sens">Clarity sugg.</th><th class="sens">Offer</th><th>GPA</th><th title="Visited campus / Shadow day / Legacy">Visit</th><th>Readers</th><th>Interview</th><th>Acad</th><th>Mission</th><th>Extra</th><th>Social</th><th>Recs</th><th>Reach</th><th>Overall</th><th>Combined</th><th>Decision</th></tr>';
   apps.forEach(function(r){
     var s=r.s,flags=(s.visitedCampus?'V':'')+(s.shadowDay?' S':'')+(s.legacy==='yes'?' L':'');
-    h+='<tr><td><a href="#" class="rv-open" data-id="'+esc(s.id)+'">'+esc(s.last)+', '+esc(s.first)+'</a></td><td>'+esc(g(s)||'--')+'</td><td>'+esc(s.school||'--')+'</td><td>'+(pay(s)||'--')+'</td><td>'+esc(s.actualgpa||s.gpa||'--')+'</td><td>'+(flags.trim()||'<span class="rv-miss">none</span>')+'</td><td>'+esc(s.readers||'--')+'</td><td>'+esc(s.intdate||'--')+'</td>';
+    h+='<tr><td><a href="#" class="rv-open" data-id="'+esc(s.id)+'">'+esc(s.last)+', '+esc(s.first)+'</a></td><td>'+esc(g(s)||'--')+'</td><td>'+esc(s.school||'--')+'</td><td>'+(pay(s)||'--')+'</td><td>'+clarityCell(s)+'</td><td class="sens">'+fmt$(s.income)+'</td><td class="sens">'+fmt$(s.suggtuit)+'</td><td class="sens">'+fmt$(s.parentoffer)+'</td><td>'+esc(s.actualgpa||s.gpa||'--')+'</td><td>'+(flags.trim()||'<span class="rv-miss">none</span>')+'</td><td>'+esc(s.readers||'--')+'</td><td>'+esc(s.intdate||'--')+'</td>';
     scoreKeys.forEach(function(k){h+='<td>'+esc(s[k]||'--')+'</td>';});
     h+='<td><strong>'+(r.combined!==null?r.combined.toFixed(0)+'%':'--')+'</strong></td><td>'+(s.decision?'<span class="rv-dec rv-'+s.decision.replace(/\s/g,'').toLowerCase()+'">'+esc(s.decision)+'</span>':'--')+'</td></tr>';
   });
-  if(!apps.length)h+='<tr><td colspan="17" style="text-align:center;color:#9EA4B0;font-style:italic">No applicants match these filters.</td></tr>';
-  h+='</table></div><div class="dsec-note" style="margin-top:6px">Visit: V = visited campus, S = shadow day, L = legacy. Combined % averages whichever reader scores are entered, unweighted.</div>';
+  if(!apps.length)h+='<tr><td colspan="21" style="text-align:center;color:#9EA4B0;font-style:italic">No applicants match these filters.</td></tr>';
+  h+='</table></div><div class="dsec-note" style="margin-top:6px">Visit: V = visited campus, S = shadow day, L = legacy. Clarity: status from Clarity for aid applicants; "No file" means aid requested but no Clarity application found. Combined % averages whichever reader scores are entered, unweighted.</div>';
   document.getElementById('review').innerHTML=h;
 
   [['rv-grade','grade'],['rv-pay','pay'],['rv-dec','dec']].forEach(function(p){document.getElementById(p[0]).addEventListener('change',function(){RV[p[1]]=this.value;renderReview();});});
@@ -1471,6 +1481,8 @@ function detail(){
         '<div class="fa-cell sens"><div class="fl">Parent offer</div><div class="fn">'+fmt$(s.parentoffer)+'</div></div>'+
         '<div class="fa-cell sens"><div class="fl">Sugg. tuition</div><div class="fn">'+fmt$(s.suggtuit)+'</div></div>'+
         '<div class="fa-cell sens"><div class="fl">Family income</div><div class="fn">'+fmt$(s.income)+'</div></div>'+
+        '<div class="fa-cell"><div class="fl">Clarity</div><div class="fn" style="font-size:13px">'+clarityCell(s)+(s.clarityDifficulty?' <span style="font-size:10px;color:#9EA4B0">difficulty '+s.clarityDifficulty+'/5</span>':'')+'</div></div>'+
+        (clarityGap(s)!==null?'<div class="fa-cell sens"><div class="fl">Offer vs suggested</div><div class="fn" style="color:'+(clarityGap(s)>=0?'#2A6B4A':'#A8302A')+'">'+(clarityGap(s)>=0?'+':'-')+fmt$(Math.abs(Math.round(clarityGap(s))))+'</div></div>':'')+
         '<div class="fa-cell"><div class="fl">Aid requested</div><div class="fn" style="color:'+(s.aid==='yes'?'#8A5C00':'#9EA4B0')+'">'+(s.aid==='yes'?'Yes':'Unknown')+'</div></div>'+
       '</div>'
     )+''+
@@ -1778,6 +1790,7 @@ function runImport(){
       if(ex>=0){
         var keep=['photo','notes','decision','star'];
         keep.forEach(function(k){if(students[ex][k])data[k]=students[ex][k];});
+        ['income','parentoffer','suggtuit'].forEach(function(k){if((data[k]==null||data[k]==='')&&students[ex][k]!=null)data[k]=students[ex][k];});
         Object.assign(students[ex],data);
         updated++;
       } else {
@@ -1843,6 +1856,7 @@ function runFinalsiteSync(){
              students[si].last.toLowerCase()===data.last.toLowerCase()){ex=si;break;}
         }
         if(ex>=0){
+          ['income','parentoffer','suggtuit'].forEach(function(k){if((data[k]==null||data[k]==='')&&students[ex][k]!=null)data[k]=students[ex][k];});
           Object.assign(students[ex],data);
           updated++;
         }else{
