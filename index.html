@@ -283,6 +283,22 @@ body.cview .cview-banner{display:block}
 .rv-miss{color:#A8302A;font-weight:500}
 .rv-dec{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;background:#EEF1F6;color:#003260}
 .rv-in,.rv-win{background:#E3F1E9;color:#2A6B4A}.rv-needtowin{background:#FAF3E0;color:#8A5C00}.rv-deny{background:#F8E4E2;color:#A8302A}
+
+.rv-reader{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:11px;color:#5A6070;margin:0 0 10px}
+.rv-reader input{min-width:200px;background:#FFFBEE}
+.rv-score{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:4px 10px;border-radius:5px;border:1px solid #003260;background:#003260;color:#fff;cursor:pointer}
+.rv-score.done{background:#fff;color:#003260}
+.sc-who{font-size:11px;color:#5A6070;line-height:1.6}
+.sc-grid{display:flex;flex-direction:column;gap:6px}
+.sc-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:600;color:#1A1D25}
+.sc-pick{display:flex;gap:4px}
+.sc-b{width:32px;height:30px;border-radius:5px;border:1px solid #E4E6EA;background:#fff;font-family:'Montserrat',sans-serif;font-weight:700;color:#5A6070;cursor:pointer}
+.sc-b.on{background:#003260;border-color:#003260;color:#fff}
+.rv-list{margin-top:12px;border-top:1px solid #F0F1F4;padding-top:10px}
+.rv-list-h{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9EA4B0;margin-bottom:6px}
+.rv-li{font-size:11.5px;color:#1A1D25;padding:4px 0}
+.rv-li span{color:#5A6070}
+.rv-lc{font-size:11.5px;color:#5A6070;background:#F4F5F7;border-radius:5px;padding:6px 9px;margin-top:4px;white-space:pre-wrap}
 </style>
 </head>
 <body>
@@ -701,7 +717,79 @@ function saveLocal(){
   students.forEach(function(s){if(s.photo)photos[s.id]=s.photo;});
   localStorage.setItem(PHOTO_SK,JSON.stringify(photos));
 }
+// MERGING SAVES -- every student carries _mod (when it was last changed on any
+// device). Before each save the latest shared copy is fetched and merged record
+// by record, so two people editing different students (or scoring the same
+// student as different readers) no longer overwrite each other. Deleted
+// students are remembered in CFG.tomb so a stale tab can't bring them back.
+var SCORE_KEYS=['racad','rmission','rextra','rsocial','rrecs','rreach','roverall'];
+var SNAP={},CFGSNAP='';
+function ser(x){var c=Object.assign({},x);delete c.photo;delete c._mod;return JSON.stringify(c);}
+function serCfg(c){var x=Object.assign({},c);delete x.tomb;delete x._mod;return JSON.stringify(x);}
+function snapAll(){SNAP={};students.forEach(function(x){SNAP[String(x.id)]=ser(x);});CFGSNAP=serCfg(CFG);}
+function addTomb(id,at){CFG.tomb=CFG.tomb||[];if(!CFG.tomb.some(function(t){return String(t.id)===String(id);}))CFG.tomb.push({id:id,at:at});if(CFG.tomb.length>3000)CFG.tomb=CFG.tomb.slice(-3000);}
+function stampChanges(){
+  var now=Date.now(),seen={};
+  students.forEach(function(x){var k=String(x.id);seen[k]=1;var j=ser(x);if(SNAP[k]!==j){x._mod=now;SNAP[k]=j;}});
+  Object.keys(SNAP).forEach(function(k){if(!seen[k]){addTomb(k,now);delete SNAP[k];}});
+  var cj=serCfg(CFG);if(cj!==CFGSNAP){CFG._mod=now;CFGSNAP=cj;}
+}
+function applyReviewAverages(x){
+  var rv=x.reviews;if(!rv)return;
+  var names=Object.keys(rv).filter(function(n){return rv[n]&&!rv[n].removed;});
+  if(!names.length){if(Object.keys(rv).length){SCORE_KEYS.forEach(function(k){x[k]=null;});x.readersScored='';}return;}
+  SCORE_KEYS.forEach(function(k){
+    var v=names.map(function(n){return parseFloat(rv[n][k]);}).filter(function(n){return!isNaN(n);});
+    x[k]=v.length?String(Math.round(v.reduce(function(a,b){return a+b;},0)/v.length*10)/10):null;
+  });
+  x.readersScored=names.join(', ');
+}
+function mergeReviews(a,b){
+  if(!a&&!b)return undefined;var out={};
+  [a||{},b||{}].forEach(function(src){Object.keys(src).forEach(function(n){if(!out[n]||(src[n].at||0)>(out[n].at||0))out[n]=src[n];});});
+  return out;
+}
+function mergeStudent(local,cloud){
+  var base=(local._mod||0)>(cloud._mod||0)?local:cloud;
+  var m=Object.assign({},base);
+  var rv=mergeReviews(local.reviews,cloud.reviews);
+  if(rv){m.reviews=rv;applyReviewAverages(m);}
+  m._mod=Math.max(local._mod||0,cloud._mod||0);
+  return m;
+}
+function mergeTombs(a,b){var by={};(a||[]).concat(b||[]).forEach(function(t){var k=String(t.id);if(!by[k]||t.at>by[k].at)by[k]=t;});return Object.keys(by).map(function(k){return by[k];});}
+function mergeCfg(local,cloud){
+  if(!cloud)return local;
+  var base=(local._mod||0)>(cloud._mod||0)?local:cloud;
+  var m=Object.assign({},base);m.tomb=mergeTombs(local.tomb,cloud.tomb);return m;
+}
+function mergeLists(local,cloud,tombs){
+  var tomb={};(tombs||[]).forEach(function(t){tomb[String(t.id)]=t.at;});
+  var L={},C={},order=[];
+  local.forEach(function(x){L[String(x.id)]=x;});
+  cloud.forEach(function(x){var k=String(x.id);C[k]=x;order.push(k);});
+  local.forEach(function(x){var k=String(x.id);if(!C[k])order.push(k);});
+  var out=[];
+  order.forEach(function(k){
+    var l=L[k],c=C[k],m;
+    if(l&&c)m=mergeStudent(l,c);
+    else if(c)m=c;
+    else if(l._mod)m=l;   // added or changed here since loading
+    else return;           // stale copy of a student someone else removed
+    if(tomb[k]&&(m._mod||0)<=tomb[k])return;
+    if(l&&l.photo)m.photo=l.photo;
+    out.push(m);
+  });
+  return out;
+}
+function adoptMerged(list,cfg){
+  var before=JSON.stringify(students.map(ser));
+  students=list;CFG=cfg;snapAll();saveLocal();
+  return before!==JSON.stringify(students.map(ser));
+}
+
 function sync(){
+  stampChanges();
   saveLocal(); // always save local immediately -- this is what survives refresh
   clearTimeout(syncT);
   syncT=setTimeout(push,1500);
@@ -721,10 +809,20 @@ function push(){
     }
   }
   setSd('busy','Saving...');
-  fetch(PROXY_URL,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({s:toSync,cfg:CFG})
+  var mergedList,mergedCfg;
+  fetch(PROXY_URL+'?t='+Date.now())
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(function(d){
+    var rec=(d&&d.record)||{};
+    mergedCfg=mergeCfg(CFG,rec.cfg);
+    mergedList=mergeLists(students,Array.isArray(rec.s)?rec.s:[],mergedCfg.tomb);
+    toSync=mergedList.map(function(s){var c=Object.assign({},s);delete c.photo;return c;});
+    if(toSync.length===0&&lastKnownCloudCount>0&&!confirm('This would erase all '+lastKnownCloudCount+' students from the SHARED roster for everyone. Are you sure you want to do this?'))throw new Error('Push blocked');
+    return fetch(PROXY_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({s:toSync,cfg:mergedCfg})
+    });
   })
   .then(function(r){
     if(!r.ok){
@@ -734,7 +832,11 @@ function push(){
     }
     return r.json();
   })
-  .then(function(){lastKnownCloudCount=toSync.length;setSd('ok','Saved');setTimeout(function(){setSd('ok','');},2000);})
+  .then(function(){
+    lastKnownCloudCount=toSync.length;
+    if(adoptMerged(mergedList,mergedCfg)){render();if(selId)detail();renderActiveView();}
+    setSd('ok','Saved');setTimeout(function(){setSd('ok','');},2000);
+  })
   .catch(function(e){
     console.error('Push failed:',e);
     // Stays red and visible -- does NOT auto-clear -- until a save actually succeeds.
@@ -744,36 +846,24 @@ function push(){
 
 function pull(){
   // Step 1: always load & render from localStorage immediately
-  loadLocal();render();
+  loadLocal();if(!Object.keys(SNAP).length)snapAll();render();
   // Step 2: fetch the shared cloud copy (via the Worker proxy) and merge if newer/bigger.
   fetch(PROXY_URL)
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
     .then(function(d){
       var changed=false;
-      if(d.record&&d.record.s&&Array.isArray(d.record.s)){
-        var cloud=d.record.s;
-        if(cloud.length>0)lastKnownCloudCount=cloud.length;
-        // Merge: cloud wins unless local has more students (user just imported)
-        if(cloud.length>0&&cloud.length>=students.length){
-          students=cloud;changed=true;
-        }else if(students.length>cloud.length){
-          push(); // local is ahead (e.g. just imported) -- push it up
-        }
+      if(d.record&&Array.isArray(d.record.s)){
+        var rec=d.record;
+        if(rec.s.length>0)lastKnownCloudCount=rec.s.length;
+        var mc=mergeCfg(CFG,rec.cfg||null);
+        var ml=mergeLists(students,rec.s,mc.tomb);
+        var cfgChanged=JSON.stringify(mc)!==JSON.stringify(CFG);
+        changed=adoptMerged(ml,mc)||cfgChanged;
+        // anything newer here than in the shared copy still needs saving
+        var cloudMod={};rec.s.forEach(function(x){cloudMod[String(x.id)]=x._mod||0;});
+        if(students.some(function(x){return!(String(x.id) in cloudMod)||(x._mod||0)>cloudMod[String(x.id)];}))push();
       }
-      if(d.record&&d.record.cfg){
-        var rc=d.record.cfg;
-        CFG=Object.assign({},CFG_DEFAULTS,rc,{
-          goals:Object.assign({},CFG_DEFAULTS.goals,rc.goals),
-          aidBudget:Object.assign({},CFG_DEFAULTS.aidBudget,rc.aidBudget),
-          monthly:{
-            inquiries:Object.assign({},CFG_DEFAULTS.monthly.inquiries,(rc.monthly||{}).inquiries),
-            applications:Object.assign({},CFG_DEFAULTS.monthly.applications,(rc.monthly||{}).applications)
-          },
-          snapshots:rc.snapshots||[]
-        });
-        changed=true;
-      }
-      if(changed){saveLocal();render();if(selId)detail();renderActiveView();}
+      if(changed){render();if(selId)detail();renderActiveView();}
       setSd('ok','');
     })
     .catch(function(){
@@ -1266,7 +1356,48 @@ function renderSnap(){
 // ============ COMMITTEE REVIEW ============
 // ASSUMPTION: Combined % = average of whichever of the 7 reader scores are
 // filled in (out of 5), not weighted -- adjust if PCHS weights certain scores.
-var RV={grade:'all',pay:'all',dec:'all',q:''}; // Committee Review filters, kept for the session
+var RV={grade:'all',pay:'all',dec:'all',q:''};
+var READER=(function(){try{return localStorage.getItem('pca_reader')||'';}catch(e){return'';}})();
+function myReview(s){return READER&&s.reviews&&s.reviews[READER]&&!s.reviews[READER].removed?s.reviews[READER]:null;}
+function scoredBy(s){var rv=s.reviews||{};return Object.keys(rv).filter(function(n){return rv[n]&&!rv[n].removed;});}
+function reviewPct(r){var v=SCORE_KEYS.map(function(k){return parseFloat(r[k]);}).filter(function(n){return!isNaN(n);});return v.length?v.reduce(function(a,b){return a+b;},0)/v.length/5*100:null;}
+var SCORE_LABELS={racad:'Academic',rmission:'Mission fit',rextra:'Extracurricular',rsocial:'Social fit',rrecs:'Recommendations',rreach:'School reach',roverall:'Overall'};
+function openScore(id){
+  var st=students.filter(function(x){return String(x.id)===String(id);})[0];if(!st)return;
+  if(!READER){var n=prompt('Your name as a reader (used to keep your scores separate):','');if(!n||!n.trim())return;setReader(n.trim());}
+  var ov=document.getElementById('ov-score');
+  if(!ov){ov=document.createElement('div');ov.className='ov';ov.id='ov-score';document.body.appendChild(ov);
+    ov.addEventListener('click',function(e){if(e.target===ov)ov.classList.remove('open');});}
+  var mine=myReview(st)||{};
+  var others=scoredBy(st).filter(function(n){return n!==READER;}).map(function(n){var p=reviewPct(st.reviews[n]);return esc(n)+(p!=null?' ('+p.toFixed(0)+'%)':'');});
+  var h='<div class="modal" style="width:520px"><div class="mh"><div class="mt2">Score: '+esc(st.first)+' '+esc(st.last)+'</div><button class="mx" id="sc-x">&times;</button></div><div class="mb">';
+  h+='<div class="sc-who">Scoring as <strong>'+esc(READER)+'</strong> &middot; <a href="#" id="sc-change">not you?</a>'+(others.length?'<br>Also scored by: '+others.join(', '):'')+'</div>';
+  h+='<div class="sc-grid">';
+  SCORE_KEYS.forEach(function(k){
+    h+='<label class="sc-row"><span>'+SCORE_LABELS[k]+'</span><span class="sc-pick" data-k="'+k+'">';
+    [1,2,3,4,5].forEach(function(v){h+='<button type="button" class="sc-b'+(String(mine[k])===String(v)?' on':'')+'" data-v="'+v+'">'+v+'</button>';});
+    h+='</span></label>';
+  });
+  h+='</div><div class="fi full"><label>Your comments</label><textarea id="sc-com" class="iarea" style="min-height:80px">'+esc(mine.comments||'')+'</textarea></div></div>';
+  h+='<div class="mf">'+(myReview(st)?'<button class="bc" id="sc-clear" style="margin-right:auto;color:#A8302A">Remove my score</button>':'')+'<button class="bc" id="sc-cancel">Cancel</button><button class="bs2" id="sc-save">Save score</button></div></div>';
+  ov.innerHTML=h;ov.classList.add('open');
+  var picks=ov.querySelectorAll('.sc-pick');
+  for(var i=0;i<picks.length;i++)picks[i].addEventListener('click',function(e){var b=e.target.closest('.sc-b');if(!b)return;var on=b.classList.contains('on');var bs=this.querySelectorAll('.sc-b');for(var j=0;j<bs.length;j++)bs[j].classList.remove('on');if(!on)b.classList.add('on');});
+  function close(){ov.classList.remove('open');}
+  document.getElementById('sc-x').onclick=close;document.getElementById('sc-cancel').onclick=close;
+  document.getElementById('sc-change').onclick=function(e){e.preventDefault();var n=prompt('Your name as a reader:',READER);if(n&&n.trim()){setReader(n.trim());openScore(id);}};
+  document.getElementById('sc-save').onclick=function(){
+    var r={at:Date.now()};
+    for(var i=0;i<picks.length;i++){var on=picks[i].querySelector('.sc-b.on');if(on)r[picks[i].getAttribute('data-k')]=on.getAttribute('data-v');}
+    var c=document.getElementById('sc-com').value.trim();if(c)r.comments=c;
+    if(SCORE_KEYS.every(function(k){return r[k]==null;})&&!c){alert('Pick at least one score or add a comment.');return;}
+    st.reviews=st.reviews||{};st.reviews[READER]=r;applyReviewAverages(st);
+    close();sync();renderReview();if(String(selId)===String(st.id))detail();
+  };
+  var cl=document.getElementById('sc-clear');
+  if(cl)cl.onclick=function(){st.reviews[READER]={removed:true,at:Date.now()};applyReviewAverages(st);close();sync();renderReview();if(String(selId)===String(st.id))detail();};
+}
+function setReader(n){READER=n;try{localStorage.setItem('pca_reader',n);}catch(e){}} // Committee Review filters, kept for the session
 function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function renderReview(){
   var scoreKeys=['racad','rmission','rextra','rsocial','rrecs','rreach','roverall'];
@@ -1293,7 +1424,7 @@ function renderReview(){
   var n=apps.length,c=function(f){return apps.filter(f).length;};
   var fp=c(function(r){return pay(r.s)==='FP';}),fa=c(function(r){return pay(r.s)==='FA';}),nocl=c(function(r){return noClarity(r.s);});
   var visited=c(function(r){return r.s.visitedCampus;}),shadow=c(function(r){return r.s.shadowDay;}),legacy=c(function(r){return r.s.legacy==='yes';});
-  var readers=c(function(r){return r.s.readers&&String(r.s.readers).toLowerCase()!=='deleted user';}),interviews=c(function(r){return r.s.intdate;}),scored=c(function(r){return r.scored;});
+  var readers=c(function(r){return r.s.readers&&String(r.s.readers).toLowerCase()!=='deleted user';}),interviews=c(function(r){return r.s.intdate;}),scored=c(function(r){return r.scored;}),mineN=c(function(r){return myReview(r.s);});
   var decs=['In','Win','Need to Win','Waitlist','Deny'],tally={};decs.forEach(function(d){tally[d]=c(function(r){return r.s.decision===d;});});
   var undecided=n-decs.reduce(function(a,d){return a+tally[d];},0);
   function pct(x){return n?Math.round(x/n*100)+'%':'--';}
@@ -1302,31 +1433,36 @@ function renderReview(){
   h+='<div class="dgrid4">';
   h+='<div class="dc4"><div class="dn">'+n+'</div><div class="dl">Applicants</div><div class="dsub">'+fp+' full pay &middot; '+fa+' aid'+(n-fp-fa?' &middot; '+(n-fp-fa)+' unknown':'')+'</div>'+(nocl?'<div class="dsub" style="color:#A8302A">'+nocl+' aid with no Clarity file</div>':'')+'</div>';
   h+='<div class="dc4"><div class="dn">'+pct(visited)+'</div><div class="dl">Visited campus</div><div class="dsub">'+visited+' visited &middot; '+shadow+' shadowed &middot; '+legacy+' legacy</div></div>';
-  h+='<div class="dc4"><div class="dn">'+readers+' / '+n+'</div><div class="dl">Readers assigned</div><div class="dsub">'+scored+' scored &middot; '+interviews+' interviews set</div></div>';
+  h+='<div class="dc4"><div class="dn">'+readers+' / '+n+'</div><div class="dl">Readers assigned</div><div class="dsub">'+scored+' scored'+(READER?' ('+mineN+' by you)':'')+' &middot; '+interviews+' interviews set</div></div>';
   h+='<div class="dc4"><div class="dn">'+undecided+'</div><div class="dl">Awaiting decision</div><div class="dsub">'+decs.map(function(d){return d+' '+tally[d];}).join(' &middot; ')+'</div></div>';
   h+='</div>';
 
   function sel(id,cur,opts){return'<select class="rv-f" id="'+id+'">'+opts.map(function(o){return'<option value="'+o[0]+'"'+(cur===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>';}
+  h+='<div class="rv-reader">Scoring as: <input id="rv-reader" class="rv-f" placeholder="Type your name to score" value="'+esc(READER)+'"/> <span>Each reader\'s scores are saved separately and averaged into the columns below.</span></div>';
   h+='<div class="rv-bar">'+
     sel('rv-grade',RV.grade,[['all','All grades'],['9','9th grade'],['tr','Transfers (10-12)']])+
     sel('rv-pay',RV.pay,[['all','Full pay + aid'],['FP','Full pay'],['FA','Financial aid'],['noclar','Aid, no Clarity file']])+
     sel('rv-dec',RV.dec,[['all','All decisions'],['none','No decision yet'],['In','In'],['Win','Win'],['Need to Win','Need to Win'],['Waitlist','Waitlist'],['Deny','Deny']])+
     '<input class="rv-f rv-q" id="rv-q" type="search" placeholder="Search name or school" value="'+esc(RV.q)+'"/></div>';
 
-  h+='<div class="dsec rv-wrap"><table class="dtable rv-table"><tr><th>Student</th><th>Gr</th><th>School</th><th>Pay</th><th>Clarity</th><th class="sens">Income</th><th class="sens">Clarity sugg.</th><th class="sens">Offer</th><th>GPA</th><th title="Visited campus / Shadow day / Legacy">Visit</th><th>Readers</th><th>Interview</th><th>Acad</th><th>Mission</th><th>Extra</th><th>Social</th><th>Recs</th><th>Reach</th><th>Overall</th><th>Combined</th><th>Decision</th></tr>';
+  h+='<div class="dsec rv-wrap"><table class="dtable rv-table"><tr><th>Student</th><th>Gr</th><th>School</th><th>Pay</th><th>Clarity</th><th class="sens">Income</th><th class="sens">Clarity sugg.</th><th class="sens">Offer</th><th>GPA</th><th title="Visited campus / Shadow day / Legacy">Visit</th><th>Readers</th><th>Scored by</th><th>Interview</th><th>Acad</th><th>Mission</th><th>Extra</th><th>Social</th><th>Recs</th><th>Reach</th><th>Overall</th><th>Combined</th><th>Decision</th><th></th></tr>';
   apps.forEach(function(r){
     var s=r.s,flags=(s.visitedCampus?'V':'')+(s.shadowDay?' S':'')+(s.legacy==='yes'?' L':'');
-    h+='<tr><td><a href="#" class="rv-open" data-id="'+esc(s.id)+'">'+esc(s.last)+', '+esc(s.first)+'</a></td><td>'+esc(g(s)||'--')+'</td><td>'+esc(s.school||'--')+'</td><td>'+(pay(s)||'--')+'</td><td>'+clarityCell(s)+'</td><td class="sens">'+fmt$(s.income)+'</td><td class="sens">'+fmt$(s.suggtuit)+'</td><td class="sens">'+fmt$(s.parentoffer)+'</td><td>'+esc(s.actualgpa||s.gpa||'--')+'</td><td>'+(flags.trim()||'<span class="rv-miss">none</span>')+'</td><td>'+esc(s.readers||'--')+'</td><td>'+esc(s.intdate||'--')+'</td>';
+    h+='<tr><td><a href="#" class="rv-open" data-id="'+esc(s.id)+'">'+esc(s.last)+', '+esc(s.first)+'</a></td><td>'+esc(g(s)||'--')+'</td><td>'+esc(s.school||'--')+'</td><td>'+(pay(s)||'--')+'</td><td>'+clarityCell(s)+'</td><td class="sens">'+fmt$(s.income)+'</td><td class="sens">'+fmt$(s.suggtuit)+'</td><td class="sens">'+fmt$(s.parentoffer)+'</td><td>'+esc(s.actualgpa||s.gpa||'--')+'</td><td>'+(flags.trim()||'<span class="rv-miss">none</span>')+'</td><td>'+esc(s.readers||'--')+'</td><td title="'+esc(scoredBy(s).join(', '))+'">'+(scoredBy(s).length?scoredBy(s).length+(scoredBy(s).length===1?' reader':' readers'):'--')+'</td><td>'+esc(s.intdate||'--')+'</td>';
     scoreKeys.forEach(function(k){h+='<td>'+esc(s[k]||'--')+'</td>';});
-    h+='<td><strong>'+(r.combined!==null?r.combined.toFixed(0)+'%':'--')+'</strong></td><td>'+(s.decision?'<span class="rv-dec rv-'+s.decision.replace(/\s/g,'').toLowerCase()+'">'+esc(s.decision)+'</span>':'--')+'</td></tr>';
+    h+='<td><strong>'+(r.combined!==null?r.combined.toFixed(0)+'%':'--')+'</strong></td><td>'+(s.decision?'<span class="rv-dec rv-'+s.decision.replace(/\s/g,'').toLowerCase()+'">'+esc(s.decision)+'</span>':'--')+'</td><td><button class="rv-score'+(myReview(s)?' done':'')+'" data-id="'+esc(s.id)+'">'+(myReview(s)?'My score':'Score')+'</button></td></tr>';
   });
-  if(!apps.length)h+='<tr><td colspan="21" style="text-align:center;color:#9EA4B0;font-style:italic">No applicants match these filters.</td></tr>';
+  if(!apps.length)h+='<tr><td colspan="23" style="text-align:center;color:#9EA4B0;font-style:italic">No applicants match these filters.</td></tr>';
   h+='</table></div><div class="dsec-note" style="margin-top:6px">Visit: V = visited campus, S = shadow day, L = legacy. Clarity: status from Clarity for aid applicants; "No file" means aid requested but no Clarity application found. Combined % averages whichever reader scores are entered, unweighted.</div>';
   document.getElementById('review').innerHTML=h;
 
   [['rv-grade','grade'],['rv-pay','pay'],['rv-dec','dec']].forEach(function(p){document.getElementById(p[0]).addEventListener('change',function(){RV[p[1]]=this.value;renderReview();});});
   var q=document.getElementById('rv-q');
   q.addEventListener('input',function(){RV.q=this.value;var pos=this.selectionStart;renderReview();var nq=document.getElementById('rv-q');nq.focus();try{nq.setSelectionRange(pos,pos);}catch(e){}});
+  var rin=document.getElementById('rv-reader');
+  rin.addEventListener('change',function(){setReader(this.value.trim());renderReview();});
+  var sbs=document.querySelectorAll('#review .rv-score');
+  for(var si=0;si<sbs.length;si++)sbs[si].addEventListener('click',function(){var v=document.getElementById('rv-reader').value.trim();if(v&&v!==READER)setReader(v);openScore(this.getAttribute('data-id'));});
   var links=document.querySelectorAll('#review .rv-open');
   for(var i=0;i<links.length;i++)links[i].addEventListener('click',function(e){e.preventDefault();var id=this.getAttribute('data-id');var st=students.filter(function(x){return String(x.id)===id;})[0];if(!st)return;switchView('roster');pick(st.id);});
 }
@@ -1488,10 +1624,11 @@ function detail(){
     )+''+
 
     // READER CARD
-    (hasScores||s.rcomments?
+    (hasScores||s.rcomments||scoredBy(s).length?
       '<div class="reader-card">'+
         '<div class="dch">Reader review'+(s.readers&&s.readers.toLowerCase()!=='deleted user'?' -- '+s.readers:'')+(s.intdate?' &middot; '+s.intdate:'')+'</div>'+
         (hasScores?rsHTML:'')+
+        (scoredBy(s).length?'<div class="rv-list"><div class="rv-list-h">Scored by '+scoredBy(s).length+(scoredBy(s).length===1?' reader':' readers')+' (scores above are the average)</div>'+scoredBy(s).map(function(n){var r=s.reviews[n],p=reviewPct(r);return'<div class="rv-li"><strong>'+esc(n)+'</strong> '+(p!=null?p.toFixed(0)+'%':'')+' <span>'+SCORE_KEYS.filter(function(k){return r[k]!=null;}).map(function(k){return SCORE_LABELS[k]+' '+r[k];}).join(' &middot; ')+'</span>'+(r.comments?'<div class="rv-lc">'+esc(r.comments)+'</div>':'')+'</div>';}).join('')+'</div>':'')+
         (s.rcomments?'<div class="reader-comments">'+(s.readers&&s.readers.toLowerCase()!=='deleted user'?'<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9EA4B0;margin-bottom:6px">'+s.readers+'</div>':'')+s.rcomments+'</div>':'')+
       '</div>':'')+
 
@@ -1562,6 +1699,7 @@ function detail(){
 
 // MODAL EDIT
 function openAdd(){
+  ['e-r-acad','e-r-mission','e-r-extra','e-r-social','e-r-recs','e-r-reach','e-r-overall'].forEach(function(k){var e=document.getElementById(k);if(e){e.disabled=false;e.title='';}});
   editId=null;mPhoto=null;
   document.getElementById('et').textContent='Add student';
   document.getElementById('btn-del').style.display='none';
@@ -1585,6 +1723,8 @@ function openEdit(id){
   Object.keys(fm).forEach(function(k){var e=document.getElementById(k);if(e)e.value=fm[k]||'';});
   var sm={'e-status':s.status||'Inquiry','e-decision':s.decision||'','e-aid':s.aid||'unknown','e-grade':s.grade||'','e-legacy':s.legacy||'','e-src':s.src||'','e-appform':s.appform||'','e-appfee':s.appfee||'','e-trans':s.trans||'','e-8thgrades':s.grades8th||'','e-rec-admin':s.recadmin||'','e-rec-eng':s.receng||'','e-rec-math':s.recmath||'','e-interview':s.interview||'','e-appphoto':s.appphoto||'','e-isee':s.isee||''};
   Object.keys(sm).forEach(function(k){var e=document.getElementById(k);if(e)e.value=sm[k];});
+  var fromReaders=scoredBy(s).length>0;
+  ['e-r-acad','e-r-mission','e-r-extra','e-r-social','e-r-recs','e-r-reach','e-r-overall'].forEach(function(k){var e=document.getElementById(k);if(e){e.disabled=fromReaders;e.title=fromReaders?'Averaged from reader scores. Use Score on Committee Review to change.':'';}});
   var cm={'e-visited':s.visitedCampus,'e-hostour':s.hosTour,'e-vpd':s.vpd,'e-openhouse':s.openHouse,'e-privatetour':s.privateTour,'e-shadowday':s.shadowDay};
   Object.keys(cm).forEach(function(k){var e=document.getElementById(k);if(e)e.checked=!!cm[k];});
   if(mPhoto){document.getElementById('pp').innerHTML='<img src="'+mPhoto+'"/>';document.getElementById('rm-photo').style.display='block';}else resetPP();
