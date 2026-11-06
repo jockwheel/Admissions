@@ -839,6 +839,7 @@ var CFG=JSON.parse(JSON.stringify(CFG_DEFAULTS));
 
 // STORAGE
 var PHOTO_SK='pca_photos_v1';
+var REMOVED_PHOTOS={}; // photos removed in the edit form, so the merged save drops them
 function loadLocal(){
   try{students=JSON.parse(localStorage.getItem(SK))||[];}catch(e){students=[];}
   try{
@@ -866,9 +867,12 @@ function saveLocal(){
   });
   localStorage.setItem(SK,JSON.stringify(stripped));
   localStorage.setItem(CFG_SK,JSON.stringify(CFG));
-  // Save photos separately in localStorage only
+  // Save photos separately in localStorage only. Merge with what is already
+  // stored so a second open tab can't wipe photos another tab just added.
   var photos={};
-  students.forEach(function(s){if(s.photo)photos[s.id]=s.photo;});
+  try{photos=JSON.parse(localStorage.getItem(PHOTO_SK))||{};}catch(e){photos={};}
+  var ids={};students.forEach(function(s){ids[String(s.id)]=1;if(s.photo)photos[s.id]=s.photo;});
+  Object.keys(photos).forEach(function(k){if(!ids[k]||REMOVED_PHOTOS[k])delete photos[k];});REMOVED_PHOTOS={};
   localStorage.setItem(PHOTO_SK,JSON.stringify(photos));
 }
 // MERGING SAVES -- every student carries _mod (when it was last changed on any
@@ -2414,7 +2418,7 @@ function saveStudent(){
   var status=document.getElementById('e-status').value;
   var d={first:first,last:last,school:document.getElementById('e-school').value.trim(),worship:document.getElementById('e-worship').value.trim(),gpa:document.getElementById('e-gpa').value||null,actualgpa:document.getElementById('e-actualgpa').value||null,referral:document.getElementById('e-referral').value.trim(),grade:document.getElementById('e-grade').value,notes:document.getElementById('e-notes').value.trim(),parentoffer:document.getElementById('e-parentoffer').value||null,suggtuit:document.getElementById('e-suggtuit').value||null,income:document.getElementById('e-income').value||null,p1name:document.getElementById('e-p1name').value.trim(),p1rel:document.getElementById('e-p1rel').value.trim(),p1email:document.getElementById('e-p1email').value.trim(),p1phone:document.getElementById('e-p1phone').value.trim(),p2name:document.getElementById('e-p2name').value.trim(),p2rel:document.getElementById('e-p2rel').value.trim(),p2email:document.getElementById('e-p2email').value.trim(),p2phone:document.getElementById('e-p2phone').value.trim(),interests:tags(document.getElementById('e-int').value),activities:tags(document.getElementById('e-act').value),readers:document.getElementById('e-readers').value.trim(),intdate:document.getElementById('e-intdate').value.trim(),racad:document.getElementById('e-r-acad').value||null,rmission:document.getElementById('e-r-mission').value||null,rextra:document.getElementById('e-r-extra').value||null,rsocial:document.getElementById('e-r-social').value||null,rrecs:document.getElementById('e-r-recs').value||null,rreach:document.getElementById('e-r-reach').value||null,roverall:document.getElementById('e-r-overall').value||null,rcomments:document.getElementById('e-rcomments').value.trim(),status:status,decision:document.getElementById('e-decision').value,aid:document.getElementById('e-aid').value,idate:document.getElementById('e-idate').value.trim(),src:document.getElementById('e-src').value,visits:document.getElementById('e-visits').value.trim(),legacy:document.getElementById('e-legacy').value,entry:document.getElementById('e-entry').value,visitedCampus:document.getElementById('e-visited').checked,hosTour:document.getElementById('e-hostour').checked,vpd:document.getElementById('e-vpd').checked,openHouse:document.getElementById('e-openhouse').checked,privateTour:document.getElementById('e-privatetour').checked,shadowDay:document.getElementById('e-shadowday').checked,photo:mPhoto||null};
 
-  if(editId){for(var i=0;i<students.length;i++){if(students[i].id===editId){Object.assign(students[i],d);break;}}selId=editId;}
+  if(editId){for(var i=0;i<students.length;i++){if(students[i].id===editId){if(students[i].photo&&!mPhoto)REMOVED_PHOTOS[String(editId)]=1;Object.assign(students[i],d);break;}}selId=editId;}
   else{var ns=Object.assign({id:uid()},d);students.push(ns);selId=ns.id;}
   sync();closeEdit();render();detail();
 }
