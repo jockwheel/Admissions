@@ -2471,7 +2471,7 @@ function runImport(){
       if(pref&&pref.toLowerCase()!==first.toLowerCase())data.pref=pref;
       var ex=findByNames([first,pref],last);
       if(ex>=0){
-        data.first=students[ex].first; // never rename an existing record
+        data.first=students[ex].first;data.last=students[ex].last; // never rename an existing record
         var keep=['photo','notes','decision','star'];
         keep.forEach(function(k){if(students[ex][k])data[k]=students[ex][k];});
         ['income','parentoffer','suggtuit'].forEach(function(k){if((data[k]==null||data[k]==='')&&students[ex][k]!=null)data[k]=students[ex][k];});
@@ -2537,7 +2537,7 @@ function runFinalsiteSync(){
         if(c.preferred_name&&c.preferred_name.toLowerCase()!==c.first_name.toLowerCase())data.pref=c.preferred_name;
         var ex=findByNames([c.first_name,c.preferred_name],c.last_name);
         if(ex>=0){
-          data.first=students[ex].first; // never rename an existing record
+          data.first=students[ex].first;data.last=students[ex].last; // never rename an existing record
           ['income','parentoffer','suggtuit'].forEach(function(k){if((data[k]==null||data[k]==='')&&students[ex][k]!=null)data[k]=students[ex][k];});
           Object.assign(students[ex],data);
           updated++;
