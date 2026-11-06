@@ -395,6 +395,30 @@ body.cview .cview-banner{display:block}
 .pm-dec .dec-btn{border-color:#C9CDD4;color:#5A6070;background:#fff}
 .pm-dec .dec-btn:hover{border-color:#003260;color:#003260}
 .pm-dec .dec-btn.sel-in,.pm-dec .dec-btn.sel-win,.pm-dec .dec-btn.sel-need,.pm-dec .dec-btn.sel-deny,.pm-dec .dec-btn.sel-wait{color:#fff}
+/* MEETING GROUPS */
+.gp{display:inline-block;font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap;letter-spacing:.03em}
+.srow .gp{font-size:8px;padding:2px 6px;flex-shrink:0}
+.grp-sel{font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:600;padding:3px 4px;border:1px solid #E4E6EA;border-radius:5px;background:#fff;color:#1A1D25;max-width:140px}
+.dgrid7{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:#E4E6EA;border-radius:8px;overflow:hidden;margin-bottom:1rem}
+.dgrid7 .dc4{background:#fff;padding:10px 12px}
+@media(max-width:900px){.dgrid7{grid-template-columns:repeat(3,1fr)}}
+.ag-top{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border-radius:8px;padding:12px 16px;margin-bottom:12px;font-size:12.5px;color:#1A1D25}
+.ag-sec{background:#fff;border-radius:8px;padding:14px 16px;margin-bottom:12px;border-left:5px solid #C9CDD4;overflow-x:auto}
+.ag-hd{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.ag-d{font-size:11px;color:#5A6070;flex:1}
+.ag-n{font-family:'EB Garamond',serif;font-size:22px;font-weight:600;color:#003260}
+.ag-chips{display:flex;flex-wrap:wrap;gap:6px}
+.ag-chip{font-size:11px;font-weight:600;color:#003260;background:#F4F5F7;border-radius:99px;padding:4px 10px;text-decoration:none}
+.ag-chip:hover{background:#E8EDF5}
+.sug-btn{font-family:'Montserrat',sans-serif;font-size:9.5px;font-weight:700;border:none;border-radius:99px;padding:4px 9px;cursor:pointer;opacity:.85}
+.sug-btn:hover{opacity:1}
+.grp-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px}
+.grp-row .lbl{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-right:2px}
+.grp-btn{padding:4px 11px;border-radius:99px;font-family:'Montserrat',sans-serif;font-size:9.5px;font-weight:700;letter-spacing:.04em;cursor:pointer;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.5)}
+.grp-btn:hover{border-color:rgba(255,255,255,.5);color:#fff}
+.pm-grp-btn{padding:6px 12px;border-radius:99px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;cursor:pointer;border:1px solid #C9CDD4;background:#fff;color:#5A6070}
+.pm-grpbar{display:inline-block;margin-top:10px;font-size:13px;font-weight:700;padding:6px 16px;border-radius:99px;letter-spacing:.02em}
+.pm-hero.grp{border-left-width:10px}
 </style>
 </head>
 <body>
@@ -467,6 +491,15 @@ body.cview .cview-banner{display:block}
         <option value="drafts">Draft applications</option>
         <option value="pending">Drafts pending payment</option>
         <option value="midyear">Mid-Year (January) starts</option>
+      </optgroup>
+      <optgroup label="Meeting group">
+        <option value="grp:bubble">Bubble: Aid</option>
+        <option value="grp:win">Need to Win</option>
+        <option value="grp:fpwant">Full Pay: Want</option>
+        <option value="grp:discuss">Discuss</option>
+        <option value="grp:clear">Clear Admit</option>
+        <option value="grp:notfit">Not a Fit</option>
+        <option value="grp:none">Applicants not sorted</option>
       </optgroup>
     </select>
     <select class="fsel" id="f2">
@@ -713,6 +746,13 @@ body.cview .cview-banner{display:block}
     <div class="ihint">
       Select all your <strong>LastName_FirstName.jpeg</strong> files at once. They'll be matched to students automatically and stored on this device.<br><br>
       Photos stay local -- they won't sync to teammates, but survive refresh. Each teammate runs this import once.
+    </div>
+    <div class="ihint" style="margin-top:10px;background:#FFF8E6">
+      <strong>Or pull photos straight from Finalsite, no files needed:</strong><br>
+      1. Drag this button to your browser's bookmarks bar:
+      <a id="fs-bm" href="#" style="display:inline-block;margin:6px 0;padding:5px 11px;border:1px solid #C49A3C;border-radius:5px;color:#8A5C00;font-weight:700;text-decoration:none;background:#fff">Send Finalsite photos to tracker</a><br>
+      2. Log in to Finalsite and open the applicant list (Dashboard, then click the Applicant count).<br>
+      3. Click the bookmark. This tracker opens and every applicant with a Finalsite photo gets it on this device. Run it again any time new photos come in.
     </div>
     <div style="margin-top:8px">
       <input type="file" id="fi-photos" accept="image/*,.jpeg,.jpg" multiple style="display:none"/>
@@ -1309,14 +1349,14 @@ function renderPresent(){
   var h='<div class="pm-bar"><div class="pm-t">Committee Meeting</div><div class="pm-c">'+(PM.i+1)+' of '+PM.ids.length+(PM.label?' &middot; '+esc(PM.label):'')+'</div><div class="pm-sp"></div>'+
     '<button id="pm-prev"'+(PM.i<=0?' disabled':'')+'>&#8249; Previous</button><button id="pm-next"'+(PM.i>=PM.ids.length-1?' disabled':'')+'>Next &#8250;</button><button id="pm-x">Exit</button></div>';
   h+='<div class="pm-wrap">';
-  h+='<div class="pm-hero"><div class="pm-av" style="background:'+p[0]+';color:'+p[1]+'">'+(s.photo?'<img src="'+s.photo+'"/>':ini(s))+'</div><div>'+
+ h+='<div class="pm-hero'+(grpOf(s.group)?' grp':'')+'" style="'+(grpOf(s.group)?'border-left-color:'+grpOf(s.group).c:'')+'"><div class="pm-av" style="background:'+p[0]+';color:'+p[1]+'">'+(s.photo?'<img src="'+s.photo+'"/>':ini(s))+'</div><div>'+
     '<div class="pm-name">'+esc(s.first)+' '+esc(s.last)+(s.star==='yes'?' <span style="color:#C49A3C;font-size:26px">&#9733;</span>':'')+'</div>'+
     '<div class="pm-sub">'+esc(s.school||'School not provided')+' &middot; Applying for '+esc(s.grade||'--')+' &middot; '+(isMid(s)?'Mid-Year (January) start':'Fall 2027')+'</div>'+
     '<div class="pm-badges">'+'<span class="b '+statusBadgeClass(s.status||'Inquiry')+'">'+esc(s.status||'Inquiry')+'</span>'+
       (s.aid==='yes'?badge('Financial aid','#FAF3E0','#8A5C00'):(s.aid==='no'?badge('Full pay','#E6F4ED','#2A6B4A'):badge('Aid unknown','#F4F5F7','#5A6070')))+
       (s.legacy==='yes'?badge('Legacy','#E8F0FA','#1A5CA8'):'')+(s.intl==='yes'?badge('International','#E8F0FA','#1A5CA8'):'')+
       (s.decision?'<span class="rv-dec rv-'+s.decision.replace(/\s/g,'').toLowerCase()+'" style="font-size:11px;padding:3px 10px">Decision: '+esc(s.decision)+'</span>':'')+
-    '</div></div>'+
+    '</div>'+(grpOf(s.group)?'<div class="pm-grpbar" style="background:'+grpOf(s.group).bg+';color:'+grpOf(s.group).c+'">'+grpOf(s.group).l+' &middot; '+grpOf(s.group).d+'</div>':'')+'</div>'+
     '<div class="pm-kpis"><div class="pm-kpi"><div class="v" style="color:'+(gpa?({gh:'#2A6B4A',gm:'#8A5C00',gl:'#A8302A'}[gpc(gpa)]||'#003260'):'#9EA4B0')+'">'+(gpa?parseFloat(gpa).toFixed(2):'--')+'</div><div class="l">'+(s.actualgpa?'Actual GPA':'Est. GPA')+'</div></div>'+
     '<div class="pm-kpi"><div class="v">'+(combined!==null?combined.toFixed(0)+'%':'--')+'</div><div class="l">Reader combined</div></div>'+
     '<div class="pm-kpi"><div class="v" style="color:'+(ckn===CK_REQ.length?'#2A6B4A':'#003260')+'">'+(ckn!==null?ckn+'/'+CK_REQ.length:'--')+'</div><div class="l">Documents in</div></div>'+
@@ -1352,6 +1392,7 @@ function renderPresent(){
   h+='<div class="pm-card span2"><h4>Application checklist'+(s.ckDate?' <span style="font-weight:500;letter-spacing:0;text-transform:none;color:#9EA4B0">&middot; Finalsite '+fmtDay(s.ckDate)+'</span>':'')+'</h4><div>'+ckChips(s,false)+'</div>'+(ckn!==null&&ckn<CK_REQ.length?'<div class="ck-miss-txt" style="font-size:12px">Still missing: '+ckMissing(s).join(', ')+'</div>':'')+'</div>';
   var decs=['In','Win','Need to Win','Waitlist','Deny'];
   h+='<div class="pm-card"><h4>Committee decision</h4><div class="pm-dec">'+decs.map(function(d){return'<button class="dec-btn'+(s.decision===d?' '+decBtnClass(d):'')+'" data-dec="'+d+'">'+d+'</button>';}).join('')+'</div>'+
+    '<h4 style="margin-top:14px">Meeting group</h4><div class="pm-dec">'+grpButtons(s,'pm-grp-btn')+'</div>'+
     '<h4 style="margin-top:14px">Meeting notes</h4><textarea class="pm-notes" id="pm-notes" placeholder="Notes from the discussion (saved when you move on)">'+esc(s.notes||'')+'</textarea></div>';
   // Reader scores
   var sl=[['racad','Academic'],['rmission','Mission'],['rextra','Extracurr.'],['rsocial','Social'],['rrecs','Recs'],['rreach','Reach'],['roverall','Overall']];
@@ -1371,6 +1412,8 @@ function renderPresent(){
   var db=box.querySelectorAll('.pm-dec .dec-btn');
   for(var i=0;i<db.length;i++)db[i].addEventListener('click',function(){var d=this.getAttribute('data-dec');pmSaveNotes();var st=byId(PM.ids[PM.i]);if(!st)return;st.decision=st.decision===d?'':d;sync();renderPresent();});
   document.getElementById('pm-notes').addEventListener('blur',pmSaveNotes);
+  var pg=box.querySelectorAll('.pm-grp-btn');
+  for(var j=0;j<pg.length;j++)pg[j].addEventListener('click',function(){pmSaveNotes();setGroup(PM.ids[PM.i],this.getAttribute('data-grp'));renderPresent();});
 }
 document.addEventListener('keydown',function(e){
   var box=document.getElementById('present');if(!box||!box.classList.contains('open'))return;
@@ -1394,6 +1437,72 @@ function apiFetch(url,opts,retried){
     return r;
   });
 }
+
+// ============ MEETING GROUPS (added 2026-11-06) ============
+// Jim's ask: sort applicants before committee so the meeting only discusses the
+// students who need it. Discussion groups are presented one by one; Clear Admit
+// and Not a Fit are a consent list the committee can approve as a block.
+var GROUPS=[
+  {k:'bubble',l:'Bubble: Aid',s:'BUBBLE',d:'We want them; aid has to fall into place',c:'#8A5C00',bg:'#FFF4D6',disc:true},
+  {k:'win',l:'Need to Win',s:'WIN',d:'Strong fit we have to win over',c:'#1A5CA8',bg:'#E8F0FA',disc:true},
+  {k:'fpwant',l:'Full Pay: Want',s:'FP WANT',d:'Full-pay family we want',c:'#2A6B4A',bg:'#E6F4ED',disc:true},
+  {k:'discuss',l:'Discuss',s:'DISCUSS',d:'Open question for the committee',c:'#5A3A8A',bg:'#F2EEF8',disc:true},
+  {k:'clear',l:'Clear Admit',s:'CLEAR',d:'Strong file, no discussion needed',c:'#3C4250',bg:'#EEF0F3',disc:false},
+  {k:'notfit',l:'Not a Fit',s:'NOT FIT',d:'No discussion needed',c:'#A8302A',bg:'#FAEAEA',disc:false}
+];
+function grpOf(k){for(var i=0;i<GROUPS.length;i++)if(GROUPS[i].k===k)return GROUPS[i];return null;}
+function grpPill(s,short){var g=grpOf(s.group);if(!g)return'';return'<span class="gp" style="background:'+g.bg+';color:'+g.c+'" title="'+esc(g.d)+'">'+(short?g.s:g.l)+'</span>';}
+function combinedOf(s){var v=SCORE_KEYS.map(function(k){return parseFloat(s[k]);}).filter(function(x){return!isNaN(x);});return v.length?v.reduce(function(a,b){return a+b;},0)/v.length/5*100:null;}
+// A starting point only: well-scored files get a suggested group based on pay type.
+// Nothing is set until someone accepts it.
+function suggestGroup(s){
+  if(s.group||!isApp(s))return'';
+  // Only once readers have scored the file, so the agenda doesn't fill up on GPA alone.
+  var comb=combinedOf(s);
+  if(comb===null||comb<75)return'';
+  return s.aid==='yes'?'bubble':(s.aid==='no'?'fpwant':'');
+}
+function setGroup(id,k){var s=byId(id);if(!s)return;s.group=s.group===k?'':k;sync();}
+function grpSelect(s){
+  var g=grpOf(s.group);
+  return'<select class="grp-sel" data-id="'+esc(s.id)+'" style="'+(g?'background:'+g.bg+';color:'+g.c+';border-color:'+g.bg:'')+'"><option value="">Not sorted</option>'+GROUPS.map(function(x){return'<option value="'+x.k+'"'+(s.group===x.k?' selected':'')+'>'+x.l+'</option>';}).join('')+'</select>';
+}
+function grpButtons(s,cls){return GROUPS.map(function(g){var on=s.group===g.k;return'<button class="'+cls+'" data-grp="'+g.k+'" style="'+(on?'background:'+g.bg+';color:'+g.c+';border-color:'+g.c:'')+'" title="'+esc(g.d)+'">'+g.l+'</button>';}).join('');}
+function agendaHTML(apps){
+  var h='',byG=function(k){return apps.filter(function(r){return r.s.group===k;});};
+  var disc=GROUPS.filter(function(g){return g.disc;}),cons=GROUPS.filter(function(g){return!g.disc;});
+  var discN=disc.reduce(function(a,g){return a+byG(g.k).length;},0),consN=cons.reduce(function(a,g){return a+byG(g.k).length;},0);
+  var unsorted=apps.filter(function(r){return!grpOf(r.s.group);});
+  h+='<div class="ag-top"><div><strong>'+discN+' students to discuss</strong> &middot; about '+(discN*3)+' minutes at 3 minutes each &middot; '+consN+' on the consent list'+(unsorted.length?' &middot; <span style="color:#A8302A">'+unsorted.length+' not sorted yet</span>':'')+'</div>'+(discN?'<button class="present-btn" id="ag-present-all">&#9654; Present discussion groups</button>':'')+'</div>';
+  function row(r){var s=r.s;return'<tr><td><a href="#" class="rv-open" data-id="'+esc(s.id)+'">'+esc(s.last)+', '+esc(s.first)+'</a></td><td>'+esc(s.school||'--')+'</td><td class="c">'+(gradeOf(s)||'--')+'</td><td class="c">'+(payOf(s)||'--')+'</td><td class="c">'+esc(s.actualgpa||s.gpa||'--')+'</td><td class="c">'+(ckIn(s)!==null?ckIn(s)+'/'+CK_REQ.length:'--')+'</td><td class="c">'+(r.combined!==null?r.combined.toFixed(0)+'%':'--')+'</td><td class="sens c">'+(s.aid==='yes'?fmt$(s.parentoffer):'--')+'</td><td class="c">'+(s.decision?'<span class="rv-dec rv-'+s.decision.replace(/\s/g,'').toLowerCase()+'">'+esc(s.decision)+'</span>':'--')+'</td><td>'+grpSelect(s)+'</td></tr>';}
+  var thead='<tr><th>Student</th><th>School</th><th class="c">Gr</th><th class="c">Pay</th><th class="c">GPA</th><th class="c">Docs</th><th class="c">Combined</th><th class="sens c">Parent offer</th><th class="c">Decision</th><th>Group</th></tr>';
+  disc.forEach(function(g){
+    var L=byG(g.k);
+    h+='<div class="ag-sec" style="border-left-color:'+g.c+'"><div class="ag-hd"><span class="gp" style="background:'+g.bg+';color:'+g.c+';font-size:11px;padding:4px 11px">'+g.l+'</span><span class="ag-d">'+g.d+'</span><span class="ag-n">'+L.length+'</span>'+(L.length?'<button class="call-btn ag-present" data-grp="'+g.k+'">Present this group</button>':'')+'</div>';
+    h+=L.length?'<table class="dtable ck-table">'+thead+L.map(row).join('')+'</table>':'<div class="pm-empty">No one in this group yet.</div>';
+    h+='</div>';
+  });
+  cons.forEach(function(g){
+    var L=byG(g.k);
+    h+='<div class="ag-sec" style="border-left-color:'+g.c+'"><div class="ag-hd"><span class="gp" style="background:'+g.bg+';color:'+g.c+';font-size:11px;padding:4px 11px">'+g.l+'</span><span class="ag-d">Consent list: '+g.d.toLowerCase()+'</span><span class="ag-n">'+L.length+'</span>'+(L.length?'<button class="call-btn ag-present" data-grp="'+g.k+'">Present</button>':'')+'</div>';
+    h+=L.length?'<div class="ag-chips">'+L.map(function(r){return'<a href="#" class="rv-open ag-chip" data-id="'+esc(r.s.id)+'">'+esc(r.s.first)+' '+esc(r.s.last)+(r.s.decision?' &middot; '+esc(r.s.decision):'')+'</a>';}).join('')+'</div>':'<div class="pm-empty">No one here yet.</div>';
+    h+='</div>';
+  });
+  if(unsorted.length){
+    var sug=unsorted.filter(function(r){return suggestGroup(r.s);});
+    h+='<div class="ag-sec" style="border-left-color:#C9CDD4"><div class="ag-hd"><span class="gp" style="background:#F4F5F7;color:#5A6070;font-size:11px;padding:4px 11px">Not sorted yet</span><span class="ag-d">Pick a group for each before the meeting. Suggestions appear once readers score a file (75% or higher combined), based on pay type; nothing is set until you accept it.</span><span class="ag-n">'+unsorted.length+'</span>'+(sug.length?'<button class="call-btn" id="ag-accept-all">Accept all '+sug.length+' suggestions</button>':'')+'</div>';
+    h+='<table class="dtable ck-table"><tr><th>Student</th><th>School</th><th class="c">Gr</th><th class="c">Pay</th><th class="c">GPA</th><th class="c">Docs</th><th class="c">Combined</th><th>Suggested</th><th>Group</th></tr>';
+    unsorted.forEach(function(r){var s=r.s,sg=grpOf(suggestGroup(s));
+      h+='<tr><td><a href="#" class="rv-open" data-id="'+esc(s.id)+'">'+esc(s.last)+', '+esc(s.first)+'</a></td><td>'+esc(s.school||'--')+'</td><td class="c">'+(gradeOf(s)||'--')+'</td><td class="c">'+(payOf(s)||'--')+'</td><td class="c">'+esc(s.actualgpa||s.gpa||'--')+'</td><td class="c">'+(ckIn(s)!==null?ckIn(s)+'/'+CK_REQ.length:'--')+'</td><td class="c">'+(r.combined!==null?r.combined.toFixed(0)+'%':'--')+'</td><td>'+(sg?'<button class="sug-btn" data-id="'+esc(s.id)+'" data-grp="'+sg.k+'" style="background:'+sg.bg+';color:'+sg.c+'">+ '+sg.l+'</button>':'<span class="pm-empty">--</span>')+'</td><td>'+grpSelect(s)+'</td></tr>';});
+    h+='</table></div>';
+  }
+  return h;
+}
+function presentGroups(apps,keys,label){
+  var ids=[];keys.forEach(function(k){apps.filter(function(r){return r.s.group===k;}).forEach(function(r){ids.push(r.s.id);});});
+  openPresent(ids,label);
+}
+
 // Exact match on last name plus either the legal first name or the preferred
 // name, so a student synced under "Toi" and imported under "Kennedy" stays one record.
 function findByNames(names,last){
@@ -1445,6 +1554,7 @@ function filtered(){
     if(f1==='docsin'&&!(isApp(s)&&docsComplete(s)))return false;
     if(f1==='docsmiss'&&!(isApp(s)&&hasCk(s)&&!docsComplete(s)))return false;
     if(f1==='midyear'&&!isMid(s))return false;
+    if(f1.indexOf('grp:')===0){var gk=f1.slice(4);if(gk==='none'){if(!isApp(s)||grpOf(s.group))return false;}else if(s.group!==gk)return false;}
     if(f1==='star'&&s.star!=='yes')return false;
     if(f2&&(s.decision||'').indexOf(f2)<0)return false;
     if(f3==='yes'&&s.aid!=='yes')return false;
@@ -1876,7 +1986,7 @@ function renderSnap(){
 // ============ COMMITTEE REVIEW ============
 // ASSUMPTION: Combined % = average of whichever of the 7 reader scores are
 // filled in (out of 5), not weighted -- adjust if PCHS weights certain scores.
-var RV={grade:'all',pay:'all',dec:'all',docs:'all',q:''};
+var RV={grade:'all',pay:'all',dec:'all',docs:'all',grp:'all',mode:'list',q:''};
 var READER=(function(){try{return localStorage.getItem('pca_reader')||'';}catch(e){return'';}})();
 function myReview(s){return READER&&s.reviews&&s.reviews[READER]&&!s.reviews[READER].removed?s.reviews[READER]:null;}
 function scoredBy(s){var rv=s.reviews||{};return Object.keys(rv).filter(function(n){return rv[n]&&!rv[n].removed;});}
@@ -1938,6 +2048,8 @@ function renderReview(){
     if(RV.dec!=='all'&&RV.dec!=='none'&&s.decision!==RV.dec)return false;
     if(RV.docs==='done'&&!docsComplete(s))return false;
     if(RV.docs==='miss'&&docsComplete(s))return false;
+    if(RV.grp==='none'&&grpOf(s.group))return false;
+    if(RV.grp!=='all'&&RV.grp!=='none'&&s.group!==RV.grp)return false;
     if(RV.q){var n=((s.first||'')+' '+(s.last||'')+' '+(s.school||'')).toLowerCase();if(n.indexOf(RV.q.toLowerCase())<0)return false;}
     return true;
   }).sort(function(a,b){return(b.combined==null?-1:b.combined)-(a.combined==null?-1:a.combined)||String(a.s.last||'').localeCompare(String(b.s.last||''));});
@@ -1958,6 +2070,11 @@ function renderReview(){
   h+='<div class="dc4"><div class="dn">'+readers+' / '+n+'</div><div class="dl">Readers assigned</div><div class="dsub">'+scored+' scored'+(READER?' ('+mineN+' by you)':'')+' &middot; '+interviews+' interviews set</div></div>';
   h+='<div class="dc4"><div class="dn">'+undecided+'</div><div class="dl">Awaiting decision</div><div class="dsub">'+decs.map(function(d){return d+' '+tally[d];}).join(' &middot; ')+'</div></div>';
   h+='</div>';
+  // Meeting groups: counts across the grade/pay/decision/docs filters (not the group filter itself)
+  h+='<div class="vw-bar" style="justify-content:space-between"><div class="seg" id="rv-mode"><button data-mode="list" class="'+(RV.mode==='list'?'on':'')+'">Scoring list</button><button data-mode="agenda" class="'+(RV.mode==='agenda'?'on':'')+'">Meeting agenda</button></div><span class="dsec-note">Meeting groups: sort students before committee so the meeting only discusses the ones who need it. Click a group to filter.</span></div>';
+  var gbase=all.filter(function(r){var s=r.s;if(RV.grade==='9'&&g(s)!=='9')return false;if(RV.grade==='tr'&&!(g(s)&&g(s)!=='9'))return false;return true;});
+  h+='<div class="dgrid7">'+GROUPS.map(function(gr){var n2=gbase.filter(function(r){return r.s.group===gr.k;}).length;return'<div class="dc4 click grp-tile'+(RV.grp===gr.k?' sel':'')+'" data-grp="'+gr.k+'" title="'+esc(gr.d)+'"><div class="dn" style="color:'+gr.c+'">'+n2+'</div><div class="dl" style="color:'+gr.c+'">'+gr.l+'</div></div>';}).join('')+
+    '<div class="dc4 click grp-tile'+(RV.grp==='none'?' sel':'')+'" data-grp="none"><div class="dn" style="color:#9EA4B0">'+gbase.filter(function(r){return!grpOf(r.s.group);}).length+'</div><div class="dl">Not sorted</div></div></div>';
 
   function sel(id,cur,opts){return'<select class="rv-f" id="'+id+'">'+opts.map(function(o){return'<option value="'+o[0]+'"'+(cur===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>';}
   h+='<div class="rv-reader">Scoring as: <input id="rv-reader" class="rv-f" placeholder="Type your name to score" value="'+esc(READER)+'"/> <span>Each reader\'s scores are saved separately and averaged into the columns below.</span></div>';
@@ -1968,15 +2085,17 @@ function renderReview(){
     sel('rv-docs',RV.docs,[['all','All documents'],['done','Documents complete'],['miss','Missing documents']])+
     '<input class="rv-f rv-q" id="rv-q" type="search" placeholder="Search name or school" value="'+esc(RV.q)+'"/></div>';
 
-  h+='<div class="dsec rv-wrap"><table class="dtable rv-table"><tr><th>Student</th><th>Gr</th><th>School</th><th>Pay</th><th>Clarity</th><th class="sens">Income</th><th class="sens">Clarity sugg.</th><th class="sens">Offer</th><th>GPA</th><th title="Visited campus / Shadow day / Legacy">Visit</th><th title="Required application items received">Docs</th><th>Readers</th><th>Scored by</th><th>Interview</th><th>Acad</th><th>Mission</th><th>Extra</th><th>Social</th><th>Recs</th><th>Reach</th><th>Overall</th><th>Combined</th><th>Decision</th><th></th></tr>';
+  if(RV.mode==='agenda'){h+=agendaHTML(apps);}else{
+  h+='<div class="dsec rv-wrap"><table class="dtable rv-table"><tr><th>Student</th><th>Meeting group</th><th>Gr</th><th>School</th><th>Pay</th><th>Clarity</th><th class="sens">Income</th><th class="sens">Clarity sugg.</th><th class="sens">Offer</th><th>GPA</th><th title="Visited campus / Shadow day / Legacy">Visit</th><th title="Required application items received">Docs</th><th>Readers</th><th>Scored by</th><th>Interview</th><th>Acad</th><th>Mission</th><th>Extra</th><th>Social</th><th>Recs</th><th>Reach</th><th>Overall</th><th>Combined</th><th>Decision</th><th></th></tr>';
   apps.forEach(function(r){
     var s=r.s,flags=(s.visitedCampus?'V':'')+(s.shadowDay?' S':'')+(s.legacy==='yes'?' L':'');
-    h+='<tr><td><a href="#" class="rv-open" data-id="'+esc(s.id)+'">'+esc(s.last)+', '+esc(s.first)+'</a></td><td>'+esc(g(s)||'--')+'</td><td>'+esc(s.school||'--')+'</td><td>'+(pay(s)||'--')+'</td><td>'+clarityCell(s)+'</td><td class="sens">'+fmt$(s.income)+'</td><td class="sens">'+fmt$(s.suggtuit)+'</td><td class="sens">'+fmt$(s.parentoffer)+'</td><td>'+esc(s.actualgpa||s.gpa||'--')+'</td><td>'+(flags.trim()||'<span class="rv-miss">none</span>')+'</td><td>'+(ckIn(s)!==null?'<span class="ckn'+(docsComplete(s)?' full':'')+'">'+ckIn(s)+'/'+CK_REQ.length+'</span>':'--')+'</td><td>'+esc(s.readers||'--')+'</td><td title="'+esc(scoredBy(s).join(', '))+'">'+(scoredBy(s).length?scoredBy(s).length+(scoredBy(s).length===1?' reader':' readers'):'--')+'</td><td>'+esc(s.intdate||'--')+'</td>';
+    h+='<tr><td><a href="#" class="rv-open" data-id="'+esc(s.id)+'">'+esc(s.last)+', '+esc(s.first)+'</a></td><td>'+grpSelect(s)+'</td><td>'+esc(g(s)||'--')+'</td><td>'+esc(s.school||'--')+'</td><td>'+(pay(s)||'--')+'</td><td>'+clarityCell(s)+'</td><td class="sens">'+fmt$(s.income)+'</td><td class="sens">'+fmt$(s.suggtuit)+'</td><td class="sens">'+fmt$(s.parentoffer)+'</td><td>'+esc(s.actualgpa||s.gpa||'--')+'</td><td>'+(flags.trim()||'<span class="rv-miss">none</span>')+'</td><td>'+(ckIn(s)!==null?'<span class="ckn'+(docsComplete(s)?' full':'')+'">'+ckIn(s)+'/'+CK_REQ.length+'</span>':'--')+'</td><td>'+esc(s.readers||'--')+'</td><td title="'+esc(scoredBy(s).join(', '))+'">'+(scoredBy(s).length?scoredBy(s).length+(scoredBy(s).length===1?' reader':' readers'):'--')+'</td><td>'+esc(s.intdate||'--')+'</td>';
     scoreKeys.forEach(function(k){h+='<td>'+esc(s[k]||'--')+'</td>';});
     h+='<td><strong>'+(r.combined!==null?r.combined.toFixed(0)+'%':'--')+'</strong></td><td>'+(s.decision?'<span class="rv-dec rv-'+s.decision.replace(/\s/g,'').toLowerCase()+'">'+esc(s.decision)+'</span>':'--')+'</td><td><button class="rv-score'+(myReview(s)?' done':'')+'" data-id="'+esc(s.id)+'">'+(myReview(s)?'My score':'Score')+'</button></td></tr>';
   });
-  if(!apps.length)h+='<tr><td colspan="24" style="text-align:center;color:#9EA4B0;font-style:italic">No applicants match these filters.</td></tr>';
+  if(!apps.length)h+='<tr><td colspan="25" style="text-align:center;color:#9EA4B0;font-style:italic">No applicants match these filters.</td></tr>';
   h+='</table></div><div class="dsec-note" style="margin-top:6px">Visit: V = visited campus, S = shadow day, L = legacy. Clarity: status from Clarity for aid applicants; "No file" means aid requested but no Clarity application found. Combined % averages whichever reader scores are entered, unweighted.</div>';
+  }
   document.getElementById('review').innerHTML=h;
 
   document.getElementById('rv-present').addEventListener('click',function(){
@@ -1984,8 +2103,16 @@ function renderReview(){
     if(RV.pay!=='all')lbl.push({FP:'Full pay',FA:'Financial aid',noclar:'Aid, no Clarity file'}[RV.pay]);
     if(RV.dec!=='all')lbl.push(RV.dec==='none'?'No decision yet':RV.dec);
     if(RV.docs!=='all')lbl.push(RV.docs==='done'?'Documents complete':'Missing documents');
+    if(RV.grp!=='all')lbl.push(RV.grp==='none'?'Not sorted':grpOf(RV.grp).l);
     openPresent(apps.map(function(r){return r.s.id;}),lbl.join(' · '));
   });
+  var mb=document.querySelectorAll('#rv-mode button');for(var mi=0;mi<mb.length;mi++)mb[mi].addEventListener('click',function(){RV.mode=this.getAttribute('data-mode');renderReview();});
+  var gt=document.querySelectorAll('#review .grp-tile');for(var gi=0;gi<gt.length;gi++)gt[gi].addEventListener('click',function(){var k=this.getAttribute('data-grp');RV.grp=RV.grp===k?'all':k;renderReview();});
+  var gs=document.querySelectorAll('#review .grp-sel');for(var gj=0;gj<gs.length;gj++)gs[gj].addEventListener('change',function(){var st=byId(this.getAttribute('data-id'));if(!st)return;st.group=this.value;sync();render();renderReview();});
+  var sb2=document.querySelectorAll('#review .sug-btn');for(var gk=0;gk<sb2.length;gk++)sb2[gk].addEventListener('click',function(){var st=byId(this.getAttribute('data-id'));if(!st)return;st.group=this.getAttribute('data-grp');sync();render();renderReview();});
+  var aa=document.getElementById('ag-accept-all');if(aa)aa.addEventListener('click',function(){var n3=0;apps.forEach(function(r){var k=suggestGroup(r.s);if(k){r.s.group=k;n3++;}});if(n3){sync();render();}renderReview();});
+  var gl=document.querySelectorAll('#review .ag-present');for(var gm=0;gm<gl.length;gm++)gl[gm].addEventListener('click',function(){var k=this.getAttribute('data-grp');presentGroups(apps,[k],grpOf(k).l);});
+  var pa=document.getElementById('ag-present-all');if(pa)pa.addEventListener('click',function(){presentGroups(apps,GROUPS.filter(function(x){return x.disc;}).map(function(x){return x.k;}),'Discussion groups');});
   [['rv-grade','grade'],['rv-pay','pay'],['rv-dec','dec'],['rv-docs','docs']].forEach(function(p){document.getElementById(p[0]).addEventListener('change',function(){RV[p[1]]=this.value;renderReview();});});
   var q=document.getElementById('rv-q');
   q.addEventListener('input',function(){RV.q=this.value;var pos=this.selectionStart;renderReview();var nq=document.getElementById('rv-q');nq.focus();try{nq.setSelectionRange(pos,pos);}catch(e){}});
@@ -2036,7 +2163,7 @@ function render(){
     // decision pill
     var decColors={'In':'#2A6B4A','Win':'#1A5CA8','Need to Win':'#8A5C00','Deny':'#A8302A','Waitlist':'#5A3A8A'};
     var dec=s.decision&&decColors[s.decision]?'<span class="spill" style="background:'+decColors[s.decision]+'22;color:'+decColors[s.decision]+'">'+s.decision.split(' ')[0]+'</span>':'';
-    var pills=(isMid(s)?'<span class="spill2 sp-mid" title="Mid-Year (January) start">MID</span>':'');
+    var pills=grpPill(s,true)+(isMid(s)?'<span class="spill2 sp-mid" title="Mid-Year (January) start">MID</span>':'');
     if(isApp(s)&&hasCk(s)){var ckn=ckIn(s);pills+='<span class="spill2 sp-docs'+(ckn===CK_REQ.length?' full':'')+'" title="Required application items received">'+ckn+'/'+CK_REQ.length+'</span>';}
     else if(isPending(s))pills+='<span class="spill2 sp-pay" title="Draft application: form done, only the fee is left">FEE DUE</span>';
     else if(isDraft(s))pills+='<span class="spill2 sp-draft" title="Draft application in progress">DRAFT</span>';
@@ -2122,6 +2249,7 @@ function detail(){
             '<button class="beh" id="bhe" style="margin-left:auto">Edit</button>'+
           '</div>'+
           '<div class="decision-row" style="margin-top:8px">'+decBtns+'</div>'+
+          (app?'<div class="grp-row"><span class="lbl">Meeting group</span>'+grpButtons(s,'grp-btn')+'</div>':'')+
         '</div>'+
         '<div class="hr-right">'+
           '<div class="gpa-block">'+
@@ -2203,6 +2331,9 @@ function detail(){
   });
   w('bpr',function(){if(confirm('Move to Applicant?')){for(var i=0;i<students.length;i++){if(students[i].id===selId){students[i].status='Applicant';break;}}sync();render();detail();}});
   w('hpbtn',function(){document.getElementById('fi-hero').setAttribute('data-sid',selId);document.getElementById('fi-hero').click();});
+
+  var gb=el.querySelectorAll('.grp-btn');
+  for(var gi=0;gi<gb.length;gi++)gb[gi].addEventListener('click',function(){setGroup(selId,this.getAttribute('data-grp'));render();detail();});
 
   // Checklist items and draft call log
   var ckt=el.querySelectorAll('.ckc.tog');
@@ -2653,8 +2784,8 @@ document.getElementById('fi-photos').addEventListener('change',function(){
 // EXPORT
 function exportCSV(){
   if(!students.length){alert('No students to export.');return;}
-  var cols=['last','first','school','gpa','actualgpa','grade','entry','_docs','_missing','draft','status','decision','star','aid','parentoffer','suggtuit','income','p1name','p1rel','p1email','p1phone','p2name','p2rel','p2email','p2phone','interests','activities','notes','idate','src','worship','referral','readers','intdate','racad','rmission','rextra','rsocial','rrecs','rreach','roverall','rcomments','visits'];
-  var hdrs=['last_name','first_name','school','est_gpa','actual_gpa','grade','entry_term','docs_in','missing_items','draft_status','status','decision','starred','aid_requested','parent_offer','suggested_tuition','family_income','parent1_name','parent1_relation','parent1_email','parent1_phone','parent2_name','parent2_relation','parent2_email','parent2_phone','interests','activities','meeting_notes','inquiry_date','source','place_of_worship','referral_friend','assigned_readers','interview_date','academic_ability','mission_fit','extracurricular','social_fit','recommendations','school_reach','overall_quality','reader_comments','campus_visits'];
+  var cols=['last','first','school','gpa','actualgpa','grade','entry','group','_docs','_missing','draft','status','decision','star','aid','parentoffer','suggtuit','income','p1name','p1rel','p1email','p1phone','p2name','p2rel','p2email','p2phone','interests','activities','notes','idate','src','worship','referral','readers','intdate','racad','rmission','rextra','rsocial','rrecs','rreach','roverall','rcomments','visits'];
+  var hdrs=['last_name','first_name','school','est_gpa','actual_gpa','grade','entry_term','meeting_group','docs_in','missing_items','draft_status','status','decision','starred','aid_requested','parent_offer','suggested_tuition','family_income','parent1_name','parent1_relation','parent1_email','parent1_phone','parent2_name','parent2_relation','parent2_email','parent2_phone','interests','activities','meeting_notes','inquiry_date','source','place_of_worship','referral_friend','assigned_readers','interview_date','academic_ability','mission_fit','extracurricular','social_fit','recommendations','school_reach','overall_quality','reader_comments','campus_visits'];
   var rows=[hdrs.join(',')];
   sorted().forEach(function(s){var row=cols.map(function(k){var v=k==='_docs'?(ckIn(s)===null?'':ckIn(s)+'/'+CK_REQ.length):(k==='_missing'?ckMissing(s).join('; '):(Array.isArray(s[k])?s[k].join('; '):(s[k]||'')));v=String(v).replace(/"/g,'""');if(v.indexOf(',')>-1||v.indexOf('"')>-1||v.indexOf('\n')>-1)v='"'+v+'"';return v;});rows.push(row.join(','));});
   var blob=new Blob([rows.join('\n')],{type:'text/csv'});
@@ -2739,6 +2870,28 @@ function setCview(on){
 }
 document.getElementById('btn-cview').addEventListener('click',function(){setCview(!document.body.classList.contains('cview'));});
 (function(){var on=false;try{on=localStorage.getItem('pca_cview')==='1';}catch(e){}setCview(on);})();
+// PHOTOS FROM FINALSITE -- the "Send Finalsite photos to tracker" bookmark runs on a
+// logged-in Finalsite student list, opens this page, and posts resized photos here.
+// Only messages from Finalsite are accepted, and only JPEG photos are stored, on this device.
+var FS_ORIGIN='https://pacificachristian.fsenrollment.com';
+var FS_BOOKMARKLET="(async function(){\nif(location.hostname.indexOf('fsenrollment.com')<0){alert('Drag this to your bookmarks bar, then click it while you are on a Finalsite student list.');return;}\nvar TO='https://jockwheel.github.io',T=TO+'/Admissions/';\nvar seen={},L=[];\ndocument.querySelectorAll('a[href*=\"/contacts/\"]').forEach(function(a){var p;try{p=new URL(a.href).pathname;}catch(e){return;}var t=a.textContent.trim();if(!/^\\/contacts\\/[0-9a-f-]{36}$/.test(p)||t.indexOf(',')<0||seen[p])return;seen[p]=1;L.push([p,t]);});\nif(!L.length){alert('Open a Finalsite student list first (for example, click the Applicant count on the Finalsite dashboard), then click this again.');return;}\nvar w=window.open(T,'pcaTracker');if(!w){alert('Allow pop-ups for Finalsite so the tracker can open.');return;}\nvar box=document.createElement('div');box.style.cssText='position:fixed;top:12px;right:12px;z-index:2147483647;background:#003260;color:#fff;padding:12px 16px;border-radius:8px;font:600 13px Arial,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.3);max-width:360px';document.body.appendChild(box);\nfunction say(t){box.textContent=t;}\nsay('Opening the tracker...');\nvar ack={m:0,miss:[]};\nwindow.addEventListener('message',function(e){if(e.origin===TO&&e.data&&e.data.type==='pca-photos-ack'){ack.m+=e.data.matched;ack.miss=ack.miss.concat(e.data.missing||[]);}});\nawait new Promise(function(r){var d=false;window.addEventListener('message',function(e){if(!d&&e.origin===TO&&e.data&&e.data.type==='pca-ready'){d=true;r();}});setTimeout(function(){if(!d){d=true;r();}},10000);});\nfunction nm(t){var m=t.match(/^([^,]+),\\s*([^(]+?)\\s*(?:\\(([^)]*)\\))?\\s*$/);return m?{last:m[1].trim(),first:m[2].trim().split(/\\s+/)[0],pref:(m[3]||'').trim()}:null;}\nasync function one(p){\n  var t=await fetch(p[0]+'/portrait/edit',{credentials:'include',headers:{'X-Requested-With':'XMLHttpRequest'}}).then(function(r){return r.ok?r.text():'';}).catch(function(){return'';});\n  var m=t.match(/https:\\\\?\\/\\\\?\\/sa-assets-production\\.s3\\.amazonaws\\.com[^\"'\\s)]+/);if(!m)return null;\n  var u=m[0].replace(/\\\\\\//g,'/').replace(/\\\\u0026/g,'&').replace(/&amp;/g,'&').replace(/\\\\+$/,'');\n  var b=await fetch(u).then(function(r){return r.blob();});var bmp=await createImageBitmap(b);\n  var k=Math.min(1,360/Math.max(bmp.width,bmp.height)),c=document.createElement('canvas');c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);\n  c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);if(bmp.close)bmp.close();\n  var n=nm(p[1]);if(!n)return null;n.data=c.toDataURL('image/jpeg',0.82);return n;\n}\nvar found=0,batch=[];\nfor(var i=0;i<L.length;i++){\n  say('Finalsite photos: checking '+(i+1)+' of '+L.length+' ('+found+' found so far)');\n  try{var r=await one(L[i]);if(r){found++;batch.push(r);}}catch(e){}\n  if(batch.length>=5||(i===L.length-1&&batch.length)){w.postMessage({type:'pca-photos',items:batch},TO);batch=[];}\n}\nsetTimeout(function(){say('Done: '+found+' photos sent, '+ack.m+' matched in the tracker'+(ack.miss.length?'. Not matched: '+ack.miss.join(', '):'.')+' You can close this note.');box.onclick=function(){box.remove();};},2500);\n})();\n";
+(function(){var a=document.getElementById('fs-bm');if(a){a.href='javascript:'+encodeURIComponent(FS_BOOKMARKLET);a.addEventListener('click',function(e){e.preventDefault();alert('Drag this button to your bookmarks bar, then click the bookmark while you are on a Finalsite student list.');});}})();
+window.addEventListener('message',function(e){
+  if(e.origin!==FS_ORIGIN)return;var d=e.data;
+  if(!d||d.type!=='pca-photos'||!Array.isArray(d.items))return;
+  var matched=0,miss=[];
+  d.items.forEach(function(it){
+    if(!it||typeof it.data!=='string'||it.data.indexOf('data:image/jpeg;base64,')!==0||it.data.length>300000)return;
+    var ix=findByNames([it.first,it.pref],it.last),s=ix>-1?students[ix]:findStudentFuzzy(it.first+(it.pref?' ('+it.pref+')':''),it.last);
+    if(!s){miss.push(it.first+' '+it.last);return;}
+    s.photo=it.data;matched++;
+  });
+  try{saveLocal();}catch(x){setSd('err','Photo storage is full on this device');}
+  render();if(selId)detail();
+  setSd('ok',matched+' photos added');setTimeout(function(){setSd('ok','');},4000);
+  try{e.source.postMessage({type:'pca-photos-ack',matched:matched,missing:miss},FS_ORIGIN);}catch(x){}
+});
+if(window.opener)setTimeout(function(){try{window.opener.postMessage({type:'pca-ready'},FS_ORIGIN);}catch(e){}},2500); // give the shared roster a moment to load first
 pull();
 // Background refresh -- only while the tab is actually visible, so a
 // forgotten/backgrounded tab stops polling entirely instead of quietly
@@ -2766,3 +2919,4 @@ if(!document.hidden)startAutoRefresh();
 <!-- deployed 2026-11-05 clarity -->
 <!-- deployed 2026-11-05 reader scoring -->
 <!-- deployed 2026-11-06 checklist, drafts, mid-year, meeting mode -->
+<!-- deployed 2026-11-06 meeting groups, Finalsite photos -->
