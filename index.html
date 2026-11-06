@@ -1400,7 +1400,11 @@ function findByNames(names,last){
   var L=String(last||'').trim().toLowerCase(),N=names.filter(Boolean).map(function(n){return String(n).trim().toLowerCase();});
   for(var i=0;i<students.length;i++){var s=students[i];if(String(s.last||'').trim().toLowerCase()!==L)continue;
     var f=String(s.first||'').trim().toLowerCase(),pf=String(s.pref||'').trim().toLowerCase();
-    if(N.indexOf(f)>-1||(pf&&N.indexOf(pf)>-1))return i;}
+    if(N.indexOf(f)>-1||(pf&&N.indexOf(pf)>-1))return i;
+    }
+  // Also check names this record is known by elsewhere (set when duplicates were merged)
+  for(var j=0;j<students.length;j++){var aka=students[j].aka;if(!Array.isArray(aka))continue;
+    for(var a=0;a<N.length;a++){if(aka.indexOf(N[a]+' '+L)>-1)return j;}}
   return-1;
 }
 function normGrade(g){var m=String(g||'').match(/\d+/);return m?m[0]+'th':'';}
