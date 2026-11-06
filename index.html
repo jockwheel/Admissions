@@ -320,6 +320,20 @@ body.cview .cview-banner{display:block}
 .ck-top .ckbar{flex:1;height:8px}
 .ck-asof{font-size:10px;color:#9EA4B0;margin-left:auto;white-space:nowrap}
 .ck-miss-txt{font-size:11px;color:#A8302A;margin-top:4px}
+.cv-tog{float:right;margin-top:-3px;font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:none;padding:3px 10px;border-radius:99px;border:1px solid #C9D3E3;background:#fff;color:#5A6070;cursor:pointer}
+.cv-tog.on{background:#E6F4ED;border-color:#2A6B4A;color:#2A6B4A}
+.cv-chip{display:inline-flex;gap:5px;align-items:center;font-size:11px;font-weight:600;padding:4px 10px;border-radius:99px;background:#E8F0FA;color:#1A3F73;margin:0 6px 6px 0}
+.cv-chip b{font-weight:700;color:#5A6070;font-size:10px}
+.cv-chip.par{background:#F4F5F7;color:#5A6070}
+.hvis{margin-left:2px;padding:3px 10px;border-radius:99px;font-size:10px;font-weight:700;letter-spacing:.05em;cursor:pointer;border:1px solid rgba(255,255,255,.25);background:transparent;color:rgba(255,255,255,.55)}
+.hvis.on{border-color:#7CC4A0;background:rgba(124,196,160,.18);color:#BFE6D1}
+.cv-tile{cursor:pointer;transition:background .15s}.cv-tile:hover{background:#F4F7FB!important}
+.cv-evrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.cv-ev{font-size:11px;padding:5px 12px;border-radius:99px;border:1px solid #D7DEEA;background:#fff;color:#003260;cursor:pointer}.cv-ev b{font-weight:700}.cv-ev:hover{background:#F4F7FB}
+.sp-vis{background:#E6F4ED;color:#2A6B4A}
+.fd-row{cursor:pointer}.fd-row:hover td{background:#F4F7FB}
+.fd-alt{font-size:9.5px;color:#8A93A3;font-weight:600;margin-left:4px}
+.fd-none td{color:#8A5C00;font-style:italic;cursor:pointer}
 .spill2{font-size:8.5px;font-weight:700;padding:2px 6px;border-radius:99px;letter-spacing:.04em;flex-shrink:0;white-space:nowrap}
 .sp-docs{background:#EEF0F3;color:#5A6070}
 .sp-docs.full{background:#E6F4ED;color:#2A6B4A}
@@ -438,7 +452,7 @@ body.cview .cview-banner{display:block}
     </button>
     <button class="hbtn hbtn-w" id="btn-import-photos">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-      Import Photos
+      Photos &amp; Events
     </button>
     <button class="hbtn" id="btn-import-hdr">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -492,6 +506,18 @@ body.cview .cview-banner{display:block}
         <option value="pending">Drafts pending payment</option>
         <option value="midyear">Mid-Year (January) starts</option>
       </optgroup>
+      <optgroup label="Campus visits">
+        <option value="visited">Visited campus</option>
+        <option value="notvisited">Not visited yet</option>
+        <option value="visited-app">Applicants who visited</option>
+        <option value="notvisited-app">Applicants not yet on campus</option>
+        <option value="ev:vpd">Came to Visit Pacifica Day</option>
+        <option value="ev:openHouse">Came to Open House</option>
+        <option value="ev:hosTour">Came to HOS Tour</option>
+        <option value="ev:privateTour">Had a Private Tour</option>
+        <option value="ev:shadowDay">Did a Shadow Day</option>
+        <option value="noschool">No school listed</option>
+      </optgroup>
       <optgroup label="Meeting group">
         <option value="grp:bubble">Bubble: Aid</option>
         <option value="grp:win">Need to Win</option>
@@ -529,7 +555,7 @@ body.cview .cview-banner{display:block}
     </button>
     <button class="abtn abtn-out" id="btn-import-photos-sb" style="color:#C49A3C;border-color:#C49A3C">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-      Import Photos
+      Photos &amp; Events
     </button>
     <button class="abtn abtn-red" id="btn-clear">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
@@ -741,18 +767,18 @@ body.cview .cview-banner{display:block}
 <!-- PHOTO IMPORT MODAL -->
 <div class="ov" id="ov-photos">
 <div class="modal" style="width:500px">
-  <div class="mh"><div class="mt2">Import Photos</div><button class="mx" id="mx-photos">&times;</button></div>
+  <div class="mh"><div class="mt2">Photos &amp; Campus Events from Finalsite</div><button class="mx" id="mx-photos">&times;</button></div>
   <div class="mb">
     <div class="ihint">
       Select all your <strong>LastName_FirstName.jpeg</strong> files at once. They'll be matched to students automatically and stored on this device.<br><br>
       Photos stay local -- they won't sync to teammates, but survive refresh. Each teammate runs this import once.
     </div>
     <div class="ihint" style="margin-top:10px;background:#FFF8E6">
-      <strong>Or pull photos straight from Finalsite, no files needed:</strong><br>
+      <strong>Pull photos, campus events and schools from Finalsite in one click:</strong><br>
       1. Drag this button to your browser's bookmarks bar:
-      <a id="fs-bm" href="#" style="display:inline-block;margin:6px 0;padding:5px 11px;border:1px solid #C49A3C;border-radius:5px;color:#8A5C00;font-weight:700;text-decoration:none;background:#fff">Send Finalsite photos to tracker</a><br>
+      <a id="fs-bm" href="#" style="display:inline-block;margin:6px 0;padding:5px 11px;border:1px solid #C49A3C;border-radius:5px;color:#8A5C00;font-weight:700;text-decoration:none;background:#fff">PCA Photos &amp; Events</a><br>
       2. Log in to Finalsite and open the applicant list (Dashboard, then click the Applicant count).<br>
-      3. Click the bookmark. This tracker opens and every applicant with a Finalsite photo gets it on this device. Run it again any time new photos come in.
+      3. Click the bookmark. This tracker opens, then each student on that list gets their Finalsite photo, every event they actually attended (with the date), and their current school if the tracker had none. Events and schools save for the whole team; photos stay on this device. Run it after each event, on both the Applicant and Inquiry lists.
     </div>
     <div style="margin-top:8px">
       <input type="file" id="fi-photos" accept="image/*,.jpeg,.jpg" multiple style="display:none"/>
@@ -1347,7 +1373,7 @@ function renderPresent(){
   var p=pal(s),gpa=s.actualgpa||s.gpa,score=SCORE_KEYS.map(function(k){return parseFloat(s[k]);}).filter(function(v){return!isNaN(v);});
   var combined=score.length?score.reduce(function(a,b){return a+b;},0)/score.length/5*100:null;
   var eng=[['visitedCampus','Visited campus'],['vpd','Visit Pacifica Day'],['openHouse','Open House'],['hosTour','HOS Tour'],['privateTour','Private Tour'],['shadowDay','Shadow Day']];
-  var engN=eng.filter(function(e){return!!s[e[0]];}).length;
+  var engN=evCount(s);
   var ckn=ckIn(s);
   var badge=function(t,bg,fg){return'<span class="b" style="background:'+bg+';color:'+fg+'">'+t+'</span>';};
   var h='<div class="pm-bar"><div class="pm-t">Committee Meeting</div><div class="pm-c">'+(PM.i+1)+' of '+PM.ids.length+(PM.label?' &middot; '+esc(PM.label):'')+'</div><div class="pm-sp"></div>'+
@@ -1375,7 +1401,8 @@ function renderPresent(){
     '<div class="pm-row"><span class="k">Interview</span><span class="v">'+esc(s.intdate||'Not scheduled')+'</span></div>'+
     '<div class="pm-row"><span class="k">Readers</span><span class="v">'+esc(s.readers||'--')+'</span></div></div>';
   // Engagement
-  h+='<div class="pm-card"><h4>Engagement with Pacifica</h4><div>'+eng.map(function(e){return'<span class="ckc '+(s[e[0]]?'ok':'na')+'">'+(s[e[0]]?'&#10003; ':'')+e[1]+'</span>';}).join('')+'</div>'+
+  var cev=campusEvents(s);
+  h+='<div class="pm-card"><h4>Engagement with Pacifica</h4><div>'+'<span class="ckc '+(s.visitedCampus?'ok':'na')+'">'+(s.visitedCampus?'&#10003; Visited campus':'Not on campus yet')+'</span>'+(cev.length?cev.map(function(e){return'<span class="ckc ok">'+esc(e.l)+(e.d?' &middot; '+fmtDay(e.d):'')+'</span>';}).join(''):'')+'</div>'+
     '<div class="pm-row"><span class="k">Heard about us</span><span class="v">'+esc(s.src||'--')+'</span></div>'+
     (s.referral?'<div class="pm-row"><span class="k">Referred by</span><span class="v">'+esc(s.referral)+'</span></div>':'')+
     '<div class="pm-row"><span class="k">First inquiry</span><span class="v">'+fmtDay(s.idate)+'</span></div>'+
@@ -1558,6 +1585,7 @@ function filtered(){
     if(f1==='docsin'&&!(isApp(s)&&docsComplete(s)))return false;
     if(f1==='docsmiss'&&!(isApp(s)&&hasCk(s)&&!docsComplete(s)))return false;
     if(f1==='midyear'&&!isMid(s))return false;
+    if(f1&&!campusFilter(f1,s))return false;
     if(f1.indexOf('grp:')===0){var gk=f1.slice(4);if(gk==='none'){if(!isApp(s)||grpOf(s.group))return false;}else if(s.group!==gk)return false;}
     if(f1==='star'&&s.star!=='yes')return false;
     if(f2&&(s.decision||'').indexOf(f2)<0)return false;
@@ -1703,6 +1731,8 @@ function renderDash(){
   });
   h+='</table></div>';
 
+  h+=campusDashHTML();
+
   // CONVERSION
   h+='<div class="dsec"><div class="dsec-hd"><div class="dsec-t">Conversion &amp; Percentages</div></div>';
   h+='<table class="dtable"><tr><th>Measure</th><th>Rate</th></tr>';
@@ -1722,6 +1752,7 @@ function renderDash(){
   h+='</div>';
 
   document.getElementById('dash').innerHTML=h;
+  wireCampusDash(document.getElementById('dash'));
 
   // WIRE inline edits
   document.getElementById('cfg-jandeadline').addEventListener('change',function(){CFG.janDeadline=this.value;sync();});
@@ -1756,27 +1787,132 @@ function renderActiveView(){
 // ASSUMPTION: Yield = Enrolled ÷ Applications (the workbook doesn't specify
 // enrolled ÷ accepted vs. enrolled ÷ applications -- adjust if you want the former).
 function renderFeeder(){
-  var bySchool={};
+  var bySchool={},none={inq:0,app:0,enr:0,vis:0};
   students.forEach(function(s){
-    var name=(s.school||'').trim();
-    if(!name)return;
-    if(!bySchool[name])bySchool[name]={school:name,inq:0,app:0,enr:0};
-    bySchool[name].inq++;
-    if(isApp(s))bySchool[name].app++;
-    if(s.status==='Enrolled')bySchool[name].enr++;
+    var name=(s.school||'').trim(),k=schoolKey(name);
+    var r;
+    if(!k)r=none;
+    else{if(!bySchool[k])bySchool[k]={key:k,names:{},inq:0,app:0,enr:0,vis:0};r=bySchool[k];r.names[name]=(r.names[name]||0)+1;}
+    r.inq++;
+    if(isApp(s))r.app++;
+    if(s.status==='Enrolled')r.enr++;
+    if(s.visitedCampus)r.vis++;
   });
-  var list=Object.keys(bySchool).map(function(k){return bySchool[k];}).sort(function(a,b){return b.inq-a.inq;});
+  var list=Object.keys(bySchool).map(function(k){var r=bySchool[k];
+    // show the spelling used most often
+    r.school=Object.keys(r.names).sort(function(a,b){return r.names[b]-r.names[a]||b.length-a.length;})[0];
+    r.alt=Object.keys(r.names).length-1;return r;
+  }).sort(function(a,b){return b.app-a.app||b.inq-a.inq||a.school.localeCompare(b.school);});
 
-  var h='<div class="dash-hdr"><div><div class="dash-title">Feeder Schools</div><div class="dash-sub">'+list.length+' schools represented -- counted automatically from the roster</div></div></div>';
-  h+='<div class="dsec"><table class="dtable"><tr><th>School</th><th>Inquiries</th><th>Applications</th><th>Enrolled</th><th>App Rate</th><th>Yield</th></tr>';
+  var h='<div class="dash-hdr"><div><div class="dash-title">Feeder Schools</div><div class="dash-sub">'+list.length+' schools represented. Inquiries counts every student from that school (applicants included). Spelling differences are merged. Click a school to see its students.</div></div></div>';
+  h+='<div class="dsec"><table class="dtable fd-tab"><tr><th>School</th><th>Inquiries</th><th>Applications</th><th>Enrolled</th><th>Visited Campus</th><th>App Rate</th><th>Yield</th></tr>';
   list.forEach(function(r){
     var appRate=r.inq?r.app/r.inq:0;
     var yieldRate=r.app?r.enr/r.app:0;
-    h+='<tr><td>'+r.school+'</td><td>'+r.inq+'</td><td>'+r.app+'</td><td>'+r.enr+'</td><td>'+(appRate*100).toFixed(0)+'%</td><td>'+(yieldRate*100).toFixed(0)+'%</td></tr>';
+    h+='<tr class="fd-row" data-school="'+esc(r.key)+'" data-name="'+esc(r.school)+'"><td>'+esc(r.school)+(r.alt?' <span class="fd-alt" title="Also spelled '+r.alt+' other way(s) in the roster">+'+r.alt+' spelling'+(r.alt>1?'s':'')+'</span>':'')+'</td><td>'+r.inq+'</td><td>'+r.app+'</td><td>'+r.enr+'</td><td>'+r.vis+'</td><td>'+(appRate*100).toFixed(0)+'%</td><td>'+(yieldRate*100).toFixed(0)+'%</td></tr>';
   });
-  if(!list.length)h+='<tr><td colspan="6" style="text-align:center;color:#9EA4B0;font-style:italic">No schools recorded yet -- import or add students with a school set.</td></tr>';
+  if(none.inq)h+='<tr class="fd-none"><td>No school listed</td><td>'+none.inq+'</td><td>'+none.app+'</td><td>'+none.enr+'</td><td>'+none.vis+'</td><td colspan="2">Add a school on these students so they count above</td></tr>';
+  if(!list.length)h+='<tr><td colspan="7" style="text-align:center;color:#9EA4B0;font-style:italic">No schools recorded yet -- import or add students with a school set.</td></tr>';
   h+='</table></div>';
-  document.getElementById('feeder').innerHTML=h;
+  var box=document.getElementById('feeder');box.innerHTML=h;
+  var rows=box.querySelectorAll('.fd-row');
+  for(var i=0;i<rows.length;i++)rows[i].addEventListener('click',function(){
+    var k='school:'+this.getAttribute('data-school'),sel=document.getElementById('f1');
+    var o=sel.querySelector('option[data-sch]');if(!o){o=document.createElement('option');o.setAttribute('data-sch','1');sel.appendChild(o);}
+    o.value=k;o.textContent='School: '+this.getAttribute('data-name');
+    switchView('roster');sel.value=k;render();
+  });
+  var nr=box.querySelector('.fd-none');if(nr)nr.addEventListener('click',function(){goRoster('noschool');});
+}
+
+// ============ CAMPUS VISITS & EVENTS ============
+// Event attendance comes from Finalsite checklist items, which Finalsite only
+// marks complete once a student actually attends (a registration alone leaves
+// the item open). Each attended event is kept on s.events as {l:label,d:date}.
+// The yes/no flags (vpd, openHouse, ...) stay because the Dashboard funnel and
+// the edit modal use them; addEvents keeps the two in step.
+var EV_DEFS=[
+  {k:'vpd',l:'Visit Pacifica Day',re:/visit pacifica day/i},
+  {k:'openHouse',l:'Open House',re:/open house/i},
+  {k:'hosTour',l:'HOS Tour',re:/head of school|information session/i},
+  {k:'privateTour',l:'Private Tour',re:/^\s*(schedule\s+)?(private\s+)?tour\s*$/i},
+  {k:'shadowDay',l:'Shadow Day',re:/shadow/i},
+  {k:'',l:'Future Seawolf Day',re:/future seawolf/i},
+  {k:'',l:'Homecoming',re:/homecoming/i},
+  {k:'',l:'Sporting Event',re:/sporting/i},
+  {k:'',l:'Parent Coffee',re:/coffee/i,parent:true}
+];
+var EV_FLAGS=EV_DEFS.filter(function(d){return!!d.k;});
+function evDefOf(name){for(var i=0;i<EV_DEFS.length;i++)if(EV_DEFS[i].re.test(name||''))return EV_DEFS[i];return null;}
+// evs: [[finalsiteItemName,'YYYY-MM-DD'],...]. Only ever adds. Returns true if anything changed.
+function addEvents(s,evs){
+  var before=JSON.stringify([s.events||[],s.visitedCampus,EV_FLAGS.map(function(d){return!!s[d.k];})]);
+  var have={},list=(s.events||[]).slice();list.forEach(function(e){have[e.l+'|'+(e.d||'')]=1;});
+  (evs||[]).forEach(function(p){
+    var d=evDefOf(p[0]);if(!d)return;var dt=String(p[1]||'').slice(0,10);
+    if(d.k)s[d.k]=true;if(!d.parent)s.visitedCampus=true;
+    // an undated entry is replaced once a dated one arrives
+    if(dt&&have[d.l+'|']){list=list.filter(function(e){return!(e.l===d.l&&!e.d);});delete have[d.l+'|'];}
+    if(!dt&&list.some(function(e){return e.l===d.l;}))return;
+    if(have[d.l+'|'+dt])return;have[d.l+'|'+dt]=1;list.push({l:d.l,d:dt});
+  });
+  list.sort(function(a,b){return(a.d||'9').localeCompare(b.d||'9');});
+  if(list.length)s.events=list;
+  return before!==JSON.stringify([s.events||[],s.visitedCampus,EV_FLAGS.map(function(d){return!!s[d.k];})]);
+}
+// Everything the student has been to, dated where Finalsite gave a date.
+function campusEvents(s){
+  var out=(s.events||[]).slice(),seen={};out.forEach(function(e){seen[e.l]=1;});
+  EV_FLAGS.forEach(function(d){if(s[d.k]&&!seen[d.l])out.push({l:d.l,d:''});});
+  return out;
+}
+function evCount(s){return campusEvents(s).filter(function(e){var d=evDefOf(e.l)||{};return!d.parent;}).length;}
+function toggleVisited(id){var s=byId(id);if(!s)return;
+  if(s.visitedCampus&&EV_FLAGS.some(function(d){return s[d.k];})&&!confirm('This student has campus events recorded. Mark as not visited anyway?'))return;
+  s.visitedCampus=!s.visitedCampus;sync();}
+function campusCard(s){
+  var ev=campusEvents(s);
+  var chips=ev.length?ev.map(function(e){var d=evDefOf(e.l)||{};return'<span class="cv-chip'+(d.parent?' par':'')+'">'+esc(e.l)+(e.d?' <b>'+fmtDay(e.d)+'</b>':'')+'</span>';}).join(''):'<span class="notag">No campus events recorded yet</span>';
+  return'<div class="dc full"><div class="dch">Campus visits &amp; events'+
+    '<button class="cv-tog'+(s.visitedCampus?' on':'')+'" id="cvtog">'+(s.visitedCampus?'&#10003; Visited campus':'Mark visited campus')+'</button></div>'+
+    '<div class="tags">'+chips+'</div>'+
+    (s.visits?'<div class="nbox" style="margin-top:8px">'+s.visits+'</div>':'')+'</div>';
+}
+function goRoster(f1){switchView('roster');var sel=document.getElementById('f1');sel.value=f1;if(sel.value!==f1){var o=document.createElement('option');o.value=f1;o.textContent=f1;sel.appendChild(o);sel.value=f1;}render();}
+function campusDashHTML(){
+  var apps=students.filter(isApp),inqs=students.filter(function(s){return!isApp(s);});
+  var v=function(l){return l.filter(function(s){return!!s.visitedCampus;}).length;};
+  var tile=function(n,l,sub,f){return'<div class="dc4 cv-tile" data-f1="'+f+'"><div class="dn">'+n+'</div><div class="dl">'+l+'</div><div class="dsub">'+sub+'</div></div>';};
+  var h='<div class="dsec"><div class="dsec-hd"><div class="dsec-t">Campus Visits</div><div class="dsec-note">Click a box to see those students</div></div>';
+  h+='<div class="dgrid4" style="margin:0">'+
+    tile(v(students),'Visited campus',students.length?Math.round(v(students)/students.length*100)+'% of everyone':'','visited')+
+    tile(v(apps),'Applicants who visited',apps.length?Math.round(v(apps)/apps.length*100)+'% of applicants':'','visited-app')+
+    tile(apps.length-v(apps),'Applicants not yet on campus','worth an invite','notvisited-app')+
+    tile(v(inqs),'Inquiries who visited',inqs.length?Math.round(v(inqs)/inqs.length*100)+'% of inquiries':'','visited-inq')+'</div>';
+  h+='<div class="cv-evrow">'+EV_FLAGS.map(function(d){var n=students.filter(function(s){return!!s[d.k];}).length;return'<button class="cv-ev" data-f1="ev:'+d.k+'"><b>'+n+'</b> '+d.l+'</button>';}).join('')+'</div></div>';
+  return h;
+}
+function wireCampusDash(root){
+  var t=root.querySelectorAll('[data-f1]');for(var i=0;i<t.length;i++)t[i].addEventListener('click',function(){goRoster(this.getAttribute('data-f1'));});
+}
+function campusFilter(f1,s){
+  if(f1==='visited')return!!s.visitedCampus;
+  if(f1==='notvisited')return!s.visitedCampus;
+  if(f1==='visited-app')return isApp(s)&&!!s.visitedCampus;
+  if(f1==='notvisited-app')return isApp(s)&&!s.visitedCampus;
+  if(f1==='visited-inq')return!isApp(s)&&!!s.visitedCampus;
+  if(f1.indexOf('ev:')===0)return!!s[f1.slice(3)];
+  if(f1==='noschool')return!schoolKey(s.school);
+  if(f1.indexOf('school:')===0)return schoolKey(s.school)===f1.slice(7);
+  return true;
+}
+
+// ============ SCHOOL NAMES ============
+// Same school typed different ways ("Calvary Christian", "Calvary Christian
+// School", "calvary christian school ") should count as one feeder school.
+function schoolKey(n){
+  n=(n||'').toLowerCase().replace(/&/g,' and ').replace(/\bst\.?\s/g,'saint ').replace(/[^a-z0-9 ]/g,' ');
+  return n.replace(/\b(the|school|of)\b/g,' ').replace(/\s+/g,' ').trim();
 }
 
 // ============ FINANCIAL AID ============
@@ -2167,7 +2303,7 @@ function render(){
     // decision pill
     var decColors={'In':'#2A6B4A','Win':'#1A5CA8','Need to Win':'#8A5C00','Deny':'#A8302A','Waitlist':'#5A3A8A'};
     var dec=s.decision&&decColors[s.decision]?'<span class="spill" style="background:'+decColors[s.decision]+'22;color:'+decColors[s.decision]+'">'+s.decision.split(' ')[0]+'</span>':'';
-    var pills=grpPill(s,true)+(isMid(s)?'<span class="spill2 sp-mid" title="Mid-Year (January) start">MID</span>':'');
+    var pills=grpPill(s,true)+(s.visitedCampus?'<span class="spill2 sp-vis" title="Visited campus">&#10003;</span>':'')+(isMid(s)?'<span class="spill2 sp-mid" title="Mid-Year (January) start">MID</span>':'');
     if(isApp(s)&&hasCk(s)){var ckn=ckIn(s);pills+='<span class="spill2 sp-docs'+(ckn===CK_REQ.length?' full':'')+'" title="Required application items received">'+ckn+'/'+CK_REQ.length+'</span>';}
     else if(isPending(s))pills+='<span class="spill2 sp-pay" title="Draft application: form done, only the fee is left">FEE DUE</span>';
     else if(isDraft(s))pills+='<span class="spill2 sp-draft" title="Draft application in progress">DRAFT</span>';
@@ -2250,6 +2386,7 @@ function detail(){
             (s.aid==='yes'?'<span class="b baid" style="font-size:10px">Aid requested</span>':'')+
             (s.aid==='no'?'<span class="b" style="font-size:10px;background:rgba(196,154,60,.2);color:#C49A3C;padding:3px 8px;border-radius:99px">Full Pay</span>':'')+
             '<button id="hstar" style="margin-left:2px;padding:3px 9px;border-radius:99px;font-size:15px;line-height:1;border:1px solid '+(s.star==='yes'?'#C49A3C':'rgba(255,255,255,.25)')+';background:'+(s.star==='yes'?'rgba(196,154,60,.2)':'transparent')+';color:'+(s.star==='yes'?'#C49A3C':'rgba(255,255,255,.3)')+';cursor:pointer" data-sid="'+s.id+'">'+(s.star==='yes'?'&#9733;':'&#9734;')+'</button>'+
+            '<button class="hvis'+(s.visitedCampus?' on':'')+'" id="hvis" title="Has this student been on campus?">'+(s.visitedCampus?'&#10003; VISITED CAMPUS':'NOT ON CAMPUS YET')+'</button>'+
             '<button class="beh" id="bhe" style="margin-left:auto">Edit</button>'+
           '</div>'+
           '<div class="decision-row" style="margin-top:8px">'+decBtns+'</div>'+
@@ -2319,7 +2456,7 @@ function detail(){
       '</div>'+
       '<div class="dc"><div class="dch">Interests</div><div class="tags">'+it+'</div></div>'+
       '<div class="dc"><div class="dch">Extracurriculars</div><div class="tags">'+at+'</div></div>'+
-      (s.visits?'<div class="dc full"><div class="dch">Campus visits &amp; events</div><div class="nbox">'+s.visits+'</div></div>':'')+
+      campusCard(s)+
 
     '</div>';
 
@@ -2328,6 +2465,8 @@ function detail(){
   w('bnp',function(){var i=fIds.indexOf(selId);if(fIds[i-1])pick(fIds[i-1]);});
   w('bnn',function(){var i=fIds.indexOf(selId);if(fIds[i+1])pick(fIds[i+1]);});
   w('bhe',function(){openEdit(selId);});
+  w('hvis',function(){toggleVisited(selId);render();detail();});
+  w('cvtog',function(){toggleVisited(selId);render();detail();});
   w('hstar',function(){
     var sid=this.getAttribute('data-sid');
     for(var i=0;i<students.length;i++){if(students[i].id===sid){students[i].star=students[i].star==='yes'?'':'yes';break;}}
@@ -2417,6 +2556,7 @@ function saveStudent(){
   if(!first||!last){alert('First and last name are required.');return;}
   var status=document.getElementById('e-status').value;
   var d={first:first,last:last,school:document.getElementById('e-school').value.trim(),worship:document.getElementById('e-worship').value.trim(),gpa:document.getElementById('e-gpa').value||null,actualgpa:document.getElementById('e-actualgpa').value||null,referral:document.getElementById('e-referral').value.trim(),grade:document.getElementById('e-grade').value,notes:document.getElementById('e-notes').value.trim(),parentoffer:document.getElementById('e-parentoffer').value||null,suggtuit:document.getElementById('e-suggtuit').value||null,income:document.getElementById('e-income').value||null,p1name:document.getElementById('e-p1name').value.trim(),p1rel:document.getElementById('e-p1rel').value.trim(),p1email:document.getElementById('e-p1email').value.trim(),p1phone:document.getElementById('e-p1phone').value.trim(),p2name:document.getElementById('e-p2name').value.trim(),p2rel:document.getElementById('e-p2rel').value.trim(),p2email:document.getElementById('e-p2email').value.trim(),p2phone:document.getElementById('e-p2phone').value.trim(),interests:tags(document.getElementById('e-int').value),activities:tags(document.getElementById('e-act').value),readers:document.getElementById('e-readers').value.trim(),intdate:document.getElementById('e-intdate').value.trim(),racad:document.getElementById('e-r-acad').value||null,rmission:document.getElementById('e-r-mission').value||null,rextra:document.getElementById('e-r-extra').value||null,rsocial:document.getElementById('e-r-social').value||null,rrecs:document.getElementById('e-r-recs').value||null,rreach:document.getElementById('e-r-reach').value||null,roverall:document.getElementById('e-r-overall').value||null,rcomments:document.getElementById('e-rcomments').value.trim(),status:status,decision:document.getElementById('e-decision').value,aid:document.getElementById('e-aid').value,idate:document.getElementById('e-idate').value.trim(),src:document.getElementById('e-src').value,visits:document.getElementById('e-visits').value.trim(),legacy:document.getElementById('e-legacy').value,entry:document.getElementById('e-entry').value,visitedCampus:document.getElementById('e-visited').checked,hosTour:document.getElementById('e-hostour').checked,vpd:document.getElementById('e-vpd').checked,openHouse:document.getElementById('e-openhouse').checked,privateTour:document.getElementById('e-privatetour').checked,shadowDay:document.getElementById('e-shadowday').checked,photo:mPhoto||null};
+  if(d.hosTour||d.vpd||d.openHouse||d.privateTour||d.shadowDay)d.visitedCampus=true;
 
   if(editId){for(var i=0;i<students.length;i++){if(students[i].id===editId){if(students[i].photo&&!mPhoto)REMOVED_PHOTOS[String(editId)]=1;Object.assign(students[i],d);break;}}selId=editId;}
   else{var ns=Object.assign({id:uid()},d);students.push(ns);selId=ns.id;}
@@ -2599,9 +2739,9 @@ function runImport(){
       // Only set engagement flags to true -- never write false, so a manually
       // checked box on re-import never gets clobbered just because this export
       // doesn't repeat that date column.
-      if(vpdDate){data.vpd=true;data.visitedCampus=true;}
-      if(cal1Date){data.openHouse=true;data.visitedCampus=true;}
-      if(infoSessDate){data.hosTour=true;data.visitedCampus=true;}
+      // These export columns are event REGISTRATION dates, so they no longer
+      // tick attendance (no-shows and future sign-ups were showing as visits).
+      // Attendance comes from the Photos & Events bookmark instead.
 
       if(pref&&pref.toLowerCase()!==first.toLowerCase())data.pref=pref;
       var ex=findByNames([first,pref],last);
@@ -2878,8 +3018,8 @@ document.getElementById('btn-cview').addEventListener('click',function(){setCvie
 // logged-in Finalsite student list, opens this page, and posts resized photos here.
 // Only messages from Finalsite are accepted, and only JPEG photos are stored, on this device.
 var FS_ORIGIN='https://pacificachristian.fsenrollment.com';
-var FS_BOOKMARKLET="(async function(){\nif(location.hostname.indexOf('fsenrollment.com')<0){alert('Drag this to your bookmarks bar, then click it while you are on a Finalsite student list.');return;}\nvar TO='https://jockwheel.github.io',T=TO+'/Admissions/';\nvar seen={},L=[];\ndocument.querySelectorAll('a[href*=\"/contacts/\"]').forEach(function(a){var p;try{p=new URL(a.href).pathname;}catch(e){return;}var t=a.textContent.trim();if(!/^\\/contacts\\/[0-9a-f-]{36}$/.test(p)||t.indexOf(',')<0||seen[p])return;seen[p]=1;L.push([p,t]);});\nif(!L.length){alert('Open a Finalsite student list first (for example, click the Applicant count on the Finalsite dashboard), then click this again.');return;}\nvar w=window.open(T,'pcaTracker');if(!w){alert('Allow pop-ups for Finalsite so the tracker can open.');return;}\nvar box=document.createElement('div');box.style.cssText='position:fixed;top:12px;right:12px;z-index:2147483647;background:#003260;color:#fff;padding:12px 16px;border-radius:8px;font:600 13px Arial,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.3);max-width:360px';document.body.appendChild(box);\nfunction say(t){box.textContent=t;}\nsay('Opening the tracker...');\nvar ack={m:0,miss:[]};\nwindow.addEventListener('message',function(e){if(e.origin===TO&&e.data&&e.data.type==='pca-photos-ack'){ack.m+=e.data.matched;ack.miss=ack.miss.concat(e.data.missing||[]);}});\nawait new Promise(function(r){var d=false;window.addEventListener('message',function(e){if(!d&&e.origin===TO&&e.data&&e.data.type==='pca-ready'){d=true;r();}});setTimeout(function(){if(!d){d=true;r();}},10000);});\nfunction nm(t){var m=t.match(/^([^,]+),\\s*([^(]+?)\\s*(?:\\(([^)]*)\\))?\\s*$/);return m?{last:m[1].trim(),first:m[2].trim().split(/\\s+/)[0],pref:(m[3]||'').trim()}:null;}\nasync function one(p){\n  var t=await fetch(p[0]+'/portrait/edit',{credentials:'include',headers:{'X-Requested-With':'XMLHttpRequest'}}).then(function(r){return r.ok?r.text():'';}).catch(function(){return'';});\n  var m=t.match(/https:\\\\?\\/\\\\?\\/sa-assets-production\\.s3\\.amazonaws\\.com[^\"'\\s)]+/);if(!m)return null;\n  var u=m[0].replace(/\\\\\\//g,'/').replace(/\\\\u0026/g,'&').replace(/&amp;/g,'&').replace(/\\\\+$/,'');\n  var b=await fetch(u).then(function(r){return r.blob();});var bmp=await createImageBitmap(b);\n  var k=Math.min(1,360/Math.max(bmp.width,bmp.height)),c=document.createElement('canvas');c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);\n  c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);if(bmp.close)bmp.close();\n  var n=nm(p[1]);if(!n)return null;n.data=c.toDataURL('image/jpeg',0.82);return n;\n}\nvar found=0,batch=[];\nfor(var i=0;i<L.length;i++){\n  say('Finalsite photos: checking '+(i+1)+' of '+L.length+' ('+found+' found so far)');\n  try{var r=await one(L[i]);if(r){found++;batch.push(r);}}catch(e){}\n  if(batch.length>=5||(i===L.length-1&&batch.length)){w.postMessage({type:'pca-photos',items:batch},TO);batch=[];}\n}\nsetTimeout(function(){say('Done: '+found+' photos sent, '+ack.m+' matched in the tracker'+(ack.miss.length?'. Not matched: '+ack.miss.join(', '):'.')+' You can close this note.');box.onclick=function(){box.remove();};},2500);\n})();\n";
-(function(){var a=document.getElementById('fs-bm');if(a){a.href='javascript:'+encodeURIComponent(FS_BOOKMARKLET);a.addEventListener('click',function(e){e.preventDefault();alert('Drag this button to your bookmarks bar, then click the bookmark while you are on a Finalsite student list.');});}})();
+var FS_BOOKMARKLET="(async function(){\nif(location.hostname.indexOf('fsenrollment.com')<0){alert('Drag this to your bookmarks bar, then click it while you are on a Finalsite student list.');return;}\nvar TO='https://jockwheel.github.io',T=TO+'/Admissions/';\nvar seen={},L=[];\ndocument.querySelectorAll('a[href*=\"/contacts/\"]').forEach(function(a){var p;try{p=new URL(a.href).pathname;}catch(e){return;}var t=a.textContent.trim();if(!/^\\/contacts\\/[0-9a-f-]{36}$/.test(p)||t.indexOf(',')<0||seen[p])return;seen[p]=1;L.push([p,t]);});\nif(!L.length){alert('Open a Finalsite student list first (for example, click the Applicant or Inquiry count on the Finalsite dashboard), then click this again.');return;}\nvar w=window.open(T,'pcaTracker');if(!w){alert('Allow pop-ups for Finalsite so the tracker can open.');return;}\nvar box=document.createElement('div');box.style.cssText='position:fixed;top:12px;right:12px;z-index:2147483647;background:#003260;color:#fff;padding:12px 16px;border-radius:8px;font:600 13px Arial,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.3);max-width:360px';document.body.appendChild(box);\nfunction say(t){box.textContent=t;}\nfunction sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}\nsay('Opening the tracker...');\nvar ack={m:0,miss:[],ev:0};\nwindow.addEventListener('message',function(e){if(e.origin!==TO||!e.data)return;if(e.data.type==='pca-photos-ack'){ack.m+=e.data.matched;ack.miss=ack.miss.concat(e.data.missing||[]);}if(e.data.type==='pca-fs-ack'){ack.ev+=e.data.updated;}});\nawait new Promise(function(r){var d=false;window.addEventListener('message',function(e){if(!d&&e.origin===TO&&e.data&&e.data.type==='pca-ready'){d=true;r();}});setTimeout(function(){if(!d){d=true;r();}},10000);});\nasync function get(u,h){for(var k=0;k<8;k++){var r=await fetch(u,{credentials:'include',headers:h||{}});if(r.status!==429)return r.ok?r.text():'';await sleep(4000*(k+1));}return'';}\nfunction nm(t){var m=t.match(/^([^,]+),\\s*([^(]+?)\\s*(?:\\(([^)]*)\\))?\\s*$/);return m?{last:m[1].trim(),first:m[2].trim().split(/\\s+/)[0],pref:(m[3]||'').trim()}:null;}\nvar reCk=/\"workflow\":\"(\\w+)\",\"contact_id\":\"[^\"]*\",\"completion_date\":(null|\"([^\"]*)\"),\"checklist_item_name\":\"((?:[^\"\\\\]|\\\\.)*)\"/g;\nvar EVRE=/Visit Pacifica|Open House|Tour|Coffee|Sporting|Seawolf|Homecoming|Information Session|Shadow/i;\nasync function info(p){\n  var html=await get(p[0]);if(!html)return null;var ev=[],m;reCk.lastIndex=0;\n  while((m=reCk.exec(html))){if(m[3]&&EVRE.test(m[4])&&!/Form|Fee|Questionnaire|Recommendation|Email/i.test(m[4]))ev.push([m[4].trim(),m[3].slice(0,10)]);}\n  var doc=new DOMParser().parseFromString(html,'text/html');doc.querySelectorAll('script,style').forEach(function(e){e.remove();});\n  var txt=doc.body.textContent.replace(/\\s+/g,' ');var sm=txt.match(/Current School: (.*?)\\s*Current School \\(other\\): (.*?)\\s*Interests:/);\n  var school=sm?((sm[1].trim()==='Other'||!sm[1].trim())?sm[2].trim():sm[1].trim()):'';\n  var n=nm(p[1]);if(!n)return null;n.school=school;n.events=ev;return n;\n}\nasync function photo(p){\n  var t=await get(p[0]+'/portrait/edit',{'X-Requested-With':'XMLHttpRequest'});\n  var m=t.match(/https:\\\\?\\/\\\\?\\/sa-assets-production\\.s3\\.amazonaws\\.com[^\"'\\s)]+/);if(!m)return null;\n  var u=m[0].replace(/\\\\\\//g,'/').replace(/\\\\u0026/g,'&').replace(/&amp;/g,'&').replace(/\\\\+$/,'');\n  var b=await fetch(u).then(function(r){return r.blob();});var bmp=await createImageBitmap(b);\n  var k=Math.min(1,360/Math.max(bmp.width,bmp.height)),c=document.createElement('canvas');c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);\n  c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);if(bmp.close)bmp.close();\n  var n=nm(p[1]);if(!n)return null;n.data=c.toDataURL('image/jpeg',0.82);return n;\n}\nvar found=0,evs=0,pb=[],fb=[];\nfor(var i=0;i<L.length;i++){\n  say('Finalsite sync: student '+(i+1)+' of '+L.length+' ('+found+' photos, '+evs+' with campus events)');\n  try{var r=await photo(L[i]);if(r){found++;pb.push(r);}}catch(e){}\n  try{var f=await info(L[i]);if(f){if(f.events.length)evs++;fb.push(f);}}catch(e){}\n  await sleep(300);\n  var last=i===L.length-1;\n  if(pb.length>=5||(last&&pb.length)){w.postMessage({type:'pca-photos',items:pb},TO);pb=[];}\n  if(fb.length>=10||(last&&fb.length)){w.postMessage({type:'pca-fs',items:fb},TO);fb=[];}\n}\nsetTimeout(function(){say('Done: '+found+' photos sent ('+ack.m+' matched), '+ack.ev+' students got event or school updates'+(ack.miss.length?'. Not matched: '+ack.miss.join(', '):'.')+' You can close this note.');box.onclick=function(){box.remove();};},3000);\n})();\n";
+(function(){var a=document.getElementById('fs-bm');if(a){a.href='javascript:'+encodeURIComponent(FS_BOOKMARKLET);a.addEventListener('click',function(e){e.preventDefault();alert('Drag this button to your bookmarks bar (if you already have the old photo bookmark, replace it with this one), then click the bookmark while you are on a Finalsite student list.');});}})();
 window.addEventListener('message',function(e){
   if(e.origin!==FS_ORIGIN)return;var d=e.data;
   if(!d||d.type!=='pca-photos'||!Array.isArray(d.items))return;
@@ -2894,6 +3034,22 @@ window.addEventListener('message',function(e){
   render();if(selId)detail();
   setSd('ok',matched+' photos added');setTimeout(function(){setSd('ok','');},4000);
   try{e.source.postMessage({type:'pca-photos-ack',matched:matched,missing:miss},FS_ORIGIN);}catch(x){}
+});
+window.addEventListener('message',function(e){
+  if(e.origin!==FS_ORIGIN)return;var d=e.data;
+  if(!d||d.type!=='pca-fs'||!Array.isArray(d.items))return;
+  var upd=0,miss=[];
+  d.items.forEach(function(it){
+    if(!it||typeof it.first!=='string'||typeof it.last!=='string')return;
+    var ix=findByNames([it.first,it.pref],it.last),s=ix>-1?students[ix]:findStudentFuzzy(it.first+(it.pref?' ('+it.pref+')':''),it.last);
+    if(!s){miss.push(it.first+' '+it.last);return;}
+    var ch=addEvents(s,Array.isArray(it.events)?it.events.filter(function(p){return Array.isArray(p)&&typeof p[0]==='string';}).map(function(p){return[String(p[0]).slice(0,80),String(p[1]||'').slice(0,10)];}):[]);
+    if(!(s.school||'').trim()&&typeof it.school==='string'&&it.school.trim()){s.school=it.school.trim().slice(0,80);ch=true;}
+    if(ch)upd++;
+  });
+  if(upd){sync();render();if(selId)detail();renderActiveView();}
+  setSd('ok',upd+' students updated from Finalsite');setTimeout(function(){setSd('ok','');},4000);
+  try{e.source.postMessage({type:'pca-fs-ack',updated:upd,missing:miss},FS_ORIGIN);}catch(x){}
 });
 if(window.opener)setTimeout(function(){try{window.opener.postMessage({type:'pca-ready'},FS_ORIGIN);}catch(e){}},2500); // give the shared roster a moment to load first
 pull();
