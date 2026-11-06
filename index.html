@@ -1384,7 +1384,7 @@ function renderPresent(){
     '<div class="pm-sub">'+esc(s.school||'School not provided')+' &middot; Applying for '+esc(s.grade||'--')+' &middot; '+(isMid(s)?'Mid-Year (January) start':'Fall 2027')+'</div>'+
     '<div class="pm-badges">'+'<span class="b '+statusBadgeClass(s.status||'Inquiry')+'">'+esc(s.status||'Inquiry')+'</span>'+
       (s.aid==='yes'?badge('Financial aid','#FAF3E0','#8A5C00'):(s.aid==='no'?badge('Full pay','#E6F4ED','#2A6B4A'):badge('Aid unknown','#F4F5F7','#5A6070')))+
-      (s.legacy==='yes'?badge('Legacy','#E8F0FA','#1A5CA8'):'')+(s.intl==='yes'?badge('International','#E8F0FA','#1A5CA8'):'')+
+      (s.legacy==='yes'?badge('Legacy','#E8F0FA','#1A5CA8'):'')+(s.intl==='yes'?badge('International','#E8F0FA','#1A5CA8'):'')+intLevelPill(s)+
       (s.decision?'<span class="rv-dec rv-'+s.decision.replace(/\s/g,'').toLowerCase()+'" style="font-size:11px;padding:3px 10px">Decision: '+esc(s.decision)+'</span>':'')+
     '</div>'+(grpOf(s.group)?'<div class="pm-grpbar" style="background:'+grpOf(s.group).bg+';color:'+grpOf(s.group).c+'">'+grpOf(s.group).l+' &middot; '+grpOf(s.group).d+'</div>':'')+'</div>'+
     '<div class="pm-kpis"><div class="pm-kpi"><div class="v" style="color:'+(gpa?({gh:'#2A6B4A',gm:'#8A5C00',gl:'#A8302A'}[gpc(gpa)]||'#003260'):'#9EA4B0')+'">'+(gpa?parseFloat(gpa).toFixed(2):'--')+'</div><div class="l">'+(s.actualgpa?'Actual GPA':'Est. GPA')+'</div></div>'+
@@ -1398,8 +1398,10 @@ function renderPresent(){
     (s.actualgpa&&s.gpa?'<div class="pm-row"><span class="k">Estimated GPA</span><span class="v">'+parseFloat(s.gpa).toFixed(2)+'</span></div>':'')+
     '<div class="pm-row"><span class="k">Current school</span><span class="v">'+esc(s.school||'--')+'</span></div>'+
     '<div class="pm-row"><span class="k">Applied</span><span class="v">'+fmtDay(s.appdate)+'</span></div>'+
-    '<div class="pm-row"><span class="k">Interview</span><span class="v">'+esc(s.intdate||'Not scheduled')+'</span></div>'+
+    '<div class="pm-row"><span class="k">Interview</span><span class="v">'+esc(intText(s)||'Not scheduled')+'</span></div>'+
     '<div class="pm-row"><span class="k">Readers</span><span class="v">'+esc(s.readers||'--')+'</span></div></div>';
+  // Interview feedback
+  if(s.interview&&s.interview.when)h+='<div class="pm-card"><h4>Family interview</h4>'+intFbHTML(s)+'</div>';
   // Engagement
   var cev=campusEvents(s);
   h+='<div class="pm-card"><h4>Engagement with Pacifica</h4><div>'+'<span class="ckc '+(s.visitedCampus?'ok':'na')+'">'+(s.visitedCampus?'&#10003; Visited campus':'Not on campus yet')+'</span>'+(cev.length?cev.map(function(e){return'<span class="ckc ok">'+esc(e.l)+(e.d?' &middot; '+fmtDay(e.d):'')+'</span>';}).join(''):'')+'</div>'+
@@ -1870,6 +1872,37 @@ function evCount(s){return campusEvents(s).filter(function(e){var d=evDefOf(e.l)
 function toggleVisited(id){var s=byId(id);if(!s)return;
   if(s.visitedCampus&&EV_FLAGS.some(function(d){return s[d.k];})&&!confirm('This student has campus events recorded. Mark as not visited anyway?'))return;
   s.visitedCampus=!s.visitedCampus;sync();}
+// ============ INTERVIEWS (written by the Interview Scheduler sheet) ============
+// s.interview = {src:'sheet', when, who, room, status, fb:{by, interest, scores:{racad..}, notes, parent, at}}
+// s.intdate is Finalsite's own interview date from CSV imports; the sheet's info wins when present.
+function intText(s){
+  var i=s&&s.interview;
+  if(i&&i.when&&i.status!=='Canceled')return i.when+(i.who?' with '+i.who:'')+(i.status==='Completed'?' (done)':'');
+  return (s&&s.intdate)||'';
+}
+var INT_LVL={In:['#E6F4ED','#2A6B4A'],Strong:['#E8F0FA','#1A5CA8'],Win:['#FFF4DC','#8A5C00'],Low:['#F4F5F7','#5A6070']};
+function intLevel(s){var f=s&&s.interview&&s.interview.fb;return f&&f.interest?f.interest:'';}
+function intLevelPill(s){var l=intLevel(s),c=INT_LVL[l];return l&&c?'<span class="b" style="background:'+c[0]+';color:'+c[1]+'">Interest: '+esc(l)+'</span>':'';}
+function intFbHTML(s){
+  var i=s&&s.interview,f=i&&i.fb;
+  if(!i||!i.when)return '';
+  var h='<div class="pm-row"><span class="k">When</span><span class="v">'+esc(i.when)+(i.room?', '+esc(i.room):'')+'</span></div>'+
+    '<div class="pm-row"><span class="k">Interviewer</span><span class="v">'+esc(i.who||'--')+'</span></div>'+
+    '<div class="pm-row"><span class="k">Status</span><span class="v">'+esc(i.status||'--')+'</span></div>';
+  if(!f)return h+'<div class="pm-txt" style="font-size:11.5px;color:#9EA4B0;margin-top:6px">No feedback submitted yet</div>';
+  var sc=SCORE_KEYS.filter(function(k){return f.scores&&f.scores[k]!=null;});
+  var avg=sc.length?sc.reduce(function(a,k){return a+parseFloat(f.scores[k]);},0)/sc.length:null;
+  h+='<div style="margin:8px 0 4px">'+intLevelPill(s)+(avg!=null?' <span class="b" style="background:#F4F5F7;color:#003260">Interview avg '+avg.toFixed(1)+' / 5</span>':'')+'</div>';
+  if(sc.length)h+='<div class="pm-txt" style="font-size:11.5px;color:#5A6070">'+sc.map(function(k){return SCORE_LABELS[k]+' '+f.scores[k];}).join(' &middot; ')+'</div>';
+  if(f.notes)h+='<div class="pm-txt" style="margin-top:6px"><strong>'+esc((f.by||'Interviewer').split(' ')[0])+':</strong> '+esc(f.notes)+'</div>';
+  if(f.parent)h+='<div class="pm-txt" style="margin-top:6px;color:#5A6070"><strong>Parents:</strong> '+esc(f.parent)+'</div>';
+  return h;
+}
+function intCard(s){
+  if(!(s&&s.interview&&s.interview.when))return '';
+  return '<div class="dc full"><div class="dch">Family interview</div>'+intFbHTML(s)+'</div>';
+}
+
 function campusCard(s){
   var ev=campusEvents(s);
   var chips=ev.length?ev.map(function(e){var d=evDefOf(e.l)||{};return'<span class="cv-chip'+(d.parent?' par':'')+'">'+esc(e.l)+(e.d?' <b>'+fmtDay(e.d)+'</b>':'')+'</span>';}).join(''):'<span class="notag">No campus events recorded yet</span>';
@@ -2198,7 +2231,7 @@ function renderReview(){
   var n=apps.length,c=function(f){return apps.filter(f).length;};
   var fp=c(function(r){return pay(r.s)==='FP';}),fa=c(function(r){return pay(r.s)==='FA';}),nocl=c(function(r){return noClarity(r.s);});
   var visited=c(function(r){return r.s.visitedCampus;}),shadow=c(function(r){return r.s.shadowDay;}),legacy=c(function(r){return r.s.legacy==='yes';});
-  var readers=c(function(r){return r.s.readers&&String(r.s.readers).toLowerCase()!=='deleted user';}),interviews=c(function(r){return r.s.intdate;}),scored=c(function(r){return r.scored;}),mineN=c(function(r){return myReview(r.s);});
+  var readers=c(function(r){return r.s.readers&&String(r.s.readers).toLowerCase()!=='deleted user';}),interviews=c(function(r){return intText(r.s);}),scored=c(function(r){return r.scored;}),mineN=c(function(r){return myReview(r.s);});
   var decs=['In','Win','Need to Win','Waitlist','Deny'],tally={};decs.forEach(function(d){tally[d]=c(function(r){return r.s.decision===d;});});
   var undecided=n-decs.reduce(function(a,d){return a+tally[d];},0);
   function pct(x){return n?Math.round(x/n*100)+'%':'--';}
@@ -2229,7 +2262,7 @@ function renderReview(){
   h+='<div class="dsec rv-wrap"><table class="dtable rv-table"><tr><th>Student</th><th>Meeting group</th><th>Gr</th><th>School</th><th>Pay</th><th>Clarity</th><th class="sens">Income</th><th class="sens">Clarity sugg.</th><th class="sens">Offer</th><th>GPA</th><th title="Visited campus / Shadow day / Legacy">Visit</th><th title="Required application items received">Docs</th><th>Readers</th><th>Scored by</th><th>Interview</th><th>Acad</th><th>Mission</th><th>Extra</th><th>Social</th><th>Recs</th><th>Reach</th><th>Overall</th><th>Combined</th><th>Decision</th><th></th></tr>';
   apps.forEach(function(r){
     var s=r.s,flags=(s.visitedCampus?'V':'')+(s.shadowDay?' S':'')+(s.legacy==='yes'?' L':'');
-    h+='<tr><td><a href="#" class="rv-open" data-id="'+esc(s.id)+'">'+esc(s.last)+', '+esc(s.first)+'</a></td><td>'+grpSelect(s)+'</td><td>'+esc(g(s)||'--')+'</td><td>'+esc(s.school||'--')+'</td><td>'+(pay(s)||'--')+'</td><td>'+clarityCell(s)+'</td><td class="sens">'+fmt$(s.income)+'</td><td class="sens">'+fmt$(s.suggtuit)+'</td><td class="sens">'+fmt$(s.parentoffer)+'</td><td>'+esc(s.actualgpa||s.gpa||'--')+'</td><td>'+(flags.trim()||'<span class="rv-miss">none</span>')+'</td><td>'+(ckIn(s)!==null?'<span class="ckn'+(docsComplete(s)?' full':'')+'">'+ckIn(s)+'/'+CK_REQ.length+'</span>':'--')+'</td><td>'+esc(s.readers||'--')+'</td><td title="'+esc(scoredBy(s).join(', '))+'">'+(scoredBy(s).length?scoredBy(s).length+(scoredBy(s).length===1?' reader':' readers'):'--')+'</td><td>'+esc(s.intdate||'--')+'</td>';
+    h+='<tr><td><a href="#" class="rv-open" data-id="'+esc(s.id)+'">'+esc(s.last)+', '+esc(s.first)+'</a></td><td>'+grpSelect(s)+'</td><td>'+esc(g(s)||'--')+'</td><td>'+esc(s.school||'--')+'</td><td>'+(pay(s)||'--')+'</td><td>'+clarityCell(s)+'</td><td class="sens">'+fmt$(s.income)+'</td><td class="sens">'+fmt$(s.suggtuit)+'</td><td class="sens">'+fmt$(s.parentoffer)+'</td><td>'+esc(s.actualgpa||s.gpa||'--')+'</td><td>'+(flags.trim()||'<span class="rv-miss">none</span>')+'</td><td>'+(ckIn(s)!==null?'<span class="ckn'+(docsComplete(s)?' full':'')+'">'+ckIn(s)+'/'+CK_REQ.length+'</span>':'--')+'</td><td>'+esc(s.readers||'--')+'</td><td title="'+esc(scoredBy(s).join(', '))+'">'+(scoredBy(s).length?scoredBy(s).length+(scoredBy(s).length===1?' reader':' readers'):'--')+'</td><td>'+esc(intText(s)||'--')+(intLevel(s)?' <strong>'+esc(intLevel(s))+'</strong>':'')+'</td>';
     scoreKeys.forEach(function(k){h+='<td>'+esc(s[k]||'--')+'</td>';});
     h+='<td><strong>'+(r.combined!==null?r.combined.toFixed(0)+'%':'--')+'</strong></td><td>'+(s.decision?'<span class="rv-dec rv-'+s.decision.replace(/\s/g,'').toLowerCase()+'">'+esc(s.decision)+'</span>':'--')+'</td><td><button class="rv-score'+(myReview(s)?' done':'')+'" data-id="'+esc(s.id)+'">'+(myReview(s)?'My score':'Score')+'</button></td></tr>';
   });
@@ -2430,7 +2463,7 @@ function detail(){
     // READER CARD
     (hasScores||s.rcomments||scoredBy(s).length?
       '<div class="reader-card">'+
-        '<div class="dch">Reader review'+(s.readers&&s.readers.toLowerCase()!=='deleted user'?' -- '+s.readers:'')+(s.intdate?' &middot; '+s.intdate:'')+'</div>'+
+        '<div class="dch">Reader review'+(s.readers&&s.readers.toLowerCase()!=='deleted user'?' -- '+s.readers:'')+(intText(s)?' &middot; '+esc(intText(s)):'')+'</div>'+
         (hasScores?rsHTML:'')+
         (scoredBy(s).length?'<div class="rv-list"><div class="rv-list-h">Scored by '+scoredBy(s).length+(scoredBy(s).length===1?' reader':' readers')+' (scores above are the average)</div>'+scoredBy(s).map(function(n){var r=s.reviews[n],p=reviewPct(r);return'<div class="rv-li"><strong>'+esc(n)+'</strong> '+(p!=null?p.toFixed(0)+'%':'')+' <span>'+SCORE_KEYS.filter(function(k){return r[k]!=null;}).map(function(k){return SCORE_LABELS[k]+' '+r[k];}).join(' &middot; ')+'</span>'+(r.comments?'<div class="rv-lc">'+esc(r.comments)+'</div>':'')+'</div>';}).join('')+'</div>':'')+
         (s.rcomments?'<div class="reader-comments">'+(s.readers&&s.readers.toLowerCase()!=='deleted user'?'<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9EA4B0;margin-bottom:6px">'+s.readers+'</div>':'')+s.rcomments+'</div>':'')+
@@ -2456,6 +2489,7 @@ function detail(){
       '</div>'+
       '<div class="dc"><div class="dch">Interests</div><div class="tags">'+it+'</div></div>'+
       '<div class="dc"><div class="dch">Extracurriculars</div><div class="tags">'+at+'</div></div>'+
+      intCard(s)+
       campusCard(s)+
 
     '</div>';
@@ -2928,10 +2962,10 @@ document.getElementById('fi-photos').addEventListener('change',function(){
 // EXPORT
 function exportCSV(){
   if(!students.length){alert('No students to export.');return;}
-  var cols=['last','first','school','gpa','actualgpa','grade','entry','group','_docs','_missing','draft','status','decision','star','aid','parentoffer','suggtuit','income','p1name','p1rel','p1email','p1phone','p2name','p2rel','p2email','p2phone','interests','activities','notes','idate','src','worship','referral','readers','intdate','racad','rmission','rextra','rsocial','rrecs','rreach','roverall','rcomments','visits'];
-  var hdrs=['last_name','first_name','school','est_gpa','actual_gpa','grade','entry_term','meeting_group','docs_in','missing_items','draft_status','status','decision','starred','aid_requested','parent_offer','suggested_tuition','family_income','parent1_name','parent1_relation','parent1_email','parent1_phone','parent2_name','parent2_relation','parent2_email','parent2_phone','interests','activities','meeting_notes','inquiry_date','source','place_of_worship','referral_friend','assigned_readers','interview_date','academic_ability','mission_fit','extracurricular','social_fit','recommendations','school_reach','overall_quality','reader_comments','campus_visits'];
+  var cols=['last','first','school','gpa','actualgpa','grade','entry','group','_docs','_missing','draft','status','decision','star','aid','parentoffer','suggtuit','income','p1name','p1rel','p1email','p1phone','p2name','p2rel','p2email','p2phone','interests','activities','notes','idate','src','worship','referral','readers','intdate','_interview','_intlevel','racad','rmission','rextra','rsocial','rrecs','rreach','roverall','rcomments','visits'];
+  var hdrs=['last_name','first_name','school','est_gpa','actual_gpa','grade','entry_term','meeting_group','docs_in','missing_items','draft_status','status','decision','starred','aid_requested','parent_offer','suggested_tuition','family_income','parent1_name','parent1_relation','parent1_email','parent1_phone','parent2_name','parent2_relation','parent2_email','parent2_phone','interests','activities','meeting_notes','inquiry_date','source','place_of_worship','referral_friend','assigned_readers','interview_date','interview_scheduled','interview_interest_level','academic_ability','mission_fit','extracurricular','social_fit','recommendations','school_reach','overall_quality','reader_comments','campus_visits'];
   var rows=[hdrs.join(',')];
-  sorted().forEach(function(s){var row=cols.map(function(k){var v=k==='_docs'?(ckIn(s)===null?'':ckIn(s)+'/'+CK_REQ.length):(k==='_missing'?ckMissing(s).join('; '):(Array.isArray(s[k])?s[k].join('; '):(s[k]||'')));v=String(v).replace(/"/g,'""');if(v.indexOf(',')>-1||v.indexOf('"')>-1||v.indexOf('\n')>-1)v='"'+v+'"';return v;});rows.push(row.join(','));});
+  sorted().forEach(function(s){var row=cols.map(function(k){var v=k==='_docs'?(ckIn(s)===null?'':ckIn(s)+'/'+CK_REQ.length):(k==='_missing'?ckMissing(s).join('; '):k==='_interview'?intText(s):k==='_intlevel'?intLevel(s):((Array.isArray(s[k])?s[k].join('; '):(s[k]||''))));v=String(v).replace(/"/g,'""');if(v.indexOf(',')>-1||v.indexOf('"')>-1||v.indexOf('\n')>-1)v='"'+v+'"';return v;});rows.push(row.join(','));});
   var blob=new Blob([rows.join('\n')],{type:'text/csv'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');a.href=url;a.download='pacifica_admissions_'+new Date().toISOString().slice(0,10)+'.csv';
