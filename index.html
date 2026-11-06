@@ -299,6 +299,102 @@ body.cview .cview-banner{display:block}
 .rv-li{font-size:11.5px;color:#1A1D25;padding:4px 0}
 .rv-li span{color:#5A6070}
 .rv-lc{font-size:11.5px;color:#5A6070;background:#F4F5F7;border-radius:5px;padding:6px 9px;margin-top:4px;white-space:pre-wrap}
+
+/* ===== APPLICATION CHECKLIST / DRAFTS / MEETING MODE (added 2026-11-06) ===== */
+#checklist{padding:1.5rem;display:none;}
+#drafts{padding:1.5rem;display:none;}
+.ckc{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:3px 8px;border-radius:99px;margin:0 4px 4px 0;border:1px solid transparent;white-space:nowrap;line-height:1.3}
+.ckc.ok{background:#E6F4ED;color:#2A6B4A;border-color:#CDE8D8}
+.ckc.miss{background:#FAEAEA;color:#A8302A;border-color:#F2CFCD}
+.ckc.wv{background:#F4F5F7;color:#5A6070;border-color:#E4E6EA}
+.ckc.na{background:#fff;color:#9EA4B0;border-color:#E4E6EA}
+.ckc.tog{cursor:pointer}
+.ckc.tog:hover{filter:brightness(.96);box-shadow:0 0 0 2px rgba(0,50,96,.12)}
+.ckbar{height:6px;border-radius:99px;background:#EEF0F3;overflow:hidden;min-width:60px}
+.ckbar>div{height:100%;border-radius:99px;background:#C49A3C}
+.ckbar.full>div{background:#2A6B4A}
+.ckn{font-weight:700;color:#003260;font-size:11px;white-space:nowrap}
+.ckn.full{color:#2A6B4A}
+.ck-card{background:#fff;border-radius:8px;padding:1.1rem 1.25rem;margin-bottom:1px}
+.ck-top{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.ck-top .ckbar{flex:1;height:8px}
+.ck-asof{font-size:10px;color:#9EA4B0;margin-left:auto;white-space:nowrap}
+.ck-miss-txt{font-size:11px;color:#A8302A;margin-top:4px}
+.spill2{font-size:8.5px;font-weight:700;padding:2px 6px;border-radius:99px;letter-spacing:.04em;flex-shrink:0;white-space:nowrap}
+.sp-docs{background:#EEF0F3;color:#5A6070}
+.sp-docs.full{background:#E6F4ED;color:#2A6B4A}
+.sp-draft{background:#E8F0FA;color:#1A5CA8}
+.sp-pay{background:#FFF2CC;color:#8A5C00}
+.sp-mid{background:#F2EEF8;color:#5A3A8A}
+.vw-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}
+.seg{display:inline-flex;border:1px solid #E4E6EA;border-radius:6px;overflow:hidden;background:#fff}
+.seg button{border:none;background:#fff;padding:6px 11px;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#5A6070;cursor:pointer;border-right:1px solid #E4E6EA}
+.seg button:last-child{border-right:none}
+.seg button.on{background:#003260;color:#fff}
+.ck-table td,.ck-table th{text-align:left!important;vertical-align:middle}
+.ck-table td.c,.ck-table th.c{text-align:center!important}
+.ck-table .ckmark{display:inline-block;width:18px;height:18px;line-height:18px;border-radius:4px;text-align:center;font-size:11px;font-weight:700}
+.ck-table .ckmark.ok{background:#E6F4ED;color:#2A6B4A}
+.ck-table .ckmark.miss{background:#FAEAEA;color:#A8302A}
+.ck-table .ckmark.wv{background:#F4F5F7;color:#5A6070;font-size:8px;width:auto;padding:0 4px}
+.ck-table .ckmark.na{color:#C9CDD4}
+.ck-table a,.dr-table a{color:#003260;font-weight:700;text-decoration:none}
+.ck-table a:hover,.dr-table a:hover{text-decoration:underline}
+.dc4.click{cursor:pointer}
+.dc4.click:hover{background:#F8FAFD}
+.dc4.sel{box-shadow:inset 0 -3px 0 #C49A3C}
+.dr-table tr.pend td{background:#FFFBEE}
+.call-btn{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:4px 9px;border-radius:5px;border:1px solid #003260;background:#fff;color:#003260;cursor:pointer;white-space:nowrap}
+.call-btn.done{background:#E6F4ED;border-color:#2A6B4A;color:#2A6B4A}
+.dr-note{font-size:10.5px;color:#5A6070;font-weight:500}
+.present-btn{padding:8px 16px;border-radius:5px;border:none;background:#C49A3C;color:#fff;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.present-btn:hover{background:#B0882F}
+
+/* MEETING MODE */
+#present{display:none;position:fixed;inset:0;z-index:99500;background:#EEF1F6;overflow-y:auto;font-family:'Montserrat',sans-serif}
+#present.open{display:block}
+.pm-bar{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:12px;background:#003260;color:#fff;padding:10px 22px;border-bottom:3px solid #C49A3C}
+.pm-bar .pm-t{font-family:'EB Garamond',serif;font-size:18px;font-weight:600}
+.pm-bar .pm-c{font-size:11px;opacity:.75;letter-spacing:.04em}
+.pm-bar .pm-sp{flex:1}
+.pm-bar button{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:7px 13px;border-radius:5px;border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;cursor:pointer}
+.pm-bar button:hover{background:rgba(255,255,255,.1)}
+.pm-bar button:disabled{opacity:.3;cursor:default}
+.pm-wrap{max-width:1180px;margin:0 auto;padding:22px}
+.pm-hero{display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:center;background:#fff;border-radius:10px;padding:22px 26px;border-left:6px solid #003260}
+.pm-av{width:110px;height:110px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-family:'EB Garamond',serif;font-size:40px;font-weight:600}
+.pm-av img{width:100%;height:100%;object-fit:cover}
+.pm-name{font-family:'EB Garamond',serif;font-size:38px;font-weight:600;color:#003260;line-height:1.05}
+.pm-sub{font-size:14px;color:#5A6070;margin-top:6px}
+.pm-badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.pm-badges .b{font-size:10px}
+.pm-kpis{display:grid;grid-template-columns:repeat(4,minmax(96px,1fr));gap:1px;background:#E4E6EA;border-radius:8px;overflow:hidden}
+.pm-kpi{background:#F8FAFD;padding:12px 14px;text-align:center}
+.pm-kpi .v{font-family:'EB Garamond',serif;font-size:30px;font-weight:600;color:#003260;line-height:1}
+.pm-kpi .l{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9EA4B0;margin-top:5px}
+.pm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+.pm-card{background:#fff;border-radius:10px;padding:16px 18px}
+.pm-card.span2{grid-column:span 2}
+.pm-card.span3{grid-column:span 3}
+.pm-card h4{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#003260;border-bottom:1px solid #E8EDF5;padding-bottom:7px;margin:0 0 10px}
+.pm-row{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:5px 0;border-bottom:1px solid #F4F5F7}
+.pm-row:last-child{border-bottom:none}
+.pm-row .k{color:#5A6070}
+.pm-row .v{font-weight:700;color:#1A1D25;text-align:right}
+.pm-scores{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.pm-sc{text-align:center;background:#F8FAFD;border-radius:8px;padding:10px 4px}
+.pm-sc .v{font-family:'EB Garamond',serif;font-size:26px;font-weight:600}
+.pm-sc .l{font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#9EA4B0;margin-top:2px}
+.pm-txt{font-size:13px;line-height:1.55;color:#1A1D25;white-space:pre-wrap}
+.pm-empty{font-size:12px;color:#9EA4B0;font-style:italic}
+.pm-notes{width:100%;min-height:70px;border:1px solid #E4E6EA;border-radius:6px;padding:9px 10px;font-family:'Montserrat',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box}
+.pm-dec{display:flex;flex-wrap:wrap;gap:8px}
+.pm-dec .dec-btn{font-size:12px;padding:9px 16px}
+.pm-help{font-size:10.5px;color:#9EA4B0;text-align:center;margin:16px 0 6px}
+@media(max-width:900px){.pm-grid{grid-template-columns:1fr}.pm-card.span2,.pm-card.span3{grid-column:span 1}.pm-hero{grid-template-columns:1fr}.pm-scores{grid-template-columns:repeat(4,1fr)}}
+.pm-dec .dec-btn{border-color:#C9CDD4;color:#5A6070;background:#fff}
+.pm-dec .dec-btn:hover{border-color:#003260;color:#003260}
+.pm-dec .dec-btn.sel-in,.pm-dec .dec-btn.sel-win,.pm-dec .dec-btn.sel-need,.pm-dec .dec-btn.sel-deny,.pm-dec .dec-btn.sel-wait{color:#fff}
 </style>
 </head>
 <body>
@@ -336,6 +432,8 @@ body.cview .cview-banner{display:block}
   <div class="vtabs">
     <button class="vtab on" id="vtab-roster">Roster</button>
     <button class="vtab" id="vtab-dash">Dashboard</button>
+    <button class="vtab" id="vtab-checklist">Checklist</button>
+    <button class="vtab" id="vtab-drafts">Drafts</button>
     <button class="vtab" id="vtab-feeder">Feeder Schools</button>
     <button class="vtab sens" id="vtab-fa">Financial Aid</button>
     <button class="vtab" id="vtab-monthly">Monthly Tracker</button>
@@ -363,6 +461,13 @@ body.cview .cview-banner{display:block}
       <option value="decision">Decision</option>
       <option value="enrolled">Enrolled</option>
       <option value="star">&#9733; Starred</option>
+      <optgroup label="Application status">
+        <option value="docsmiss">Applicants missing documents</option>
+        <option value="docsin">Applicants with all documents in</option>
+        <option value="drafts">Draft applications</option>
+        <option value="pending">Drafts pending payment</option>
+        <option value="midyear">Mid-Year (January) starts</option>
+      </optgroup>
     </select>
     <select class="fsel" id="f2">
       <option value="">All decisions</option>
@@ -417,6 +522,9 @@ body.cview .cview-banner{display:block}
 <div id="yoy"></div>
 <div id="snap"></div>
 <div id="review"></div>
+<div id="checklist"></div>
+<div id="drafts"></div>
+<div id="present"></div>
 
 <input type="file" id="fi-modal" accept="image/*" style="display:none"/>
 <input type="file" id="fi-hero" accept="image/*" style="display:none"/>
@@ -448,15 +556,21 @@ body.cview .cview-banner{display:block}
       <div class="fi"><label>Grade applying for</label>
         <select id="e-grade">
           <option value="">-- Select</option>
-          <option value="9">9th</option>
-          <option value="10">10th</option>
-          <option value="11">11th</option>
-          <option value="12">12th</option>
+          <option value="9th">9th</option>
+          <option value="10th">10th</option>
+          <option value="11th">11th</option>
+          <option value="12th">12th</option>
         </select>
       </div>
       <div class="fi"><label>Legacy family</label>
         <select id="e-legacy"><option value="">No</option><option value="yes">Yes -- legacy</option></select>
       </div>
+    </div>
+    <div class="fr">
+      <div class="fi"><label>Entry term</label>
+        <select id="e-entry"><option value="">Fall 2027</option><option value="Mid-Year">Mid-Year (January start)</option></select>
+      </div>
+      <div class="fi"></div>
     </div>
     <div class="fr">
       <div class="fi"><label>Estimated GPA</label><input type="number" id="e-gpa" placeholder="e.g. 3.8" min="0" max="4.5" step="0.01"/></div>
@@ -810,7 +924,7 @@ function push(){
   }
   setSd('busy','Saving...');
   var mergedList,mergedCfg;
-  fetch(PROXY_URL+'?t='+Date.now())
+  apiFetch(PROXY_URL+'?t='+Date.now())
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(d){
     var rec=(d&&d.record)||{};
@@ -818,7 +932,7 @@ function push(){
     mergedList=mergeLists(students,Array.isArray(rec.s)?rec.s:[],mergedCfg.tomb);
     toSync=mergedList.map(function(s){var c=Object.assign({},s);delete c.photo;return c;});
     if(toSync.length===0&&lastKnownCloudCount>0&&!confirm('This would erase all '+lastKnownCloudCount+' students from the SHARED roster for everyone. Are you sure you want to do this?'))throw new Error('Push blocked');
-    return fetch(PROXY_URL,{
+    return apiFetch(PROXY_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({s:toSync,cfg:mergedCfg})
@@ -848,7 +962,7 @@ function pull(){
   // Step 1: always load & render from localStorage immediately
   loadLocal();if(!Object.keys(SNAP).length)snapAll();render();
   // Step 2: fetch the shared cloud copy (via the Worker proxy) and merge if newer/bigger.
-  fetch(PROXY_URL)
+  apiFetch(PROXY_URL)
     .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
     .then(function(d){
       var changed=false;
@@ -903,6 +1017,385 @@ function clarityCell(s){
   return'<span class="rv-dec '+c+'">'+s.clarityStatus+'</span>';
 }
 function isApp(s){return statusBucket(s)!=='inquiry';}
+
+// ============ APPLICATION CHECKLIST, DRAFTS, MID-YEAR (added 2026-11-06) ============
+// Mirrors the Application Checklist and Draft Applications tabs of the 2027-28
+// workbook. Checklist values per item: 'y' received, 'w' waived (fee only),
+// 'na' not required, '' still missing. Loaded by importing those two tabs as
+// CSV (Import CSV recognizes them automatically), and editable by clicking an
+// item on a student's profile.
+var CK_REQ=[['form','App Form'],['fee','App Fee'],['aq','Applicant Questionnaire'],['pq','Parent Questionnaire'],['tr','Transcript'],['admin','Admin Rec'],['eng','English Rec'],['math','Math Rec'],['photo','Photo']];
+var CK_EXTRA=[['int','Family Interview'],['faapp','FA Application'],['clar','Clarity']];
+var CK_SHORT={form:'App Form',fee:'Fee',aq:'Applicant Q',pq:'Parent Q',tr:'Transcript',admin:'Admin Rec',eng:'English Rec',math:'Math Rec',photo:'Photo',int:'Interview',faapp:'FA App',clar:'Clarity'};
+function hasCk(s){return!!(s&&s.ck&&typeof s.ck==='object');}
+function ckOk(v){return v==='y'||v==='w';}
+function ckIn(s){if(!hasCk(s))return null;return CK_REQ.filter(function(p){return ckOk(s.ck[p[0]]);}).length;}
+function ckMissing(s){if(!hasCk(s))return[];return CK_REQ.filter(function(p){return!ckOk(s.ck[p[0]]);}).map(function(p){return CK_SHORT[p[0]];});}
+function docsComplete(s){return ckIn(s)===CK_REQ.length;}
+function isMid(s){return s.entry==='Mid-Year';}
+function isDraft(s){return!!s.draft&&!isApp(s);}
+function isPending(s){return isDraft(s)&&s.draft==='Pending Payment';}
+function payOf(s){return s.aid==='yes'?'FA':(s.aid==='no'?'FP':'');}
+function segOf(s){if(isMid(s))return'mid';var g=gradeOf(s);return g&&g!==9?'tr':'9';}
+function byId(id){for(var i=0;i<students.length;i++)if(String(students[i].id)===String(id))return students[i];return null;}
+function todayISO(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);}
+function parseDay(v){
+  if(!v)return null;
+  var m=String(v).match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);if(m)return new Date(+m[1],+m[2]-1,+m[3]);
+  m=String(v).match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);if(m){var y=+m[3];if(y<100)y+=2000;return new Date(y,+m[1]-1,+m[2]);}
+  var d=new Date(v);return isNaN(d.getTime())?null:d;
+}
+function isoOf(v){var d=parseDay(v);return d?d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2):'';}
+function fmtDay(v){var d=parseDay(v);if(!d)return v?esc(v):'--';return(d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(-2);}
+function daysSince(v){var d=parseDay(v);if(!d)return null;return Math.max(0,Math.floor((new Date()-d)/86400000));}
+function ckBar(s){
+  var n=ckIn(s);if(n===null)return'<span class="pm-empty">not loaded</span>';
+  var full=n===CK_REQ.length;
+  return'<div style="display:flex;align-items:center;gap:6px"><div class="ckbar'+(full?' full':'')+'" style="width:64px"><div style="width:'+(n/CK_REQ.length*100)+'%"></div></div><span class="ckn'+(full?' full':'')+'">'+n+'/'+CK_REQ.length+'</span></div>';
+}
+function ckChips(s,toggle){
+  if(!hasCk(s)&&!toggle)return'<span class="pm-empty">No Finalsite checklist loaded yet.</span>';
+  var ck=s.ck||{},h='';
+  CK_REQ.concat(CK_EXTRA).forEach(function(p){
+    var k=p[0],v=ck[k]||'';
+    if((k==='faapp'||k==='clar')&&s.aid!=='yes')return;
+    var cls=v==='y'?'ok':(v==='w'?'wv':(v==='na'?'na':'miss'));
+    if(k==='int'&&v!=='y')cls='na'; // interviews happen later in the cycle, so not shown as a red flag
+    h+='<span class="ckc '+cls+(toggle?' tog':'')+'" data-ck="'+k+'"'+(toggle?' title="Click to mark received or not received"':'')+'>'+(v==='y'?'&#10003; ':'')+CK_SHORT[k]+(v==='w'?' (waived)':'')+'</span>';
+  });
+  return h;
+}
+function toggleCk(s,k){
+  s.ck=s.ck||{};var v=s.ck[k]||'';
+  if(k==='fee')s.ck[k]=v===''?'y':(v==='y'?'w':'');
+  else s.ck[k]=v==='y'?'':'y';
+  if(!s.ckDate)s.ckDate=todayISO();
+  sync();
+}
+function callCell(s){
+  return'<button class="call-btn'+(s.calledDate?' done':'')+'" data-call="'+esc(s.id)+'">'+(s.calledDate?'&#10003; Called '+fmtDay(s.calledDate)+(s.calledBy?' &middot; '+esc(s.calledBy):''):'Mark called')+'</button>';
+}
+function toggleCall(id){
+  var s=byId(id);if(!s)return false;
+  if(s.calledDate){if(!confirm('Clear the call log for '+s.first+' '+s.last+'?'))return false;s.calledDate='';s.calledBy='';}
+  else{var by=READER||(prompt('Who made the call? (saved for next time)','')||'');by=by.trim();if(by&&!READER)setReader(by);s.calledDate=todayISO();s.calledBy=by;}
+  sync();return true;
+}
+function appStatusHTML(s){
+  var h='';
+  if(isApp(s)||hasCk(s)){
+    var n=ckIn(s);
+    h+='<div class="ck-card" style="margin-bottom:1rem"><div class="dch" style="display:flex;align-items:center;gap:8px">Application checklist<span class="ck-asof">'+(s.ckDate?'From Finalsite '+fmtDay(s.ckDate)+' &middot; ':'')+'click an item to change it</span></div>';
+    if(n!==null)h+='<div class="ck-top"><span class="ckn'+(n===CK_REQ.length?' full':'')+'" style="font-size:13px">'+n+' of '+CK_REQ.length+' required items in</span><div class="ckbar'+(n===CK_REQ.length?' full':'')+'"><div style="width:'+(n/CK_REQ.length*100)+'%"></div></div></div>';
+    h+='<div>'+ckChips(s,true)+'</div>';
+    if(n!==null&&n<CK_REQ.length)h+='<div class="ck-miss-txt">Still missing: '+ckMissing(s).join(', ')+'</div>';
+    h+='</div>';
+  }
+  if(isDraft(s)){
+    var age=daysSince(s.draftUpd);
+    h+='<div class="ck-card" style="margin-bottom:1rem;border-left:4px solid '+(isPending(s)?'#C49A3C':'#1A5CA8')+'"><div class="dch">Draft application in Finalsite</div>'+
+      '<div class="ir"><span class="ik">Status</span><span class="iv">'+(isPending(s)?'<span class="spill2 sp-pay">Pending payment</span> form is done, only the fee is left':'<span class="spill2 sp-draft">Draft</span> started, not submitted')+'</span></div>'+
+      '<div class="ir"><span class="ik">Started / last updated</span><span class="iv">'+fmtDay(s.draftStart)+' / '+fmtDay(s.draftUpd)+(age!=null?' ('+age+' days ago)':'')+'</span></div>'+
+      (s.draftNote?'<div class="ir"><span class="ik">Note</span><span class="iv">'+esc(s.draftNote)+'</span></div>':'')+
+      '<div class="ir"><span class="ik">Follow-up call</span><span class="iv">'+callCell(s)+'</span></div></div>';
+  }
+  return h;
+}
+
+// Name matching for the workbook imports. Finalsite, the workbook and the
+// tracker sometimes carry a preferred name, a middle name, or a two-part last
+// name differently, so this matches on last name first, then any first-name token.
+function nname(t){var x=String(t||'').toLowerCase();if(x.normalize)x=x.normalize('NFKD').replace(/[̀-ͯ]/g,'');return x.replace(/[^a-z]/g,'');}
+function nameTokens(t){return String(t||'').replace(/[()]/g,' ').split(/[\s,\-]+/).map(nname).filter(Boolean);}
+function lev(a,b){var m=a.length,n=b.length,d=[],i,j;for(i=0;i<=m;i++){d[i]=[i];}for(j=0;j<=n;j++)d[0][j]=j;for(i=1;i<=m;i++)for(j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[m][n];}
+function firstMatch(t,x){
+  if(t===x)return true;if(t.length<3||x.length<3)return false;
+  if(x.indexOf(t)>-1||t.indexOf(x)>-1)return true;            // Ali / Aaliyah
+  var p=0;while(p<t.length&&p<x.length&&t[p]===x[p])p++;if(p>=4)return true; // Benji / Benjamin
+  return t.length>=5&&x.length>=5&&lev(t,x)<=1;               // Juliana / Julianna
+}
+function findStudentFuzzy(first,last){
+  var L=nname(last),LT=nameTokens(last),F=nameTokens(first);if(!L)return null;
+  var byLast=students.filter(function(s){var sl=nname(s.last);return sl===L||nameTokens(s.last).indexOf(L)>-1||LT.indexOf(sl)>-1;});
+  if(!byLast.length)byLast=students.filter(function(s){var st=nameTokens(s.last);return LT.some(function(t){return t.length>2&&st.indexOf(t)>-1;});});
+  if(!byLast.length&&L.length>=5)byLast=students.filter(function(s){var sl=nname(s.last);return sl.length>=5&&lev(sl,L)<=1;}); // Cabera / Cabrera
+  var hit=byLast.filter(function(s){var sf=nameTokens(s.first);return F.some(function(t){return sf.some(function(x){return firstMatch(t,x);});});});
+  if(hit.length)return hit[0];
+  // One last-name match but a different first name: only accept it when the
+  // other name appears somewhere in the record (e.g. a preferred name stored as
+  // the first name), so a sibling or a different family never gets matched.
+  if(byLast.length===1){var all=F.concat(LT),sf=nameTokens(byLast[0].first);if(all.some(function(t){return t.length>2&&sf.indexOf(t)>-1;}))return byLast[0];}
+  return null;
+}
+function findHeaderRow(rows,need){
+  for(var r=0;r<Math.min(rows.length,25);r++){var H=rows[r].map(nh);if(need.every(function(n){return H.indexOf(n)>-1;}))return r;}
+  return-1;
+}
+function importChecklistCSV(rows,hi){
+  var H=rows[hi].map(nh),col=function(n){return H.indexOf(nh(n));};
+  var map={form:'App Form',fee:'App Fee',aq:'Applicant Questionnaire',pq:'Parent Questionnaire',tr:'Transcript',admin:'Admin Rec',eng:'English Rec',math:'Math Rec',photo:'Photo',int:'Family Interview',faapp:'FA Application',clar:'Clarity'};
+  var cF=col('First Name'),cL=col('Last Name'),cA=col('App Submitted'),asof=todayISO();
+  for(var r=0;r<hi;r++){var m=rows[r].join(' ').match(/Finalsite on (\d{1,2}\/\d{1,2}\/\d{2,4})/i);if(m&&isoOf(m[1]))asof=isoOf(m[1]);}
+  var upd=0,miss=[];
+  for(var i=hi+1;i<rows.length;i++){
+    var v=rows[i],first=(v[cF]||'').trim(),last=(v[cL]||'').trim();
+    if(!first||!last)continue;
+    var s=findStudentFuzzy(first,last);
+    if(!s){miss.push(first+' '+last);continue;}
+    var ck={};
+    Object.keys(map).forEach(function(k){
+      var c=col(map[k]),raw=c>-1?(v[c]||'').trim():'',low=raw.toLowerCase();
+      ck[k]=(raw==='✓'||raw==='✔'||low==='y'||low==='yes'||low==='x'||low==='true')?'y':(low==='waived'?'w':(low==='n/a'||low==='na'?'na':''));
+    });
+    s.ck=ck;s.ckDate=asof;if(cA>-1&&v[cA])s.appdate=isoOf(v[cA])||v[cA];
+    upd++;
+  }
+  sync();render();if(selId)detail();renderActiveView();
+  showIR('Application checklist loaded for '+upd+' students (Finalsite as of '+fmtDay(asof)+').'+(miss.length?' Not found in the roster: '+miss.join(', ')+'.':''),true);
+}
+function importDraftsCSV(rows,hi){
+  var H=rows[hi].map(nh),gv=function(v,n){var c=H.indexOf(nh(n));return c>-1?(v[c]||'').trim():'';};
+  var seen={},upd=0,add=0;
+  for(var i=hi+1;i<rows.length;i++){
+    var v=rows[i],first=gv(v,'First Name'),last=gv(v,'Last Name'),st=gv(v,'Finalsite Status');
+    if(!first||!last||!st)continue;
+    var s=findStudentFuzzy(first,last);
+    if(!s){var g=gv(v,'Grade').replace(/\D/g,'');s={id:uid(),first:first.replace(/\s*\(.*\)\s*/,'').trim()||first,last:last,grade:g?g+'th':'',status:'Inquiry',aid:'unknown'};students.push(s);add++;}
+    else upd++;
+    seen[String(s.id)]=1;
+    s.draft=/pending/i.test(st)?'Pending Payment':'Draft';
+    s.draftUpd=isoOf(gv(v,'Last Updated App'))||gv(v,'Last Updated App');
+    s.draftStart=isoOf(gv(v,'Started'))||gv(v,'Started');
+    s.applyYear=gv(v,'Apply Year');
+    if(!s.school&&gv(v,'School'))s.school=gv(v,'School');
+    if(!s.gender&&gv(v,'Gender'))s.gender=gv(v,'Gender');
+    if(!s.gpa&&gv(v,'GPA'))s.gpa=gv(v,'GPA');
+    var pay=gv(v,'Pay Type');if(pay&&(!s.aid||s.aid==='unknown'))s.aid=pay==='FA'?'yes':(pay==='FP'?'no':s.aid);
+    if(!s.src&&gv(v,'How They Heard'))s.src=gv(v,'How They Heard');
+    if(/^y/i.test(gv(v,'International')))s.intl='yes';
+    if(gv(v,'Notes'))s.draftNote=gv(v,'Notes');
+    var cdt=gv(v,'Contact Date'),cby=gv(v,'Contacted By'),cyn=gv(v,'Contacted');
+    if(cdt||cby||/^y/i.test(cyn)){s.calledDate=isoOf(cdt)||s.calledDate||todayISO();if(cby)s.calledBy=cby;}
+  }
+  var cleared=0;
+  if(Object.keys(seen).length)students.forEach(function(s){if(s.draft&&!seen[String(s.id)]){s.draft='';cleared++;}});
+  sync();render();if(selId)detail();renderActiveView();
+  showIR('Draft applications loaded: '+upd+' matched, '+add+' new students added'+(cleared?', '+cleared+' no longer in Finalsite drafts cleared':'')+'.',true);
+}
+
+// ============ CHECKLIST VIEW ============
+var CKV={seg:'9',miss:'',q:'',sort:'missing'};
+function segButtons(cur,id){
+  return'<div class="seg" id="'+id+'">'+[['9','9th grade · Fall'],['tr','Transfers'],['mid','Mid-Year'],['all','All']].map(function(p){return'<button data-seg="'+p[0]+'" class="'+(cur===p[0]?'on':'')+'">'+p[1]+'</button>';}).join('')+'</div>';
+}
+function renderChecklist(){
+  var pool=students.filter(function(s){return isApp(s)&&['Application Withdrawn','Inactive App'].indexOf(s.status)<0;});
+  var list=pool.filter(function(s){return CKV.seg==='all'||segOf(s)===CKV.seg;});
+  var withCk=list.filter(hasCk);
+  var asof=withCk.reduce(function(m,s){return s.ckDate&&s.ckDate>m?s.ckDate:m;},'');
+  var c=function(f){return list.filter(f).length;};
+  var complete=c(docsComplete),near=c(function(s){var n=ckIn(s);return n!==null&&n>=7&&n<CK_REQ.length;}),onlyForm=c(function(s){var n=ckIn(s);return n!==null&&n<=2;});
+  var h='<div class="dash-hdr"><div><div class="dash-title">Application Checklist</div><div class="dash-sub">'+(asof?'From Finalsite as of '+fmtDay(asof)+'. ':'')+'Which of the 9 required items each applicant has in. Click a number to list who still owes it; click a name to open the profile.</div></div></div>';
+  h+='<div class="vw-bar">'+segButtons(CKV.seg,'ck-seg')+'</div>';
+  h+='<div class="dgrid4">';
+  h+='<div class="dc4 click'+(CKV.miss===''?' sel':'')+'" data-miss=""><div class="dn">'+list.length+'</div><div class="dl">Applicants</div><div class="dsub">'+(list.length-withCk.length?(list.length-withCk.length)+' with no checklist loaded':'all checklists loaded')+'</div></div>';
+  h+='<div class="dc4 click'+(CKV.miss==='done'?' sel':'')+'" data-miss="done"><div class="dn" style="color:#2A6B4A">'+complete+'</div><div class="dl">All documents in</div><div class="dsub">ready for committee reading</div></div>';
+  h+='<div class="dc4 click'+(CKV.miss==='near'?' sel':'')+'" data-miss="near"><div class="dn" style="color:#8A5C00">'+near+'</div><div class="dl">1 or 2 items away</div><div class="dsub">the quickest wins</div></div>';
+  h+='<div class="dc4 click'+(CKV.miss==='form'?' sel':'')+'" data-miss="form"><div class="dn" style="color:#A8302A">'+onlyForm+'</div><div class="dl">Only form and fee</div><div class="dsub">nudge on questionnaires and photo</div></div>';
+  h+='</div><div class="dgrid4">';
+  ['tr','admin','eng','math','pq','aq','photo','fee'].forEach(function(k){
+    var n=c(function(s){return hasCk(s)&&!ckOk(s.ck[k]);});
+    h+='<div class="dc4 click'+(CKV.miss===k?' sel':'')+'" data-miss="'+k+'"><div class="dn">'+n+'</div><div class="dl">Missing '+CK_SHORT[k]+(k==='fee'?' (unpaid)':'')+'</div></div>';
+  });
+  h+='</div>';
+  var rows=list.filter(function(s){
+    if(CKV.miss==='done'&&!docsComplete(s))return false;
+    if(CKV.miss==='near'){var n=ckIn(s);if(!(n!==null&&n>=7&&n<CK_REQ.length))return false;}
+    if(CKV.miss==='form'){var n2=ckIn(s);if(!(n2!==null&&n2<=2))return false;}
+    if(CKV.miss&&CK_SHORT[CKV.miss]&&!(hasCk(s)&&!ckOk(s.ck[CKV.miss])))return false;
+    if(CKV.q){var b=((s.first||'')+' '+(s.last||'')+' '+(s.school||'')).toLowerCase();if(b.indexOf(CKV.q.toLowerCase())<0)return false;}
+    return true;
+  });
+  var byName=function(a,b){return String(a.last||'').localeCompare(String(b.last||''))||String(a.first||'').localeCompare(String(b.first||''));};
+  rows.sort(function(a,b){
+    var na=ckIn(a),nb=ckIn(b);na=na===null?-1:na;nb=nb===null?-1:nb;
+    if(CKV.sort==='missing')return na-nb||byName(a,b);
+    if(CKV.sort==='closest')return nb-na||byName(a,b);
+    if(CKV.sort==='date')return String(a.appdate||'').localeCompare(String(b.appdate||''))||byName(a,b);
+    return byName(a,b);
+  });
+  h+='<div class="vw-bar"><select class="rv-f" id="ck-sort">'+[['missing','Most missing first'],['closest','Closest to complete'],['name','Last name'],['date','Oldest application first']].map(function(o){return'<option value="'+o[0]+'"'+(CKV.sort===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>'+
+    '<input class="rv-f rv-q" id="ck-q" type="search" placeholder="Search name or school" value="'+esc(CKV.q)+'"/>'+
+    '<span class="dsec-note">'+rows.length+' shown'+(CKV.miss?' &middot; <a href="#" id="ck-clear">clear filter</a>':'')+'</span></div>';
+  var mk=function(v,k){if(k==='int')return v==='y'?'<span class="ckmark ok">&#10003;</span>':'<span class="ckmark na">&middot;</span>';if(v==='y')return'<span class="ckmark ok">&#10003;</span>';if(v==='w')return'<span class="ckmark wv">WAIVED</span>';if(v==='na')return'<span class="ckmark na">n/a</span>';return'<span class="ckmark miss">&times;</span>';};
+  h+='<div class="dsec"><table class="dtable ck-table"><tr><th>Student</th><th class="c">Gr</th><th>School</th><th class="c">Pay</th><th class="c">Submitted</th><th>Items in</th><th>Still missing</th>'+CK_REQ.map(function(p){return'<th class="c">'+CK_SHORT[p[0]]+'</th>';}).join('')+'<th class="c">Interview</th><th class="c">FA App</th><th class="c">Clarity</th></tr>';
+  rows.forEach(function(s){
+    var ck=s.ck||{};
+    h+='<tr><td><a href="#" class="ck-open" data-id="'+esc(s.id)+'">'+esc(s.last)+', '+esc(s.first)+'</a>'+(isMid(s)?' <span class="spill2 sp-mid">MID</span>':'')+'</td><td class="c">'+(gradeOf(s)||'--')+'</td><td>'+esc(s.school||'--')+'</td><td class="c">'+(payOf(s)||'--')+'</td><td class="c">'+fmtDay(s.appdate)+'</td><td>'+ckBar(s)+'</td><td style="color:#A8302A;font-size:10.5px;font-weight:500">'+(hasCk(s)?esc(ckMissing(s).join(', '))||'<span style="color:#2A6B4A;font-weight:700">Complete</span>':'<span class="pm-empty">not loaded</span>')+'</td>';
+    CK_REQ.forEach(function(p){h+='<td class="c">'+(hasCk(s)?mk(ck[p[0]]||'',p[0]):'')+'</td>';});
+    h+='<td class="c">'+(hasCk(s)?mk(ck.int||'','int'):'')+'</td>';
+    h+='<td class="c">'+(s.aid==='yes'&&hasCk(s)?mk(ck.faapp||'','faapp'):'<span class="ckmark na">n/a</span>')+'</td><td class="c">'+(s.aid==='yes'&&hasCk(s)?mk(ck.clar||'','clar'):'<span class="ckmark na">n/a</span>')+'</td></tr>';
+  });
+  if(!rows.length)h+='<tr><td colspan="19" style="text-align:center;color:#9EA4B0;font-style:italic">No applicants match.</td></tr>';
+  h+='</table></div><div class="dsec-note" style="margin-top:6px">Required items: App Form, Fee (or waived), Applicant and Parent Questionnaires, Transcript (request form or upload), Admin, English and Math recommendations, Photo. The family interview is tracked separately and is not shown as missing. To refresh, export the workbook\'s Application Checklist tab as CSV and use Import CSV.</div>';
+  var el=document.getElementById('checklist');el.innerHTML=h;
+  var sb=el.querySelectorAll('#ck-seg button');for(var i=0;i<sb.length;i++)sb[i].addEventListener('click',function(){CKV.seg=this.getAttribute('data-seg');renderChecklist();});
+  var tl=el.querySelectorAll('.dc4.click');for(var j=0;j<tl.length;j++)tl[j].addEventListener('click',function(){var m=this.getAttribute('data-miss');CKV.miss=CKV.miss===m?'':m;renderChecklist();});
+  var cl=document.getElementById('ck-clear');if(cl)cl.addEventListener('click',function(e){e.preventDefault();CKV.miss='';renderChecklist();});
+  document.getElementById('ck-sort').addEventListener('change',function(){CKV.sort=this.value;renderChecklist();});
+  var q=document.getElementById('ck-q');q.addEventListener('input',function(){CKV.q=this.value;var pos=this.selectionStart;renderChecklist();var nq=document.getElementById('ck-q');nq.focus();try{nq.setSelectionRange(pos,pos);}catch(e){}});
+  var ln=el.querySelectorAll('.ck-open');for(var k2=0;k2<ln.length;k2++)ln[k2].addEventListener('click',function(e){e.preventDefault();var s=byId(this.getAttribute('data-id'));if(!s)return;switchView('roster');pick(s.id);});
+}
+
+// ============ DRAFTS VIEW ============
+var DRV={seg:'all',show:'all',q:''};
+function renderDrafts(){
+  var list=students.filter(isDraft).filter(function(s){return DRV.seg==='all'||segOf(s)===DRV.seg;});
+  var c=function(f){return list.filter(f).length;};
+  var pend=c(isPending),called=c(function(s){return!!s.calledDate;}),pendNot=c(function(s){return isPending(s)&&!s.calledDate;}),stale=c(function(s){var d=daysSince(s.draftUpd);return d!==null&&d>30;});
+  var h='<div class="dash-hdr"><div><div class="dash-title">Draft Applications</div><div class="dash-sub">Families who started an application in Finalsite but have not submitted. Pending Payment means the form is done and only the fee is left, so those are listed first.</div></div></div>';
+  h+='<div class="vw-bar">'+segButtons(DRV.seg,'dr-seg')+'</div>';
+  h+='<div class="dgrid4">';
+  h+='<div class="dc4 click'+(DRV.show==='all'?' sel':'')+'" data-show="all"><div class="dn">'+list.length+'</div><div class="dl">Drafts in progress</div></div>';
+  h+='<div class="dc4 click'+(DRV.show==='pending'?' sel':'')+'" data-show="pending"><div class="dn" style="color:#8A5C00">'+pend+'</div><div class="dl">Pending payment</div><div class="dsub">'+pendNot+' not called yet</div></div>';
+  h+='<div class="dc4 click'+(DRV.show==='notcalled'?' sel':'')+'" data-show="notcalled"><div class="dn">'+(list.length-called)+'</div><div class="dl">Not called yet</div><div class="dsub">'+called+' called</div></div>';
+  h+='<div class="dc4 click'+(DRV.show==='stale'?' sel':'')+'" data-show="stale"><div class="dn" style="color:#A8302A">'+stale+'</div><div class="dl">Untouched 30+ days</div></div>';
+  h+='</div>';
+  var rows=list.filter(function(s){
+    if(DRV.show==='pending'&&!isPending(s))return false;
+    if(DRV.show==='notcalled'&&s.calledDate)return false;
+    if(DRV.show==='stale'){var d=daysSince(s.draftUpd);if(!(d!==null&&d>30))return false;}
+    if(DRV.q){var b=((s.first||'')+' '+(s.last||'')+' '+(s.school||'')).toLowerCase();if(b.indexOf(DRV.q.toLowerCase())<0)return false;}
+    return true;
+  }).sort(function(a,b){return(isPending(b)?1:0)-(isPending(a)?1:0)||String(b.draftUpd||'').localeCompare(String(a.draftUpd||''));});
+  h+='<div class="vw-bar"><input class="rv-f rv-q" id="dr-q" type="search" placeholder="Search name or school" value="'+esc(DRV.q)+'"/><span class="dsec-note">'+rows.length+' shown</span></div>';
+  h+='<div class="dsec"><table class="dtable ck-table dr-table"><tr><th>Student</th><th class="c">Gr</th><th>School</th><th>Status</th><th class="c">Started</th><th class="c">Last updated</th><th class="c">Idle</th><th class="c">Pay</th><th class="c">GPA</th><th>Heard about us</th><th>Follow-up</th><th>Note</th></tr>';
+  rows.forEach(function(s){
+    var d=daysSince(s.draftUpd);
+    h+='<tr class="'+(isPending(s)?'pend':'')+'"><td><a href="#" class="dr-open" data-id="'+esc(s.id)+'">'+esc(s.last)+', '+esc(s.first)+'</a>'+(s.intl==='yes'?' <span class="spill2 sp-draft">INTL</span>':'')+'</td><td class="c">'+(gradeOf(s)||'--')+'</td><td>'+esc(s.school||'--')+'</td><td>'+(isPending(s)?'<span class="spill2 sp-pay">Pending payment</span>':'<span class="spill2 sp-draft">Draft</span>')+'</td><td class="c">'+fmtDay(s.draftStart)+'</td><td class="c">'+fmtDay(s.draftUpd)+'</td><td class="c"'+(d!==null&&d>30?' style="color:#A8302A"':'')+'>'+(d!==null?d+'d':'--')+'</td><td class="c">'+(payOf(s)||'--')+'</td><td class="c">'+esc(s.actualgpa||s.gpa||'--')+'</td><td class="dr-note">'+esc(s.src||'--')+'</td><td>'+callCell(s)+'</td><td class="dr-note">'+esc(s.draftNote||'')+'</td></tr>';
+  });
+  if(!rows.length)h+='<tr><td colspan="12" style="text-align:center;color:#9EA4B0;font-style:italic">No drafts match.</td></tr>';
+  h+='</table></div><div class="dsec-note" style="margin-top:6px">Mark called logs today\'s date and your name (the same name you score with on Committee Review). To refresh from Finalsite, export the workbook\'s Draft Applications tab as CSV and use Import CSV; drafts that have since been submitted move to the Application Checklist automatically.</div>';
+  var el=document.getElementById('drafts');el.innerHTML=h;
+  var sb=el.querySelectorAll('#dr-seg button');for(var i=0;i<sb.length;i++)sb[i].addEventListener('click',function(){DRV.seg=this.getAttribute('data-seg');renderDrafts();});
+  var tl=el.querySelectorAll('.dc4.click');for(var j=0;j<tl.length;j++)tl[j].addEventListener('click',function(){DRV.show=this.getAttribute('data-show');renderDrafts();});
+  var q=document.getElementById('dr-q');q.addEventListener('input',function(){DRV.q=this.value;var pos=this.selectionStart;renderDrafts();var nq=document.getElementById('dr-q');nq.focus();try{nq.setSelectionRange(pos,pos);}catch(e){}});
+  var cb=el.querySelectorAll('.call-btn');for(var k=0;k<cb.length;k++)cb[k].addEventListener('click',function(){if(toggleCall(this.getAttribute('data-call')))renderDrafts();});
+  var ln=el.querySelectorAll('.dr-open');for(var k2=0;k2<ln.length;k2++)ln[k2].addEventListener('click',function(e){e.preventDefault();var s=byId(this.getAttribute('data-id'));if(!s)return;switchView('roster');pick(s.id);});
+}
+
+// ============ MEETING MODE ============
+// Full-screen, one student at a time, in the same order as the Committee Review
+// list. Arrow keys move, Esc exits. Committee view still hides family financials.
+var PM={ids:[],i:0,label:''};
+function openPresent(ids,label,startId){
+  if(!ids||!ids.length){alert('No students to present with these filters.');return;}
+  PM.ids=ids.slice();PM.label=label||'';PM.i=startId&&ids.indexOf(startId)>-1?ids.indexOf(startId):0;
+  document.getElementById('present').classList.add('open');document.body.style.overflow='hidden';
+  renderPresent();
+}
+function closePresent(){document.getElementById('present').classList.remove('open');document.body.style.overflow='';render();renderActiveView();}
+function pmGo(d){var n=PM.i+d;if(n<0||n>=PM.ids.length)return;pmSaveNotes();PM.i=n;renderPresent();document.getElementById('present').scrollTop=0;}
+function pmSaveNotes(){var t=document.getElementById('pm-notes');if(!t)return;var s=byId(PM.ids[PM.i]);if(s&&(s.notes||'')!==t.value.trim()){s.notes=t.value.trim();sync();}}
+function renderPresent(){
+  var s=byId(PM.ids[PM.i]);var box=document.getElementById('present');
+  if(!s){box.innerHTML='<div class="pm-bar"><div class="pm-t">Committee Meeting</div><div class="pm-sp"></div><button id="pm-x">Exit</button></div>';document.getElementById('pm-x').addEventListener('click',closePresent);return;}
+  var p=pal(s),gpa=s.actualgpa||s.gpa,score=SCORE_KEYS.map(function(k){return parseFloat(s[k]);}).filter(function(v){return!isNaN(v);});
+  var combined=score.length?score.reduce(function(a,b){return a+b;},0)/score.length/5*100:null;
+  var eng=[['visitedCampus','Visited campus'],['vpd','Visit Pacifica Day'],['openHouse','Open House'],['hosTour','HOS Tour'],['privateTour','Private Tour'],['shadowDay','Shadow Day']];
+  var engN=eng.filter(function(e){return!!s[e[0]];}).length;
+  var ckn=ckIn(s);
+  var badge=function(t,bg,fg){return'<span class="b" style="background:'+bg+';color:'+fg+'">'+t+'</span>';};
+  var h='<div class="pm-bar"><div class="pm-t">Committee Meeting</div><div class="pm-c">'+(PM.i+1)+' of '+PM.ids.length+(PM.label?' &middot; '+esc(PM.label):'')+'</div><div class="pm-sp"></div>'+
+    '<button id="pm-prev"'+(PM.i<=0?' disabled':'')+'>&#8249; Previous</button><button id="pm-next"'+(PM.i>=PM.ids.length-1?' disabled':'')+'>Next &#8250;</button><button id="pm-x">Exit</button></div>';
+  h+='<div class="pm-wrap">';
+  h+='<div class="pm-hero"><div class="pm-av" style="background:'+p[0]+';color:'+p[1]+'">'+(s.photo?'<img src="'+s.photo+'"/>':ini(s))+'</div><div>'+
+    '<div class="pm-name">'+esc(s.first)+' '+esc(s.last)+(s.star==='yes'?' <span style="color:#C49A3C;font-size:26px">&#9733;</span>':'')+'</div>'+
+    '<div class="pm-sub">'+esc(s.school||'School not provided')+' &middot; Applying for '+esc(s.grade||'--')+' &middot; '+(isMid(s)?'Mid-Year (January) start':'Fall 2027')+'</div>'+
+    '<div class="pm-badges">'+'<span class="b '+statusBadgeClass(s.status||'Inquiry')+'">'+esc(s.status||'Inquiry')+'</span>'+
+      (s.aid==='yes'?badge('Financial aid','#FAF3E0','#8A5C00'):(s.aid==='no'?badge('Full pay','#E6F4ED','#2A6B4A'):badge('Aid unknown','#F4F5F7','#5A6070')))+
+      (s.legacy==='yes'?badge('Legacy','#E8F0FA','#1A5CA8'):'')+(s.intl==='yes'?badge('International','#E8F0FA','#1A5CA8'):'')+
+      (s.decision?'<span class="rv-dec rv-'+s.decision.replace(/\s/g,'').toLowerCase()+'" style="font-size:11px;padding:3px 10px">Decision: '+esc(s.decision)+'</span>':'')+
+    '</div></div>'+
+    '<div class="pm-kpis"><div class="pm-kpi"><div class="v" style="color:'+(gpa?({gh:'#2A6B4A',gm:'#8A5C00',gl:'#A8302A'}[gpc(gpa)]||'#003260'):'#9EA4B0')+'">'+(gpa?parseFloat(gpa).toFixed(2):'--')+'</div><div class="l">'+(s.actualgpa?'Actual GPA':'Est. GPA')+'</div></div>'+
+    '<div class="pm-kpi"><div class="v">'+(combined!==null?combined.toFixed(0)+'%':'--')+'</div><div class="l">Reader combined</div></div>'+
+    '<div class="pm-kpi"><div class="v" style="color:'+(ckn===CK_REQ.length?'#2A6B4A':'#003260')+'">'+(ckn!==null?ckn+'/'+CK_REQ.length:'--')+'</div><div class="l">Documents in</div></div>'+
+    '<div class="pm-kpi"><div class="v">'+engN+'</div><div class="l">Campus touches</div></div></div></div>';
+  h+='<div class="pm-grid">';
+  // Academics
+  h+='<div class="pm-card"><h4>Academics &amp; application</h4>'+
+    '<div class="pm-row"><span class="k">'+(s.actualgpa?'Actual GPA':'Estimated GPA')+'</span><span class="v">'+(gpa?parseFloat(gpa).toFixed(2):'--')+'</span></div>'+
+    (s.actualgpa&&s.gpa?'<div class="pm-row"><span class="k">Estimated GPA</span><span class="v">'+parseFloat(s.gpa).toFixed(2)+'</span></div>':'')+
+    '<div class="pm-row"><span class="k">Current school</span><span class="v">'+esc(s.school||'--')+'</span></div>'+
+    '<div class="pm-row"><span class="k">Applied</span><span class="v">'+fmtDay(s.appdate)+'</span></div>'+
+    '<div class="pm-row"><span class="k">Interview</span><span class="v">'+esc(s.intdate||'Not scheduled')+'</span></div>'+
+    '<div class="pm-row"><span class="k">Readers</span><span class="v">'+esc(s.readers||'--')+'</span></div></div>';
+  // Engagement
+  h+='<div class="pm-card"><h4>Engagement with Pacifica</h4><div>'+eng.map(function(e){return'<span class="ckc '+(s[e[0]]?'ok':'na')+'">'+(s[e[0]]?'&#10003; ':'')+e[1]+'</span>';}).join('')+'</div>'+
+    '<div class="pm-row"><span class="k">Heard about us</span><span class="v">'+esc(s.src||'--')+'</span></div>'+
+    (s.referral?'<div class="pm-row"><span class="k">Referred by</span><span class="v">'+esc(s.referral)+'</span></div>':'')+
+    '<div class="pm-row"><span class="k">First inquiry</span><span class="v">'+fmtDay(s.idate)+'</span></div>'+
+    (s.visits?'<div class="pm-txt" style="font-size:11.5px;color:#5A6070;margin-top:6px">'+esc(s.visits)+'</div>':'')+'</div>';
+  // Family & aid
+  h+='<div class="pm-card"><h4>Family &amp; tuition</h4>'+
+    (s.p1name?'<div class="pm-row"><span class="k">'+esc(s.p1rel||'Parent')+'</span><span class="v">'+esc(s.p1name)+'</span></div>':'')+
+    (s.p2name?'<div class="pm-row"><span class="k">'+esc(s.p2rel||'Parent')+'</span><span class="v">'+esc(s.p2name)+'</span></div>':'')+
+    (s.worship?'<div class="pm-row"><span class="k">Place of worship</span><span class="v">'+esc(s.worship)+'</span></div>':'')+
+    '<div class="pm-row"><span class="k">Tuition</span><span class="v">'+(s.aid==='yes'?'Requesting aid':(s.aid==='no'?'Full pay':'Unknown'))+'</span></div>'+
+    (s.aid==='yes'?'<div class="pm-row"><span class="k">Clarity</span><span class="v">'+clarityCell(s)+'</span></div>'+
+      '<div class="pm-row sens"><span class="k">Parent offer</span><span class="v">'+fmt$(s.parentoffer)+'</span></div>'+
+      '<div class="pm-row sens"><span class="k">Clarity suggested</span><span class="v">'+fmt$(s.suggtuit)+'</span></div>'+
+      (clarityGap(s)!==null?'<div class="pm-row sens"><span class="k">Offer vs suggested</span><span class="v" style="color:'+(clarityGap(s)>=0?'#2A6B4A':'#A8302A')+'">'+(clarityGap(s)>=0?'+':'-')+fmt$(Math.abs(Math.round(clarityGap(s))))+'</span></div>':'')+
+      '<div class="pm-row sens"><span class="k">Family income</span><span class="v">'+fmt$(s.income)+'</span></div>':'')+
+    '</div>';
+  // Checklist + decision
+  h+='<div class="pm-card span2"><h4>Application checklist'+(s.ckDate?' <span style="font-weight:500;letter-spacing:0;text-transform:none;color:#9EA4B0">&middot; Finalsite '+fmtDay(s.ckDate)+'</span>':'')+'</h4><div>'+ckChips(s,false)+'</div>'+(ckn!==null&&ckn<CK_REQ.length?'<div class="ck-miss-txt" style="font-size:12px">Still missing: '+ckMissing(s).join(', ')+'</div>':'')+'</div>';
+  var decs=['In','Win','Need to Win','Waitlist','Deny'];
+  h+='<div class="pm-card"><h4>Committee decision</h4><div class="pm-dec">'+decs.map(function(d){return'<button class="dec-btn'+(s.decision===d?' '+decBtnClass(d):'')+'" data-dec="'+d+'">'+d+'</button>';}).join('')+'</div>'+
+    '<h4 style="margin-top:14px">Meeting notes</h4><textarea class="pm-notes" id="pm-notes" placeholder="Notes from the discussion (saved when you move on)">'+esc(s.notes||'')+'</textarea></div>';
+  // Reader scores
+  var sl=[['racad','Academic'],['rmission','Mission'],['rextra','Extracurr.'],['rsocial','Social'],['rrecs','Recs'],['rreach','Reach'],['roverall','Overall']];
+  h+='<div class="pm-card span3"><h4>Reader scores'+(scoredBy(s).length?' &middot; '+scoredBy(s).length+(scoredBy(s).length===1?' reader':' readers')+' averaged':'')+'</h4><div class="pm-scores">'+sl.map(function(x){var v=s[x[0]];return'<div class="pm-sc"><div class="v" style="color:'+(v?rScoreColor(v):'#C9CDD4')+'">'+(v?esc(v):'--')+'</div><div class="l">'+x[1]+'</div></div>';}).join('')+'</div>'+
+    (scoredBy(s).length?'<div style="margin-top:10px">'+scoredBy(s).map(function(n){var r=s.reviews[n],pp=reviewPct(r);return'<div class="pm-txt" style="font-size:12px;margin-top:6px"><strong>'+esc(n)+'</strong>'+(pp!=null?' &middot; '+pp.toFixed(0)+'%':'')+(r.comments?': '+esc(r.comments):'')+'</div>';}).join('')+'</div>':'')+
+    (s.rcomments?'<div class="pm-txt" style="margin-top:10px;background:#F8FAFD;border-radius:6px;padding:10px 12px">'+esc(s.rcomments)+'</div>':'')+
+    (!score.length&&!s.rcomments?'<div class="pm-empty" style="margin-top:8px">No reader scores yet.</div>':'')+'</div>';
+  // Interests
+  var it=(s.interests||[]).map(function(x){return'<span class="ti">'+esc(x)+'</span>';}).join(' ');
+  var at=(s.activities||[]).map(function(x){return'<span class="ta">'+esc(x)+'</span>';}).join(' ');
+  h+='<div class="pm-card span3"><h4>Interests &amp; activities</h4><div class="tags">'+(it+at||'<span class="pm-empty">None listed</span>')+'</div></div>';
+  h+='</div><div class="pm-help">&larr; / &rarr; move between students &middot; Esc exits &middot; Committee view hides family income and offers when presenting</div></div>';
+  box.innerHTML=h;
+  document.getElementById('pm-x').addEventListener('click',function(){pmSaveNotes();closePresent();});
+  document.getElementById('pm-prev').addEventListener('click',function(){pmGo(-1);});
+  document.getElementById('pm-next').addEventListener('click',function(){pmGo(1);});
+  var db=box.querySelectorAll('.pm-dec .dec-btn');
+  for(var i=0;i<db.length;i++)db[i].addEventListener('click',function(){var d=this.getAttribute('data-dec');pmSaveNotes();var st=byId(PM.ids[PM.i]);if(!st)return;st.decision=st.decision===d?'':d;sync();renderPresent();});
+  document.getElementById('pm-notes').addEventListener('blur',pmSaveNotes);
+}
+document.addEventListener('keydown',function(e){
+  var box=document.getElementById('present');if(!box||!box.classList.contains('open'))return;
+  if(e.target&&/TEXTAREA|INPUT|SELECT/.test(e.target.tagName)){if(e.key==='Escape')e.target.blur();return;}
+  if(e.key==='ArrowRight'){e.preventDefault();pmGo(1);}
+  else if(e.key==='ArrowLeft'){e.preventDefault();pmGo(-1);}
+  else if(e.key==='Escape'){pmSaveNotes();closePresent();}
+});
+
+// Optional team passcode. Sends nothing until the Worker starts asking for one
+// (401/403); then it asks once, remembers it in this browser, and retries.
+function apiFetch(url,opts,retried){
+  opts=opts||{};var hd=Object.assign({},opts.headers||{});
+  try{var key=localStorage.getItem('pca_key');if(key)hd['X-PCA-Key']=key;}catch(e){}
+  opts.headers=hd;
+  return fetch(url,opts).then(function(r){
+    if((r.status===401||r.status===403)&&!retried){
+      var k=prompt('This tracker is passcode protected. Enter the admissions team passcode:');
+      if(k){try{localStorage.setItem('pca_key',k.trim());}catch(e){}return apiFetch(url,opts,true);}
+    }
+    return r;
+  });
+}
+function normGrade(g){var m=String(g||'').match(/\d+/);return m?m[0]+'th':'';}
+
 function tags(str){return(str||'').split(',').map(function(x){return x.trim();}).filter(Boolean);}
 function fmt$(n){if(!n&&n!==0)return'--';return'$'+Number(n).toLocaleString();}
 function fmtPct(n){if(!n)return'--';return(parseFloat(n)*100).toFixed(1)+'%';}
@@ -933,7 +1426,12 @@ function filtered(){
   return sorted().filter(function(s){
     var blob=[s.first,s.last,s.school,s.p1name,s.p2name,s.readers].concat(s.interests||[]).join(' ').toLowerCase();
     if(q&&blob.indexOf(q)<0)return false;
-    if(f1&&f1!=='star'&&statusBucket(s)!==f1)return false;
+    if(f1&&['inquiry','applicant','review','decision','enrolled'].indexOf(f1)>-1&&statusBucket(s)!==f1)return false;
+    if(f1==='drafts'&&!isDraft(s))return false;
+    if(f1==='pending'&&!isPending(s))return false;
+    if(f1==='docsin'&&!(isApp(s)&&docsComplete(s)))return false;
+    if(f1==='docsmiss'&&!(isApp(s)&&hasCk(s)&&!docsComplete(s)))return false;
+    if(f1==='midyear'&&!isMid(s))return false;
     if(f1==='star'&&s.star!=='yes')return false;
     if(f2&&(s.decision||'').indexOf(f2)<0)return false;
     if(f3==='yes'&&s.aid!=='yes')return false;
@@ -970,7 +1468,11 @@ var FUNNEL_STAGES=[
   {key:'oh',label:'Open House',calc:function(l){return l.filter(function(s){return!!s.openHouse;}).length;}},
   {key:'pt',label:'Private Tours',calc:function(l){return l.filter(function(s){return!!s.privateTour;}).length;}},
   {key:'sd',label:'Shadow Days',calc:function(l){return l.filter(function(s){return!!s.shadowDay;}).length;}},
+  {key:'drafts',label:'Draft Applications (in progress)',calc:function(l){return l.filter(isDraft).length;}},
   {key:'appsub',label:'Applications Submitted',calc:function(l){return l.filter(isApp).length;}},
+  {key:'docsin',label:'Applications Complete (all docs in)',calc:function(l){return l.filter(function(s){return isApp(s)&&docsComplete(s);}).length;}},
+  {key:'midapp',label:'Mid-Year Applicants',mid:true,calc:function(l){return l.filter(isApp).length;}},
+  {key:'midenr',label:'Mid-Year Enrolled',mid:true,calc:function(l){return l.filter(function(s){return s.status==='Enrolled';}).length;}},
   {key:'fpapp',label:'Full-Pay Applicants',calc:function(l){return l.filter(function(s){return isApp(s)&&s.aid==='no';}).length;}},
   {key:'faapp',label:'Financial-Aid Applicants',calc:function(l){return l.filter(function(s){return isApp(s)&&s.aid==='yes';}).length;}},
   {key:'totapp',label:'TOTAL APPLICANTS',goalKey:'app',strong:true,calc:function(l){return l.filter(isApp).length;}},
@@ -985,14 +1487,17 @@ var FUNNEL_STAGES=[
 var GRADES=[9,10,11,12];
 
 function funnelData(){
-  var byGrade={};
-  GRADES.forEach(function(g){byGrade[g]=students.filter(function(s){return gradeOf(s)===g;});});
-  var all=students.slice();
+  // Fall 2027 rows leave out Mid-Year (January) starts; those count only in the Mid-Year rows.
+  var fall=students.filter(function(s){return!isMid(s);}),mid=students.filter(isMid);
+  var byGrade={},midBy={};
+  GRADES.forEach(function(g){byGrade[g]=fall.filter(function(s){return gradeOf(s)===g;});midBy[g]=mid.filter(function(s){return gradeOf(s)===g;});});
+  var all=fall;
   var rows=FUNNEL_STAGES.map(function(st){
+    var src=st.mid?midBy:byGrade;
     var r={key:st.key,label:st.label,strong:!!st.strong,vals:{},total:0,goal:null};
-    GRADES.forEach(function(g){var v=st.calc(byGrade[g]);r.vals[g]=v;r.total+=v;});
+    GRADES.forEach(function(g){var v=st.calc(src[g]);r.vals[g]=v;r.total+=v;});
     // recompute total straight from all records for accuracy (not a per-grade sum, in case gradeOf is null for some)
-    r.total=st.calc(all);
+    r.total=st.calc(st.mid?mid:fall);
     if(st.goalKey){r.goal=GRADES.reduce(function(sum,g){return sum+((CFG.goals[g]||{})[st.goalKey]||0);},0);}
     return r;
   });
@@ -1041,7 +1546,7 @@ function renderDash(){
   var fpPctOfEnrolled=totalEnr?fpEnr/totalEnr:0;
 
   var h='';
-  h+='<div class="dash-hdr"><div><div class="dash-title">Admissions Dashboard</div><div class="dash-sub">Live -- computed from the roster. Yellow-style fields below are yours to edit.</div></div></div>';
+  h+='<div class="dash-hdr"><div><div class="dash-title">Admissions Dashboard</div><div class="dash-sub">Live from the roster. Fall 2027 rows leave out Mid-Year (January) starts, which are counted only in the Mid-Year rows. Yellow-style fields are yours to edit.</div></div></div>';
 
   // KEY DATES / GOALS
   h+='<div class="dsec"><div class="dsec-hd"><div class="dsec-t">Key Dates &amp; Tuition</div></div>';
@@ -1113,6 +1618,8 @@ function renderActiveView(){
   else if(activeView==='yoy')renderYoy();
   else if(activeView==='snap')renderSnap();
   else if(activeView==='review')renderReview();
+  else if(activeView==='checklist')renderChecklist();
+  else if(activeView==='drafts')renderDrafts();
 }
 
 // ============ FEEDER SCHOOLS ============
@@ -1356,7 +1863,7 @@ function renderSnap(){
 // ============ COMMITTEE REVIEW ============
 // ASSUMPTION: Combined % = average of whichever of the 7 reader scores are
 // filled in (out of 5), not weighted -- adjust if PCHS weights certain scores.
-var RV={grade:'all',pay:'all',dec:'all',q:''};
+var RV={grade:'all',pay:'all',dec:'all',docs:'all',q:''};
 var READER=(function(){try{return localStorage.getItem('pca_reader')||'';}catch(e){return'';}})();
 function myReview(s){return READER&&s.reviews&&s.reviews[READER]&&!s.reviews[READER].removed?s.reviews[READER]:null;}
 function scoredBy(s){var rv=s.reviews||{};return Object.keys(rv).filter(function(n){return rv[n]&&!rv[n].removed;});}
@@ -1416,6 +1923,8 @@ function renderReview(){
     else if(RV.pay!=='all'&&pay(s)!==RV.pay)return false;
     if(RV.dec==='none'&&s.decision)return false;
     if(RV.dec!=='all'&&RV.dec!=='none'&&s.decision!==RV.dec)return false;
+    if(RV.docs==='done'&&!docsComplete(s))return false;
+    if(RV.docs==='miss'&&docsComplete(s))return false;
     if(RV.q){var n=((s.first||'')+' '+(s.last||'')+' '+(s.school||'')).toLowerCase();if(n.indexOf(RV.q.toLowerCase())<0)return false;}
     return true;
   }).sort(function(a,b){return(b.combined==null?-1:b.combined)-(a.combined==null?-1:a.combined)||String(a.s.last||'').localeCompare(String(b.s.last||''));});
@@ -1429,7 +1938,7 @@ function renderReview(){
   var undecided=n-decs.reduce(function(a,d){return a+tally[d];},0);
   function pct(x){return n?Math.round(x/n*100)+'%':'--';}
 
-  var h='<div class="dash-hdr"><div><div class="dash-title">Committee Review</div><div class="dash-sub">'+n+' of '+all.length+' applicants shown -- sorted by Combined %, then last name. Click a name to open the profile.</div></div></div>';
+  var h='<div class="dash-hdr"><div><div class="dash-title">Committee Review</div><div class="dash-sub">'+n+' of '+all.length+' applicants shown -- sorted by Combined %, then last name. Click a name to open the profile, or present the list to the committee one student at a time.</div></div><button class="present-btn" id="rv-present">&#9654; Present to committee</button></div>';
   h+='<div class="dgrid4">';
   h+='<div class="dc4"><div class="dn">'+n+'</div><div class="dl">Applicants</div><div class="dsub">'+fp+' full pay &middot; '+fa+' aid'+(n-fp-fa?' &middot; '+(n-fp-fa)+' unknown':'')+'</div>'+(nocl?'<div class="dsub" style="color:#A8302A">'+nocl+' aid with no Clarity file</div>':'')+'</div>';
   h+='<div class="dc4"><div class="dn">'+pct(visited)+'</div><div class="dl">Visited campus</div><div class="dsub">'+visited+' visited &middot; '+shadow+' shadowed &middot; '+legacy+' legacy</div></div>';
@@ -1443,20 +1952,28 @@ function renderReview(){
     sel('rv-grade',RV.grade,[['all','All grades'],['9','9th grade'],['tr','Transfers (10-12)']])+
     sel('rv-pay',RV.pay,[['all','Full pay + aid'],['FP','Full pay'],['FA','Financial aid'],['noclar','Aid, no Clarity file']])+
     sel('rv-dec',RV.dec,[['all','All decisions'],['none','No decision yet'],['In','In'],['Win','Win'],['Need to Win','Need to Win'],['Waitlist','Waitlist'],['Deny','Deny']])+
+    sel('rv-docs',RV.docs,[['all','All documents'],['done','Documents complete'],['miss','Missing documents']])+
     '<input class="rv-f rv-q" id="rv-q" type="search" placeholder="Search name or school" value="'+esc(RV.q)+'"/></div>';
 
-  h+='<div class="dsec rv-wrap"><table class="dtable rv-table"><tr><th>Student</th><th>Gr</th><th>School</th><th>Pay</th><th>Clarity</th><th class="sens">Income</th><th class="sens">Clarity sugg.</th><th class="sens">Offer</th><th>GPA</th><th title="Visited campus / Shadow day / Legacy">Visit</th><th>Readers</th><th>Scored by</th><th>Interview</th><th>Acad</th><th>Mission</th><th>Extra</th><th>Social</th><th>Recs</th><th>Reach</th><th>Overall</th><th>Combined</th><th>Decision</th><th></th></tr>';
+  h+='<div class="dsec rv-wrap"><table class="dtable rv-table"><tr><th>Student</th><th>Gr</th><th>School</th><th>Pay</th><th>Clarity</th><th class="sens">Income</th><th class="sens">Clarity sugg.</th><th class="sens">Offer</th><th>GPA</th><th title="Visited campus / Shadow day / Legacy">Visit</th><th title="Required application items received">Docs</th><th>Readers</th><th>Scored by</th><th>Interview</th><th>Acad</th><th>Mission</th><th>Extra</th><th>Social</th><th>Recs</th><th>Reach</th><th>Overall</th><th>Combined</th><th>Decision</th><th></th></tr>';
   apps.forEach(function(r){
     var s=r.s,flags=(s.visitedCampus?'V':'')+(s.shadowDay?' S':'')+(s.legacy==='yes'?' L':'');
-    h+='<tr><td><a href="#" class="rv-open" data-id="'+esc(s.id)+'">'+esc(s.last)+', '+esc(s.first)+'</a></td><td>'+esc(g(s)||'--')+'</td><td>'+esc(s.school||'--')+'</td><td>'+(pay(s)||'--')+'</td><td>'+clarityCell(s)+'</td><td class="sens">'+fmt$(s.income)+'</td><td class="sens">'+fmt$(s.suggtuit)+'</td><td class="sens">'+fmt$(s.parentoffer)+'</td><td>'+esc(s.actualgpa||s.gpa||'--')+'</td><td>'+(flags.trim()||'<span class="rv-miss">none</span>')+'</td><td>'+esc(s.readers||'--')+'</td><td title="'+esc(scoredBy(s).join(', '))+'">'+(scoredBy(s).length?scoredBy(s).length+(scoredBy(s).length===1?' reader':' readers'):'--')+'</td><td>'+esc(s.intdate||'--')+'</td>';
+    h+='<tr><td><a href="#" class="rv-open" data-id="'+esc(s.id)+'">'+esc(s.last)+', '+esc(s.first)+'</a></td><td>'+esc(g(s)||'--')+'</td><td>'+esc(s.school||'--')+'</td><td>'+(pay(s)||'--')+'</td><td>'+clarityCell(s)+'</td><td class="sens">'+fmt$(s.income)+'</td><td class="sens">'+fmt$(s.suggtuit)+'</td><td class="sens">'+fmt$(s.parentoffer)+'</td><td>'+esc(s.actualgpa||s.gpa||'--')+'</td><td>'+(flags.trim()||'<span class="rv-miss">none</span>')+'</td><td>'+(ckIn(s)!==null?'<span class="ckn'+(docsComplete(s)?' full':'')+'">'+ckIn(s)+'/'+CK_REQ.length+'</span>':'--')+'</td><td>'+esc(s.readers||'--')+'</td><td title="'+esc(scoredBy(s).join(', '))+'">'+(scoredBy(s).length?scoredBy(s).length+(scoredBy(s).length===1?' reader':' readers'):'--')+'</td><td>'+esc(s.intdate||'--')+'</td>';
     scoreKeys.forEach(function(k){h+='<td>'+esc(s[k]||'--')+'</td>';});
     h+='<td><strong>'+(r.combined!==null?r.combined.toFixed(0)+'%':'--')+'</strong></td><td>'+(s.decision?'<span class="rv-dec rv-'+s.decision.replace(/\s/g,'').toLowerCase()+'">'+esc(s.decision)+'</span>':'--')+'</td><td><button class="rv-score'+(myReview(s)?' done':'')+'" data-id="'+esc(s.id)+'">'+(myReview(s)?'My score':'Score')+'</button></td></tr>';
   });
-  if(!apps.length)h+='<tr><td colspan="23" style="text-align:center;color:#9EA4B0;font-style:italic">No applicants match these filters.</td></tr>';
+  if(!apps.length)h+='<tr><td colspan="24" style="text-align:center;color:#9EA4B0;font-style:italic">No applicants match these filters.</td></tr>';
   h+='</table></div><div class="dsec-note" style="margin-top:6px">Visit: V = visited campus, S = shadow day, L = legacy. Clarity: status from Clarity for aid applicants; "No file" means aid requested but no Clarity application found. Combined % averages whichever reader scores are entered, unweighted.</div>';
   document.getElementById('review').innerHTML=h;
 
-  [['rv-grade','grade'],['rv-pay','pay'],['rv-dec','dec']].forEach(function(p){document.getElementById(p[0]).addEventListener('change',function(){RV[p[1]]=this.value;renderReview();});});
+  document.getElementById('rv-present').addEventListener('click',function(){
+    var lbl=[RV.grade==='9'?'9th grade':(RV.grade==='tr'?'Transfers':'All grades')];
+    if(RV.pay!=='all')lbl.push({FP:'Full pay',FA:'Financial aid',noclar:'Aid, no Clarity file'}[RV.pay]);
+    if(RV.dec!=='all')lbl.push(RV.dec==='none'?'No decision yet':RV.dec);
+    if(RV.docs!=='all')lbl.push(RV.docs==='done'?'Documents complete':'Missing documents');
+    openPresent(apps.map(function(r){return r.s.id;}),lbl.join(' · '));
+  });
+  [['rv-grade','grade'],['rv-pay','pay'],['rv-dec','dec'],['rv-docs','docs']].forEach(function(p){document.getElementById(p[0]).addEventListener('change',function(){RV[p[1]]=this.value;renderReview();});});
   var q=document.getElementById('rv-q');
   q.addEventListener('input',function(){RV.q=this.value;var pos=this.selectionStart;renderReview();var nq=document.getElementById('rv-q');nq.focus();try{nq.setSelectionRange(pos,pos);}catch(e){}});
   var rin=document.getElementById('rv-reader');
@@ -1469,12 +1986,12 @@ function renderReview(){
 
 function switchView(v){
   activeView=v;
-  ['roster','dash','feeder','fa','monthly','yoy','snap','review'].forEach(function(name){
+  ['roster','dash','checklist','drafts','feeder','fa','monthly','yoy','snap','review'].forEach(function(name){
     var tab=document.getElementById('vtab-'+name);
     if(tab)tab.className='vtab'+(v===name?' on':'');
   });
   document.querySelector('.layout').style.display=v==='roster'?'grid':'none';
-  ['dash','feeder','fa','monthly','yoy','snap','review'].forEach(function(name){
+  ['dash','checklist','drafts','feeder','fa','monthly','yoy','snap','review'].forEach(function(name){
     document.getElementById(name).style.display=v===name?'block':'none';
   });
   renderActiveView();
@@ -1506,7 +2023,11 @@ function render(){
     // decision pill
     var decColors={'In':'#2A6B4A','Win':'#1A5CA8','Need to Win':'#8A5C00','Deny':'#A8302A','Waitlist':'#5A3A8A'};
     var dec=s.decision&&decColors[s.decision]?'<span class="spill" style="background:'+decColors[s.decision]+'22;color:'+decColors[s.decision]+'">'+s.decision.split(' ')[0]+'</span>':'';
-    h+='<div class="srow'+act+'" data-id="'+s.id+'">'+avEl(s)+starH+'<span class="sn">'+s.last+', '+s.first+'</span>'+dec+gpaH+'</div>';
+    var pills=(isMid(s)?'<span class="spill2 sp-mid" title="Mid-Year (January) start">MID</span>':'');
+    if(isApp(s)&&hasCk(s)){var ckn=ckIn(s);pills+='<span class="spill2 sp-docs'+(ckn===CK_REQ.length?' full':'')+'" title="Required application items received">'+ckn+'/'+CK_REQ.length+'</span>';}
+    else if(isPending(s))pills+='<span class="spill2 sp-pay" title="Draft application: form done, only the fee is left">FEE DUE</span>';
+    else if(isDraft(s))pills+='<span class="spill2 sp-draft" title="Draft application in progress">DRAFT</span>';
+    h+='<div class="srow'+act+'" data-id="'+s.id+'">'+avEl(s)+starH+'<span class="sn">'+s.last+', '+s.first+'</span>'+pills+dec+gpaH+'</div>';
   }
   el.innerHTML=h;
   var rows=el.querySelectorAll('.srow');
@@ -1581,6 +2102,7 @@ function detail(){
           (s.p2name?'<div class="hcontact sens">'+s.p2name+(s.p2email?' &middot; '+s.p2email:'')+(s.p2phone&&!s.p2email?' &middot; '+s.p2phone:'')+'</div>':'')+
           '<div style="display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap">'+
             '<span class="b '+statusBadgeClass(stl)+'" style="font-size:10px;letter-spacing:.07em">'+stl+'</span>'+
+            (isMid(s)?'<span class="b" style="font-size:10px;background:rgba(255,255,255,.15);color:#fff">Mid-Year start</span>':'')+
             (s.aid==='yes'?'<span class="b baid" style="font-size:10px">Aid requested</span>':'')+
             (s.aid==='no'?'<span class="b" style="font-size:10px;background:rgba(196,154,60,.2);color:#C49A3C;padding:3px 8px;border-radius:99px">Full Pay</span>':'')+
             '<button id="hstar" style="margin-left:2px;padding:3px 9px;border-radius:99px;font-size:15px;line-height:1;border:1px solid '+(s.star==='yes'?'#C49A3C':'rgba(255,255,255,.25)')+';background:'+(s.star==='yes'?'rgba(196,154,60,.2)':'transparent')+';color:'+(s.star==='yes'?'#C49A3C':'rgba(255,255,255,.3)')+';cursor:pointer" data-sid="'+s.id+'">'+(s.star==='yes'?'&#9733;':'&#9734;')+'</button>'+
@@ -1621,7 +2143,7 @@ function detail(){
         (clarityGap(s)!==null?'<div class="fa-cell sens"><div class="fl">Offer vs suggested</div><div class="fn" style="color:'+(clarityGap(s)>=0?'#2A6B4A':'#A8302A')+'">'+(clarityGap(s)>=0?'+':'-')+fmt$(Math.abs(Math.round(clarityGap(s))))+'</div></div>':'')+
         '<div class="fa-cell"><div class="fl">Aid requested</div><div class="fn" style="color:'+(s.aid==='yes'?'#8A5C00':'#9EA4B0')+'">'+(s.aid==='yes'?'Yes':'Unknown')+'</div></div>'+
       '</div>'
-    )+''+
+    )+appStatusHTML(s)+
 
     // READER CARD
     (hasScores||s.rcomments||scoredBy(s).length?
@@ -1669,6 +2191,12 @@ function detail(){
   w('bpr',function(){if(confirm('Move to Applicant?')){for(var i=0;i<students.length;i++){if(students[i].id===selId){students[i].status='Applicant';break;}}sync();render();detail();}});
   w('hpbtn',function(){document.getElementById('fi-hero').setAttribute('data-sid',selId);document.getElementById('fi-hero').click();});
 
+  // Checklist items and draft call log
+  var ckt=el.querySelectorAll('.ckc.tog');
+  for(var ci=0;ci<ckt.length;ci++)ckt[ci].addEventListener('click',function(){toggleCk(s,this.getAttribute('data-ck'));render();detail();});
+  var cbt=el.querySelectorAll('.call-btn');
+  for(var cj=0;cj<cbt.length;cj++)cbt[cj].addEventListener('click',function(){if(toggleCall(this.getAttribute('data-call'))){render();detail();}});
+
   // Decision buttons
   var dbts=el.querySelectorAll('.dec-btn');
   for(var di=0;di<dbts.length;di++){
@@ -1705,7 +2233,7 @@ function openAdd(){
   document.getElementById('btn-del').style.display='none';
   var flds=['e-first','e-last','e-school','e-worship','e-gpa','e-actualgpa','e-referral','e-notes','e-parentoffer','e-suggtuit','e-income','e-revovr','e-p1name','e-p1rel','e-p1email','e-p1phone','e-p2name','e-p2rel','e-p2email','e-p2phone','e-int','e-act','e-readers','e-intdate','e-r-acad','e-r-mission','e-r-extra','e-r-social','e-r-recs','e-r-reach','e-r-overall','e-rcomments','e-idate','e-visits','e-grade','e-legacy'];
   flds.forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
-  ['e-status','e-decision','e-aid','e-t100','e-src','e-appform','e-appfee','e-trans','e-8thgrades','e-rec-admin','e-rec-eng','e-rec-math','e-interview','e-appphoto','e-isee'].forEach(function(id){var e=document.getElementById(id);if(!e)return;if(id==='e-status')e.value='Inquiry';else if(id==='e-aid')e.value='unknown';else e.value='';});
+  ['e-status','e-decision','e-aid','e-t100','e-src','e-entry','e-appform','e-appfee','e-trans','e-8thgrades','e-rec-admin','e-rec-eng','e-rec-math','e-interview','e-appphoto','e-isee'].forEach(function(id){var e=document.getElementById(id);if(!e)return;if(id==='e-status')e.value='Inquiry';else if(id==='e-aid')e.value='unknown';else e.value='';});
   ['e-visited','e-hostour','e-vpd','e-openhouse','e-privatetour','e-shadowday'].forEach(function(id){var e=document.getElementById(id);if(e)e.checked=false;});
   resetPP();
   var appSec=document.getElementById('app-sec');if(appSec)appSec.style.display='none';
@@ -1721,7 +2249,7 @@ function openEdit(id){
   document.getElementById('btn-del').style.display='block';
   var fm={'e-first':s.first,'e-last':s.last,'e-school':s.school,'e-worship':s.worship,'e-gpa':s.gpa,'e-actualgpa':s.actualgpa,'e-referral':s.referral,'e-notes':s.notes,'e-parentoffer':s.parentoffer,'e-suggtuit':s.suggtuit,'e-income':s.income,'e-p1name':s.p1name,'e-p1rel':s.p1rel,'e-p1email':s.p1email,'e-p1phone':s.p1phone,'e-p2name':s.p2name,'e-p2rel':s.p2rel,'e-p2email':s.p2email,'e-p2phone':s.p2phone,'e-int':(s.interests||[]).join(', '),'e-act':(s.activities||[]).join(', '),'e-readers':s.readers,'e-intdate':s.intdate,'e-r-acad':s.racad,'e-r-mission':s.rmission,'e-r-extra':s.rextra,'e-r-social':s.rsocial,'e-r-recs':s.rrecs,'e-r-reach':s.rreach,'e-r-overall':s.roverall,'e-rcomments':s.rcomments,'e-idate':s.idate,'e-visits':s.visits};
   Object.keys(fm).forEach(function(k){var e=document.getElementById(k);if(e)e.value=fm[k]||'';});
-  var sm={'e-status':s.status||'Inquiry','e-decision':s.decision||'','e-aid':s.aid||'unknown','e-grade':s.grade||'','e-legacy':s.legacy||'','e-src':s.src||'','e-appform':s.appform||'','e-appfee':s.appfee||'','e-trans':s.trans||'','e-8thgrades':s.grades8th||'','e-rec-admin':s.recadmin||'','e-rec-eng':s.receng||'','e-rec-math':s.recmath||'','e-interview':s.interview||'','e-appphoto':s.appphoto||'','e-isee':s.isee||''};
+  var sm={'e-status':s.status||'Inquiry','e-decision':s.decision||'','e-aid':s.aid||'unknown','e-grade':normGrade(s.grade),'e-entry':s.entry||'','e-legacy':s.legacy||'','e-src':s.src||'','e-appform':s.appform||'','e-appfee':s.appfee||'','e-trans':s.trans||'','e-8thgrades':s.grades8th||'','e-rec-admin':s.recadmin||'','e-rec-eng':s.receng||'','e-rec-math':s.recmath||'','e-interview':s.interview||'','e-appphoto':s.appphoto||'','e-isee':s.isee||''};
   Object.keys(sm).forEach(function(k){var e=document.getElementById(k);if(e)e.value=sm[k];});
   var fromReaders=scoredBy(s).length>0;
   ['e-r-acad','e-r-mission','e-r-extra','e-r-social','e-r-recs','e-r-reach','e-r-overall'].forEach(function(k){var e=document.getElementById(k);if(e){e.disabled=fromReaders;e.title=fromReaders?'Averaged from reader scores. Use Score on Committee Review to change.':'';}});
@@ -1740,7 +2268,7 @@ function saveStudent(){
   var last=(document.getElementById('e-last').value||'').trim();
   if(!first||!last){alert('First and last name are required.');return;}
   var status=document.getElementById('e-status').value;
-  var d={first:first,last:last,school:document.getElementById('e-school').value.trim(),worship:document.getElementById('e-worship').value.trim(),gpa:document.getElementById('e-gpa').value||null,actualgpa:document.getElementById('e-actualgpa').value||null,referral:document.getElementById('e-referral').value.trim(),grade:document.getElementById('e-grade').value,notes:document.getElementById('e-notes').value.trim(),parentoffer:document.getElementById('e-parentoffer').value||null,suggtuit:document.getElementById('e-suggtuit').value||null,income:document.getElementById('e-income').value||null,p1name:document.getElementById('e-p1name').value.trim(),p1rel:document.getElementById('e-p1rel').value.trim(),p1email:document.getElementById('e-p1email').value.trim(),p1phone:document.getElementById('e-p1phone').value.trim(),p2name:document.getElementById('e-p2name').value.trim(),p2rel:document.getElementById('e-p2rel').value.trim(),p2email:document.getElementById('e-p2email').value.trim(),p2phone:document.getElementById('e-p2phone').value.trim(),interests:tags(document.getElementById('e-int').value),activities:tags(document.getElementById('e-act').value),readers:document.getElementById('e-readers').value.trim(),intdate:document.getElementById('e-intdate').value.trim(),racad:document.getElementById('e-r-acad').value||null,rmission:document.getElementById('e-r-mission').value||null,rextra:document.getElementById('e-r-extra').value||null,rsocial:document.getElementById('e-r-social').value||null,rrecs:document.getElementById('e-r-recs').value||null,rreach:document.getElementById('e-r-reach').value||null,roverall:document.getElementById('e-r-overall').value||null,rcomments:document.getElementById('e-rcomments').value.trim(),status:status,decision:document.getElementById('e-decision').value,aid:document.getElementById('e-aid').value,idate:document.getElementById('e-idate').value.trim(),src:document.getElementById('e-src').value,visits:document.getElementById('e-visits').value.trim(),legacy:document.getElementById('e-legacy').value,visitedCampus:document.getElementById('e-visited').checked,hosTour:document.getElementById('e-hostour').checked,vpd:document.getElementById('e-vpd').checked,openHouse:document.getElementById('e-openhouse').checked,privateTour:document.getElementById('e-privatetour').checked,shadowDay:document.getElementById('e-shadowday').checked,photo:mPhoto||null};
+  var d={first:first,last:last,school:document.getElementById('e-school').value.trim(),worship:document.getElementById('e-worship').value.trim(),gpa:document.getElementById('e-gpa').value||null,actualgpa:document.getElementById('e-actualgpa').value||null,referral:document.getElementById('e-referral').value.trim(),grade:document.getElementById('e-grade').value,notes:document.getElementById('e-notes').value.trim(),parentoffer:document.getElementById('e-parentoffer').value||null,suggtuit:document.getElementById('e-suggtuit').value||null,income:document.getElementById('e-income').value||null,p1name:document.getElementById('e-p1name').value.trim(),p1rel:document.getElementById('e-p1rel').value.trim(),p1email:document.getElementById('e-p1email').value.trim(),p1phone:document.getElementById('e-p1phone').value.trim(),p2name:document.getElementById('e-p2name').value.trim(),p2rel:document.getElementById('e-p2rel').value.trim(),p2email:document.getElementById('e-p2email').value.trim(),p2phone:document.getElementById('e-p2phone').value.trim(),interests:tags(document.getElementById('e-int').value),activities:tags(document.getElementById('e-act').value),readers:document.getElementById('e-readers').value.trim(),intdate:document.getElementById('e-intdate').value.trim(),racad:document.getElementById('e-r-acad').value||null,rmission:document.getElementById('e-r-mission').value||null,rextra:document.getElementById('e-r-extra').value||null,rsocial:document.getElementById('e-r-social').value||null,rrecs:document.getElementById('e-r-recs').value||null,rreach:document.getElementById('e-r-reach').value||null,roverall:document.getElementById('e-r-overall').value||null,rcomments:document.getElementById('e-rcomments').value.trim(),status:status,decision:document.getElementById('e-decision').value,aid:document.getElementById('e-aid').value,idate:document.getElementById('e-idate').value.trim(),src:document.getElementById('e-src').value,visits:document.getElementById('e-visits').value.trim(),legacy:document.getElementById('e-legacy').value,entry:document.getElementById('e-entry').value,visitedCampus:document.getElementById('e-visited').checked,hosTour:document.getElementById('e-hostour').checked,vpd:document.getElementById('e-vpd').checked,openHouse:document.getElementById('e-openhouse').checked,privateTour:document.getElementById('e-privatetour').checked,shadowDay:document.getElementById('e-shadowday').checked,photo:mPhoto||null};
 
   if(editId){for(var i=0;i<students.length;i++){if(students[i].id===editId){Object.assign(students[i],d);break;}}selId=editId;}
   else{var ns=Object.assign({id:uid()},d);students.push(ns);selId=ns.id;}
@@ -1788,6 +2316,12 @@ function runImport(){
   setTimeout(function(){
     var rows=parseFullCSV(raw);
     if(rows.length<2){showIR('Need a header row and one data row.',false);return;}
+    // Workbook tabs exported as CSV get their own careful import that only
+    // touches checklist / draft fields, never the rest of the profile.
+    var ckHi=findHeaderRow(rows,['firstname','lastname','appform','appfee']);
+    if(ckHi>-1){importChecklistCSV(rows,ckHi);return;}
+    var drHi=findHeaderRow(rows,['firstname','lastname','finalsitestatus']);
+    if(drHi>-1){importDraftsCSV(rows,drHi);return;}
 
     var row1=rows[0],row2=rows[1],dataStart=1,headers=row1.map(nh);
     var isDouble=row1[0]&&(nh(row1[0])==='contact'||nh(row1[0])==='name');
@@ -1964,7 +2498,7 @@ function runFinalsiteSync(){
   btn.disabled=true;btn.style.opacity='.6';
   btn.innerHTML=btn.innerHTML.replace('Sync Finalsite','Syncing...');
 
-  fetch(PROXY_URL+'finalsite/contacts')
+  apiFetch(PROXY_URL+'finalsite/contacts')
     .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
     .then(function(d){
       var contacts=d.contacts||[];
@@ -2111,10 +2645,10 @@ document.getElementById('fi-photos').addEventListener('change',function(){
 // EXPORT
 function exportCSV(){
   if(!students.length){alert('No students to export.');return;}
-  var cols=['last','first','school','gpa','actualgpa','grade','status','decision','star','aid','parentoffer','suggtuit','income','p1name','p1rel','p1email','p1phone','p2name','p2rel','p2email','p2phone','interests','activities','notes','idate','src','worship','referral','readers','intdate','racad','rmission','rextra','rsocial','rrecs','rreach','roverall','rcomments','visits'];
-  var hdrs=['last_name','first_name','school','est_gpa','actual_gpa','grade','status','decision','starred','aid_requested','parent_offer','suggested_tuition','family_income','parent1_name','parent1_relation','parent1_email','parent1_phone','parent2_name','parent2_relation','parent2_email','parent2_phone','interests','activities','meeting_notes','inquiry_date','source','place_of_worship','referral_friend','assigned_readers','interview_date','academic_ability','mission_fit','extracurricular','social_fit','recommendations','school_reach','overall_quality','reader_comments','campus_visits'];
+  var cols=['last','first','school','gpa','actualgpa','grade','entry','_docs','_missing','draft','status','decision','star','aid','parentoffer','suggtuit','income','p1name','p1rel','p1email','p1phone','p2name','p2rel','p2email','p2phone','interests','activities','notes','idate','src','worship','referral','readers','intdate','racad','rmission','rextra','rsocial','rrecs','rreach','roverall','rcomments','visits'];
+  var hdrs=['last_name','first_name','school','est_gpa','actual_gpa','grade','entry_term','docs_in','missing_items','draft_status','status','decision','starred','aid_requested','parent_offer','suggested_tuition','family_income','parent1_name','parent1_relation','parent1_email','parent1_phone','parent2_name','parent2_relation','parent2_email','parent2_phone','interests','activities','meeting_notes','inquiry_date','source','place_of_worship','referral_friend','assigned_readers','interview_date','academic_ability','mission_fit','extracurricular','social_fit','recommendations','school_reach','overall_quality','reader_comments','campus_visits'];
   var rows=[hdrs.join(',')];
-  sorted().forEach(function(s){var row=cols.map(function(k){var v=Array.isArray(s[k])?s[k].join('; '):(s[k]||'');v=String(v).replace(/"/g,'""');if(v.indexOf(',')>-1||v.indexOf('"')>-1||v.indexOf('\n')>-1)v='"'+v+'"';return v;});rows.push(row.join(','));});
+  sorted().forEach(function(s){var row=cols.map(function(k){var v=k==='_docs'?(ckIn(s)===null?'':ckIn(s)+'/'+CK_REQ.length):(k==='_missing'?ckMissing(s).join('; '):(Array.isArray(s[k])?s[k].join('; '):(s[k]||'')));v=String(v).replace(/"/g,'""');if(v.indexOf(',')>-1||v.indexOf('"')>-1||v.indexOf('\n')>-1)v='"'+v+'"';return v;});rows.push(row.join(','));});
   var blob=new Blob([rows.join('\n')],{type:'text/csv'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');a.href=url;a.download='pacifica_admissions_'+new Date().toISOString().slice(0,10)+'.csv';
@@ -2130,6 +2664,8 @@ document.getElementById('vtab-monthly').addEventListener('click',function(){swit
 document.getElementById('vtab-yoy').addEventListener('click',function(){switchView('yoy');});
 document.getElementById('vtab-snap').addEventListener('click',function(){switchView('snap');});
 document.getElementById('vtab-review').addEventListener('click',function(){switchView('review');});
+document.getElementById('vtab-checklist').addEventListener('click',function(){switchView('checklist');});
+document.getElementById('vtab-drafts').addEventListener('click',function(){switchView('drafts');});
 document.getElementById('btn-export').addEventListener('click',exportCSV);
 document.getElementById('btn-import-hdr').addEventListener('click',openImport);
 document.getElementById('btn-sync-finalsite').addEventListener('click',runFinalsiteSync);
@@ -2221,3 +2757,4 @@ if(!document.hidden)startAutoRefresh();
 <!-- deployed 2026-11-05 -->
 <!-- deployed 2026-11-05 clarity -->
 <!-- deployed 2026-11-05 reader scoring -->
+<!-- deployed 2026-11-06 checklist, drafts, mid-year, meeting mode -->
