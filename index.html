@@ -276,8 +276,19 @@ body.cview .cview-banner{display:block}
 .rv-bar{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}
 .rv-f{font-family:'Montserrat',sans-serif;font-size:11px;padding:6px 8px;border:1px solid #E4E6EA;border-radius:6px;background:#fff;color:#1A1D25}
 .rv-q{flex:1;min-width:160px}
-.rv-wrap{overflow-x:auto}
-.rv-table td,.rv-table th{white-space:nowrap}
+.rv-wrap{overflow:auto;max-height:calc(100vh - 240px);border:1px solid #E4E6EA;border-radius:10px;background:#fff;padding:0!important}
+.rv-table td,.rv-table th{white-space:nowrap;text-align:left}
+.rv-table th{position:sticky;top:0;z-index:2;background:#F8FAFD;padding:9px 8px;border-bottom:1px solid #E4E6EA}
+.rv-table td{padding:7px 8px;vertical-align:middle}
+.rv-table tr:nth-child(odd) td{background:#FBFCFD}
+.rv-table tr:hover td{background:#F1F5FB}
+.rv-table td:first-child,.rv-table th:first-child{position:sticky;left:0;z-index:1;border-right:1px solid #EEF0F3}
+.rv-table td:first-child{background:#fff}
+.rv-table th:first-child{z-index:3}
+.rd-chip{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:#EAF1FA;color:#003260;margin:1px 0}
+.rd-chip.pend{background:#F7F8FA;color:#7A8090;font-weight:600;border:1px dashed #C9CDD4}
+.rv-none{color:#C9CDD4!important;font-weight:500}
+.comb{font-weight:800;font-size:12px}
 .rv-table a.rv-open{color:#003260;font-weight:600;text-decoration:none}
 .rv-table a.rv-open:hover{text-decoration:underline}
 .rv-miss{color:#A8302A;font-weight:500}
@@ -1399,7 +1410,7 @@ function renderPresent(){
     '<div class="pm-row"><span class="k">Current school</span><span class="v">'+esc(s.school||'--')+'</span></div>'+
     '<div class="pm-row"><span class="k">Applied</span><span class="v">'+fmtDay(s.appdate)+'</span></div>'+
     '<div class="pm-row"><span class="k">Interview</span><span class="v">'+esc(intText(s)||'Not scheduled')+'</span></div>'+
-    '<div class="pm-row"><span class="k">Readers</span><span class="v">'+esc(s.readers||'--')+'</span></div></div>';
+    '<div class="pm-row"><span class="k">Readers</span><span class="v">'+readerChips(s)+'</span></div></div>';
   // Interview feedback
   if(s.interview&&s.interview.when)h+='<div class="pm-card"><h4>Family interview</h4>'+intFbHTML(s)+'</div>';
   // Engagement
@@ -1484,6 +1495,13 @@ var GROUPS=[
   {k:'notfit',l:'Not a Fit',s:'NOT FIT',d:'No discussion needed',c:'#A8302A',bg:'#FAEAEA',disc:false}
 ];
 function grpOf(k){for(var i=0;i<GROUPS.length;i++)if(GROUPS[i].k===k)return GROUPS[i];return null;}
+// "Need to Win" can be set as a decision or as a meeting group; the filters treat either as Need to Win.
+function isNeedToWin(s){return s.decision==='Need to Win'||s.group==='win';}
+function readerList(s){return String(s.readers||'').split(/\s*,\s*/).filter(function(n){return n&&n.toLowerCase()!=='deleted user';});}
+// Interviewer who has been invited but hasn't accepted yet (they become the reader once they accept).
+function pendingReader(s){var i=s&&s.interview;return(!readerList(s).length&&i&&i.who&&i.status!=='Canceled')?i.who:'';}
+function readerChips(s){var r=readerList(s);if(r.length)return r.map(function(n){return'<span class="rd-chip" title="Assigned reader in Finalsite">'+esc(n)+'</span>';}).join(' ');var p=pendingReader(s);return p?'<span class="rd-chip pend" title="Interviewer. Becomes the reader once they accept the interview invite">'+esc(p)+' &middot; invited</span>':'<span class="rv-none">--</span>';}
+function combColor(v){return v>=85?'#2A6B4A':v>=70?'#1A5CA8':v>=55?'#8A5C00':'#A8302A';}
 function grpPill(s,short){var g=grpOf(s.group);if(!g)return'';return'<span class="gp" style="background:'+g.bg+';color:'+g.c+'" title="'+esc(g.d)+'">'+(short?g.s:g.l)+'</span>';}
 function combinedOf(s){var v=SCORE_KEYS.map(function(k){return parseFloat(s[k]);}).filter(function(x){return!isNaN(x);});return v.length?v.reduce(function(a,b){return a+b;},0)/v.length/5*100:null;}
 // A starting point only: well-scored files get a suggested group based on pay type.
@@ -1590,7 +1608,7 @@ function filtered(){
     if(f1&&!campusFilter(f1,s))return false;
     if(f1.indexOf('grp:')===0){var gk=f1.slice(4);if(gk==='none'){if(!isApp(s)||grpOf(s.group))return false;}else if(s.group!==gk)return false;}
     if(f1==='star'&&s.star!=='yes')return false;
-    if(f2&&(s.decision||'').indexOf(f2)<0)return false;
+    if(f2==='Need'){if(!isNeedToWin(s))return false;}else if(f2&&(s.decision||'')!==f2)return false;
     if(f3==='yes'&&s.aid!=='yes')return false;
     if(f3==='no'&&s.aid!=='no')return false;
     return true;
@@ -2218,7 +2236,7 @@ function renderReview(){
     if(RV.pay==='noclar'){if(!noClarity(s))return false;}
     else if(RV.pay!=='all'&&pay(s)!==RV.pay)return false;
     if(RV.dec==='none'&&s.decision)return false;
-    if(RV.dec!=='all'&&RV.dec!=='none'&&s.decision!==RV.dec)return false;
+    if(RV.dec==='Need to Win'){if(!isNeedToWin(s))return false;}else if(RV.dec!=='all'&&RV.dec!=='none'&&s.decision!==RV.dec)return false;
     if(RV.docs==='done'&&!docsComplete(s))return false;
     if(RV.docs==='miss'&&docsComplete(s))return false;
     if(RV.grp==='none'&&grpOf(s.group))return false;
@@ -2231,16 +2249,16 @@ function renderReview(){
   var n=apps.length,c=function(f){return apps.filter(f).length;};
   var fp=c(function(r){return pay(r.s)==='FP';}),fa=c(function(r){return pay(r.s)==='FA';}),nocl=c(function(r){return noClarity(r.s);});
   var visited=c(function(r){return r.s.visitedCampus;}),shadow=c(function(r){return r.s.shadowDay;}),legacy=c(function(r){return r.s.legacy==='yes';});
-  var readers=c(function(r){return r.s.readers&&String(r.s.readers).toLowerCase()!=='deleted user';}),interviews=c(function(r){return intText(r.s);}),scored=c(function(r){return r.scored;}),mineN=c(function(r){return myReview(r.s);});
-  var decs=['In','Win','Need to Win','Waitlist','Deny'],tally={};decs.forEach(function(d){tally[d]=c(function(r){return r.s.decision===d;});});
-  var undecided=n-decs.reduce(function(a,d){return a+tally[d];},0);
+  var readers=c(function(r){return readerList(r.s).length>0;}),pendR=c(function(r){return!!pendingReader(r.s);}),interviews=c(function(r){return intText(r.s);}),scored=c(function(r){return r.scored;}),mineN=c(function(r){return myReview(r.s);});
+  var decs=['In','Win','Need to Win','Waitlist','Deny'],tally={};decs.forEach(function(d){tally[d]=c(function(r){return d==='Need to Win'?isNeedToWin(r.s):r.s.decision===d;});});
+  var undecided=c(function(r){return!r.s.decision;});
   function pct(x){return n?Math.round(x/n*100)+'%':'--';}
 
   var h='<div class="dash-hdr"><div><div class="dash-title">Committee Review</div><div class="dash-sub">'+n+' of '+all.length+' applicants shown -- sorted by Combined %, then last name. Click a name to open the profile, or present the list to the committee one student at a time.</div></div><button class="present-btn" id="rv-present">&#9654; Present to committee</button></div>';
   h+='<div class="dgrid4">';
   h+='<div class="dc4"><div class="dn">'+n+'</div><div class="dl">Applicants</div><div class="dsub">'+fp+' full pay &middot; '+fa+' aid'+(n-fp-fa?' &middot; '+(n-fp-fa)+' unknown':'')+'</div>'+(nocl?'<div class="dsub" style="color:#A8302A">'+nocl+' aid with no Clarity file</div>':'')+'</div>';
   h+='<div class="dc4"><div class="dn">'+pct(visited)+'</div><div class="dl">Visited campus</div><div class="dsub">'+visited+' visited &middot; '+shadow+' shadowed &middot; '+legacy+' legacy</div></div>';
-  h+='<div class="dc4"><div class="dn">'+readers+' / '+n+'</div><div class="dl">Readers assigned</div><div class="dsub">'+scored+' scored'+(READER?' ('+mineN+' by you)':'')+' &middot; '+interviews+' interviews set</div></div>';
+  h+='<div class="dc4"><div class="dn">'+readers+' / '+n+'</div><div class="dl">Readers assigned</div><div class="dsub">'+(pendR?pendR+' invited, not accepted yet &middot; ':'')+scored+' scored'+(READER?' ('+mineN+' by you)':'')+' &middot; '+interviews+' interviews set</div></div>';
   h+='<div class="dc4"><div class="dn">'+undecided+'</div><div class="dl">Awaiting decision</div><div class="dsub">'+decs.map(function(d){return d+' '+tally[d];}).join(' &middot; ')+'</div></div>';
   h+='</div>';
   // Meeting groups: counts across the grade/pay/decision/docs filters (not the group filter itself)
@@ -2256,15 +2274,16 @@ function renderReview(){
     sel('rv-pay',RV.pay,[['all','Full pay + aid'],['FP','Full pay'],['FA','Financial aid'],['noclar','Aid, no Clarity file']])+
     sel('rv-dec',RV.dec,[['all','All decisions'],['none','No decision yet'],['In','In'],['Win','Win'],['Need to Win','Need to Win'],['Waitlist','Waitlist'],['Deny','Deny']])+
     sel('rv-docs',RV.docs,[['all','All documents'],['done','Documents complete'],['miss','Missing documents']])+
+    sel('rv-grp',RV.grp,[['all','All meeting groups']].concat(GROUPS.map(function(x){return[x.k,x.l];})).concat([['none','Not sorted']]))+
     '<input class="rv-f rv-q" id="rv-q" type="search" placeholder="Search name or school" value="'+esc(RV.q)+'"/></div>';
 
   if(RV.mode==='agenda'){h+=agendaHTML(apps);}else{
   h+='<div class="dsec rv-wrap"><table class="dtable rv-table"><tr><th>Student</th><th>Meeting group</th><th>Gr</th><th>School</th><th>Pay</th><th>Clarity</th><th class="sens">Income</th><th class="sens">Clarity sugg.</th><th class="sens">Offer</th><th>GPA</th><th title="Visited campus / Shadow day / Legacy">Visit</th><th title="Required application items received">Docs</th><th>Readers</th><th>Scored by</th><th>Interview</th><th>Acad</th><th>Mission</th><th>Extra</th><th>Social</th><th>Recs</th><th>Reach</th><th>Overall</th><th>Combined</th><th>Decision</th><th></th></tr>';
   apps.forEach(function(r){
     var s=r.s,flags=(s.visitedCampus?'V':'')+(s.shadowDay?' S':'')+(s.legacy==='yes'?' L':'');
-    h+='<tr><td><a href="#" class="rv-open" data-id="'+esc(s.id)+'">'+esc(s.last)+', '+esc(s.first)+'</a></td><td>'+grpSelect(s)+'</td><td>'+esc(g(s)||'--')+'</td><td>'+esc(s.school||'--')+'</td><td>'+(pay(s)||'--')+'</td><td>'+clarityCell(s)+'</td><td class="sens">'+fmt$(s.income)+'</td><td class="sens">'+fmt$(s.suggtuit)+'</td><td class="sens">'+fmt$(s.parentoffer)+'</td><td>'+esc(s.actualgpa||s.gpa||'--')+'</td><td>'+(flags.trim()||'<span class="rv-miss">none</span>')+'</td><td>'+(ckIn(s)!==null?'<span class="ckn'+(docsComplete(s)?' full':'')+'">'+ckIn(s)+'/'+CK_REQ.length+'</span>':'--')+'</td><td>'+esc(s.readers||'--')+'</td><td title="'+esc(scoredBy(s).join(', '))+'">'+(scoredBy(s).length?scoredBy(s).length+(scoredBy(s).length===1?' reader':' readers'):'--')+'</td><td>'+esc(intText(s)||'--')+(intLevel(s)?' <strong>'+esc(intLevel(s))+'</strong>':'')+'</td>';
-    scoreKeys.forEach(function(k){h+='<td>'+esc(s[k]||'--')+'</td>';});
-    h+='<td><strong>'+(r.combined!==null?r.combined.toFixed(0)+'%':'--')+'</strong></td><td>'+(s.decision?'<span class="rv-dec rv-'+s.decision.replace(/\s/g,'').toLowerCase()+'">'+esc(s.decision)+'</span>':'--')+'</td><td><button class="rv-score'+(myReview(s)?' done':'')+'" data-id="'+esc(s.id)+'">'+(myReview(s)?'My score':'Score')+'</button></td></tr>';
+    h+='<tr><td><a href="#" class="rv-open" data-id="'+esc(s.id)+'">'+esc(s.last)+', '+esc(s.first)+'</a></td><td>'+grpSelect(s)+'</td><td>'+esc(g(s)||'--')+'</td><td>'+esc(s.school||'--')+'</td><td>'+(pay(s)||'--')+'</td><td>'+clarityCell(s)+'</td><td class="sens">'+fmt$(s.income)+'</td><td class="sens">'+fmt$(s.suggtuit)+'</td><td class="sens">'+fmt$(s.parentoffer)+'</td><td>'+esc(s.actualgpa||s.gpa||'--')+'</td><td>'+(flags.trim()||'<span class="rv-miss">none</span>')+'</td><td>'+(ckIn(s)!==null?'<span class="ckn'+(docsComplete(s)?' full':'')+'">'+ckIn(s)+'/'+CK_REQ.length+'</span>':'--')+'</td><td>'+readerChips(s)+'</td><td title="'+esc(scoredBy(s).join(', '))+'">'+(scoredBy(s).length?scoredBy(s).length+(scoredBy(s).length===1?' reader':' readers'):'--')+'</td><td>'+esc(intText(s)||'--')+(intLevel(s)?' <strong>'+esc(intLevel(s))+'</strong>':'')+'</td>';
+    scoreKeys.forEach(function(k){h+=s[k]?'<td style="color:'+rScoreColor(s[k])+'">'+esc(s[k])+'</td>':'<td class="rv-none">--</td>';});
+    h+='<td>'+(r.combined!==null?'<span class="comb" style="color:'+combColor(r.combined)+'">'+r.combined.toFixed(0)+'%</span>':'<span class="rv-none">--</span>')+'</td><td>'+(s.decision?'<span class="rv-dec rv-'+s.decision.replace(/\s/g,'').toLowerCase()+'">'+esc(s.decision)+'</span>':'--')+'</td><td><button class="rv-score'+(myReview(s)?' done':'')+'" data-id="'+esc(s.id)+'">'+(myReview(s)?'My score':'Score')+'</button></td></tr>';
   });
   if(!apps.length)h+='<tr><td colspan="25" style="text-align:center;color:#9EA4B0;font-style:italic">No applicants match these filters.</td></tr>';
   h+='</table></div><div class="dsec-note" style="margin-top:6px">Visit: V = visited campus, S = shadow day, L = legacy. Clarity: status from Clarity for aid applicants; "No file" means aid requested but no Clarity application found. Combined % averages whichever reader scores are entered, unweighted.</div>';
@@ -2286,7 +2305,7 @@ function renderReview(){
   var aa=document.getElementById('ag-accept-all');if(aa)aa.addEventListener('click',function(){var n3=0;apps.forEach(function(r){var k=suggestGroup(r.s);if(k){r.s.group=k;n3++;}});if(n3){sync();render();}renderReview();});
   var gl=document.querySelectorAll('#review .ag-present');for(var gm=0;gm<gl.length;gm++)gl[gm].addEventListener('click',function(){var k=this.getAttribute('data-grp');presentGroups(apps,[k],grpOf(k).l);});
   var pa=document.getElementById('ag-present-all');if(pa)pa.addEventListener('click',function(){presentGroups(apps,GROUPS.filter(function(x){return x.disc;}).map(function(x){return x.k;}),'Discussion groups');});
-  [['rv-grade','grade'],['rv-pay','pay'],['rv-dec','dec'],['rv-docs','docs']].forEach(function(p){document.getElementById(p[0]).addEventListener('change',function(){RV[p[1]]=this.value;renderReview();});});
+  [['rv-grade','grade'],['rv-pay','pay'],['rv-dec','dec'],['rv-docs','docs'],['rv-grp','grp']].forEach(function(p){document.getElementById(p[0]).addEventListener('change',function(){RV[p[1]]=this.value;renderReview();});});
   var q=document.getElementById('rv-q');
   q.addEventListener('input',function(){RV.q=this.value;var pos=this.selectionStart;renderReview();var nq=document.getElementById('rv-q');nq.focus();try{nq.setSelectionRange(pos,pos);}catch(e){}});
   var rin=document.getElementById('rv-reader');
