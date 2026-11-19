@@ -463,6 +463,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible,te
 .ag-hd{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
 .ag-d{font-size:11px;color:#5A6070;flex:1}
 .ag-n{font-family:'EB Garamond',serif;font-size:22px;font-weight:600;color:#003260}
+.ag-sec.ag-empty{padding-top:8px!important;padding-bottom:8px!important;opacity:.72}.ag-sec.ag-empty .pm-empty{display:none}.ag-sec.ag-empty .ag-n{color:#C9CDD4}
 .ag-chips{display:flex;flex-wrap:wrap;gap:6px}
 .ag-chip{font-size:11px;font-weight:600;color:#003260;background:#F4F5F7;border-radius:99px;padding:4px 10px;text-decoration:none}
 .ag-chip:hover{background:#E8EDF5}
@@ -1646,13 +1647,13 @@ function agendaHTML(apps){
   var thead='<tr><th>Student</th><th>School</th><th class="c">Gr</th><th class="c">Pay</th><th class="c">GPA</th><th class="c">Docs</th><th class="c">Combined</th><th class="sens c">Parent offer</th><th class="c">Decision</th><th>Group</th></tr>';
   disc.forEach(function(g){
     var L=byG(g.k);
-    h+='<div class="ag-sec" style="border-left-color:'+g.c+'"><div class="ag-hd"><span class="gp" style="background:'+g.bg+';color:'+g.c+';font-size:11px;padding:4px 11px">'+g.l+'</span><span class="ag-d">'+g.d+'</span><span class="ag-n">'+L.length+'</span>'+(L.length?'<button class="call-btn ag-present" data-grp="'+g.k+'">Present this group</button>':'')+'</div>';
+    h+='<div class="ag-sec'+(L.length?'':' ag-empty')+'" style="border-left-color:'+g.c+'"><div class="ag-hd"><span class="gp" style="background:'+g.bg+';color:'+g.c+';font-size:11px;padding:4px 11px">'+g.l+'</span><span class="ag-d">'+g.d+'</span><span class="ag-n">'+L.length+'</span>'+(L.length?'<button class="call-btn ag-present" data-grp="'+g.k+'">Present this group</button>':'')+'</div>';
     h+=L.length?'<table class="dtable ck-table">'+thead+L.map(row).join('')+'</table>':'<div class="pm-empty">No one in this group yet.</div>';
     h+='</div>';
   });
   cons.forEach(function(g){
     var L=byG(g.k);
-    h+='<div class="ag-sec" style="border-left-color:'+g.c+'"><div class="ag-hd"><span class="gp" style="background:'+g.bg+';color:'+g.c+';font-size:11px;padding:4px 11px">'+g.l+'</span><span class="ag-d">Consent list: '+g.d.toLowerCase()+'</span><span class="ag-n">'+L.length+'</span>'+(L.length?'<button class="call-btn ag-present" data-grp="'+g.k+'">Present</button>':'')+'</div>';
+    h+='<div class="ag-sec'+(L.length?'':' ag-empty')+'" style="border-left-color:'+g.c+'"><div class="ag-hd"><span class="gp" style="background:'+g.bg+';color:'+g.c+';font-size:11px;padding:4px 11px">'+g.l+'</span><span class="ag-d">Consent list: '+g.d.toLowerCase()+'</span><span class="ag-n">'+L.length+'</span>'+(L.length?'<button class="call-btn ag-present" data-grp="'+g.k+'">Present</button>':'')+'</div>';
     h+=L.length?'<div class="ag-chips">'+L.map(function(r){return'<a href="#" class="rv-open ag-chip" data-id="'+esc(r.s.id)+'">'+esc(r.s.first)+' '+esc(r.s.last)+(r.s.decision?' &middot; '+esc(r.s.decision):'')+'</a>';}).join('')+'</div>':'<div class="pm-empty">No one here yet.</div>';
     h+='</div>';
   });
