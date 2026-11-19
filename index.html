@@ -293,7 +293,21 @@ body.cview .cview-banner{display:block}
 .rv-table a.rv-open:hover{text-decoration:underline}
 .rv-miss{color:#A8302A;font-weight:500}
 .rv-dec{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;background:#EEF1F6;color:#003260}
-.rv-in,.rv-win{background:#E3F1E9;color:#2A6B4A}.rv-needtowin{background:#FAF3E0;color:#8A5C00}.rv-deny{background:#F8E4E2;color:#A8302A}
+.rv-in,.rv-win{background:#E3F1E9;color:#2A6B4A}.rv-needtowin{background:#FAF3E0;color:#8A5C00}.rv-deny{background:#F8E4E2;color:#A8302A}.rv-waitlist{background:#EEF0F4;color:#5A6070}
+.dec-hist{margin-top:8px;font-size:11px;color:#5A6070;line-height:1.55}.dec-hist b{color:#003260}.dec-hist span{color:#9EA4B0}
+.dec-hist.dark{color:rgba(255,255,255,.62);margin-top:6px}.dec-hist.dark b{color:#fff}.dec-hist.dark span{color:rgba(255,255,255,.45)}
+.rv-iw{margin-left:auto;font-size:11px;color:#5A6070;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.dec-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.dec-chip{border:1px solid transparent;cursor:pointer;font-family:inherit}
+.dec-chip.on{border-color:currentColor;box-shadow:0 0 0 1px currentColor inset}
+.dec-chip.clr{background:none;color:#5A6070;font-size:10px;text-decoration:underline;padding:2px 4px}
+.rv-table tr.dec-row td:first-child{box-shadow:inset 3px 0 0 #9EA4B0}
+.rv-table tr.dr-in td:first-child,.rv-table tr.dr-win td:first-child{box-shadow:inset 3px 0 0 #2A6B4A}
+.rv-table tr.dr-needtowin td:first-child{box-shadow:inset 3px 0 0 #8A5C00}
+.rv-table tr.dr-deny td:first-child{box-shadow:inset 3px 0 0 #A8302A}
+.rv-table tr.dr-in,.rv-table tr.dr-win{background:#F6FBF8}
+.src-tag{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:8px;background:#EEF1F6;color:#003260}
+.src-interview{background:#E8F0FA;color:#1A5CA8}.src-finalsite{background:#F4F5F7;color:#5A6070}
 
 .rv-reader{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:11px;color:#5A6070;margin:0 0 10px}
 .rv-reader input{min-width:200px;background:#FFFBEE}
@@ -426,6 +440,24 @@ body.cview .cview-banner{display:block}
 .grp-sel{font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:600;padding:3px 4px;border:1px solid #E4E6EA;border-radius:5px;background:#fff;color:#1A1D25;max-width:140px}
 .dgrid7{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:#E4E6EA;border-radius:8px;overflow:hidden;margin-bottom:1rem}
 .dgrid7 .dc4{background:#fff;padding:10px 12px}
+.dgrid7 .dc4:last-child{grid-column:auto / -1}
+.grp-tile{transition:background .15s,box-shadow .15s}
+.grp-tile.sel{box-shadow:inset 0 -3px 0 #C49A3C;background:#FFFCF3}
+.scp{display:inline-block;min-width:26px;text-align:center;padding:2px 6px;border-radius:6px;font-weight:700;background:color-mix(in srgb,currentColor 11%,#fff)}
+.comb{display:inline-flex;flex-direction:column;align-items:flex-start;gap:3px}
+.comb-bar{display:block;width:46px;height:4px;border-radius:2px;background:#EEF0F3;overflow:hidden}
+.comb-bar b{display:block;height:100%;background:currentColor;border-radius:2px}
+.rv-table tr.dr-in td,.rv-table tr.dr-win td{background:#F3FAF6}
+.rv-table tr.dr-needtowin td{background:#FFFBF0}
+.rv-table tr.dr-deny td{background:#FDF6F5}
+.rv-table tr.dec-row:hover td{background:#EAF2EC}
+.rv-table .b{font-size:9px;padding:2px 7px;border-radius:9px;font-weight:700;vertical-align:1px;margin-left:4px}
+.dgrid4 .dc4{transition:box-shadow .15s}
+.dc4 .dn{font-variant-numeric:tabular-nums}
+#review,#dash,#checklist,#drafts,#feeder,#fa,#monthly,#yoy,#snap{animation:pcaFade .2s ease-out}
+@keyframes pcaFade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible,textarea:focus-visible{outline:2px solid #C49A3C;outline-offset:2px}
+.reader-grid{transition:opacity .2s}
 @media(max-width:900px){.dgrid7{grid-template-columns:repeat(3,1fr)}}
 .ag-top{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border-radius:8px;padding:12px 16px;margin-bottom:12px;font-size:12.5px;color:#1A1D25}
 .ag-sec{background:#fff;border-radius:8px;padding:14px 16px;margin-bottom:12px;border-left:5px solid #C9CDD4;overflow-x:auto}
@@ -879,6 +911,7 @@ var PHOTO_SK='pca_photos_v1';
 var REMOVED_PHOTOS={}; // photos removed in the edit form, so the merged save drops them
 function loadLocal(){
   try{students=JSON.parse(localStorage.getItem(SK))||[];}catch(e){students=[];}
+  if(!Object.keys(BASE).length)loadBase();
   try{
     var savedCfg=JSON.parse(localStorage.getItem(CFG_SK));
     if(savedCfg)CFG=Object.assign({},CFG_DEFAULTS,savedCfg,{
@@ -891,6 +924,7 @@ function loadLocal(){
       snapshots:savedCfg.snapshots||[]
     });
   }catch(e){}
+  students.forEach(applyReviewAverages);
   // Load photos from separate storage and merge
   try{
     var photos=JSON.parse(localStorage.getItem(PHOTO_SK))||{};
@@ -929,13 +963,39 @@ function stampChanges(){
   Object.keys(SNAP).forEach(function(k){if(!seen[k]){addTomb(k,now);delete SNAP[k];}});
   var cj=serCfg(CFG);if(cj!==CFGSNAP){CFG._mod=now;CFGSNAP=cj;}
 }
+// Every score source for a student, keyed by display name:
+//   reader reviews scored in Committee Review (x.reviews),
+//   the family interview feedback form (x.interview.fb.scores), and
+//   reviews scored inside Finalsite (x.fsrev, set by the Finalsite import).
+// The rubric fields (racad..roverall) are always the average of these, so a
+// score entered anywhere shows up everywhere.
+function scoreObj(src){var r={},any=false;if(!src)return null;SCORE_KEYS.forEach(function(k){var v=parseFloat(src[k]);if(!isNaN(v)){r[k]=String(v);any=true;}});return any?r:null;}
+function intSrcName(x){var i=x.interview,f=i&&i.fb;return((f&&f.by)||(i&&i.who)||'Interviewer')+' (interview)';}
+function scoreSources(x){
+  var out={};if(!x)return out;
+  var rv=x.reviews||{};
+  Object.keys(rv).forEach(function(n){if(rv[n]&&!rv[n].removed)out[n]=rv[n];});
+  var i=x.interview,f=i&&i.fb;
+  if(f&&i.status!=='Canceled'){var ir=scoreObj(f.scores);if(ir){ir.at=f.at||0;ir.kind='interview';out[intSrcName(x)]=ir;}}
+  var fr=scoreObj(x.fsrev);if(fr){fr.kind='finalsite';out['Finalsite'+(x.readers&&x.readers.toLowerCase()!=='deleted user'?' ('+x.readers+')':'')]=fr;}
+  return out;
+}
+// How much the family interview counts next to one reader (Committee Review setting, shared)
+function intWeight(){var w=parseFloat(CFG&&CFG.intWeight);return isNaN(w)||w<0?1:w;}
+function srcKind(r){return r&&r.kind==='interview'?'Interview':(r&&r.kind==='finalsite'?'Finalsite':'Reader');}
 function applyReviewAverages(x){
-  var rv=x.reviews;if(!rv)return;
-  var names=Object.keys(rv).filter(function(n){return rv[n]&&!rv[n].removed;});
-  if(!names.length){if(Object.keys(rv).length){SCORE_KEYS.forEach(function(k){x[k]=null;});x.readersScored='';}return;}
+  var all=scoreSources(x),names=Object.keys(all);
+  if(!names.length){
+    // Nothing to average. Clear stale averages only if they came from sources
+    // that are now gone; scores typed by hand in the profile are left alone.
+    if(x.readersScored){SCORE_KEYS.forEach(function(k){x[k]=null;});x.readersScored='';}
+    return;
+  }
+  var iw=intWeight();
   SCORE_KEYS.forEach(function(k){
-    var v=names.map(function(n){return parseFloat(rv[n][k]);}).filter(function(n){return!isNaN(n);});
-    x[k]=v.length?String(Math.round(v.reduce(function(a,b){return a+b;},0)/v.length*10)/10):null;
+    var sum=0,wt=0;
+    names.forEach(function(n){var v=parseFloat(all[n][k]);if(isNaN(v))return;var w=all[n].kind==='interview'?iw:1;sum+=v*w;wt+=w;});
+    x[k]=wt>0?String(Math.round(sum/wt*10)/10):null;
   });
   x.readersScored=names.join(', ');
 }
@@ -944,11 +1004,49 @@ function mergeReviews(a,b){
   [a||{},b||{}].forEach(function(src){Object.keys(src).forEach(function(n){if(!out[n]||(src[n].at||0)>(out[n].at||0))out[n]=src[n];});});
   return out;
 }
-function mergeStudent(local,cloud){
-  var base=(local._mod||0)>(cloud._mod||0)?local:cloud;
-  var m=Object.assign({},base);
+// Three-way merge. BASE holds each student as this browser last saw them in
+// the shared copy. A field changed only here keeps the local value, a field
+// changed only in the shared copy keeps that value, and only when both sides
+// changed the same field does the newer save win. So two people editing
+// different things on the same student (a decision here, interview feedback
+// from the sheet there, two checklist items) never overwrite each other.
+var BASE={},BASE_SK='pca_base_v1';
+function loadBase(){try{BASE=JSON.parse(localStorage.getItem(BASE_SK))||{};}catch(e){BASE={};}}
+function setBase(list){BASE={};list.forEach(function(x){BASE[String(x.id)]=ser(x);});try{localStorage.setItem(BASE_SK,JSON.stringify(BASE));}catch(e){}}
+var NO_MERGE={_mod:1,photo:1,reviews:1,readersScored:1};SCORE_KEYS.forEach(function(k){NO_MERGE[k]=1;});
+function isPlainObj(v){return v&&typeof v==='object'&&!Array.isArray(v);}
+function merge3(l,c,b,localNewer,depth){
+  var lv=JSON.stringify(l),cv=JSON.stringify(c),bv=JSON.stringify(b);
+  if(lv===cv)return c;
+  var lch=lv!==bv,cch=cv!==bv;
+  if(lch&&!cch)return l;
+  if(!lch)return c;
+  // both sides changed it: merge one level into small objects like the checklist
+  if(depth<1&&isPlainObj(l)&&isPlainObj(c)){
+    var o={},bo=isPlainObj(b)?b:{},ks={};
+    Object.keys(l).concat(Object.keys(c)).forEach(function(k){ks[k]=1;});
+    Object.keys(ks).forEach(function(k){var v=merge3(l[k],c[k],bo[k],localNewer,depth+1);if(v!==undefined)o[k]=v;});
+    return o;
+  }
+  return localNewer?l:c;
+}
+function mergeStudent(local,cloud,baseMap){
+  var bj=(baseMap||BASE)[String(cloud.id)],base=null;
+  try{base=bj?JSON.parse(bj):null;}catch(e){base=null;}
+  var localNewer=(local._mod||0)>(cloud._mod||0),m;
+  if(!base){m=Object.assign({},localNewer?local:cloud);}
+  else{
+    m=Object.assign({},cloud);var ks={};
+    Object.keys(local).concat(Object.keys(cloud)).forEach(function(k){ks[k]=1;});
+    Object.keys(ks).forEach(function(k){
+      if(NO_MERGE[k])return;
+      var v=merge3(local[k],cloud[k],base[k],localNewer,0);
+      if(v===undefined)delete m[k];else m[k]=v;
+    });
+  }
   var rv=mergeReviews(local.reviews,cloud.reviews);
-  if(rv){m.reviews=rv;applyReviewAverages(m);}
+  if(rv)m.reviews=rv;
+  applyReviewAverages(m);
   m._mod=Math.max(local._mod||0,cloud._mod||0);
   return m;
 }
@@ -958,7 +1056,7 @@ function mergeCfg(local,cloud){
   var base=(local._mod||0)>(cloud._mod||0)?local:cloud;
   var m=Object.assign({},base);m.tomb=mergeTombs(local.tomb,cloud.tomb);return m;
 }
-function mergeLists(local,cloud,tombs){
+function mergeLists(local,cloud,tombs,baseMap){
   var tomb={};(tombs||[]).forEach(function(t){tomb[String(t.id)]=t.at;});
   var L={},C={},order=[];
   local.forEach(function(x){L[String(x.id)]=x;});
@@ -967,8 +1065,8 @@ function mergeLists(local,cloud,tombs){
   var out=[];
   order.forEach(function(k){
     var l=L[k],c=C[k],m;
-    if(l&&c)m=mergeStudent(l,c);
-    else if(c)m=c;
+    if(l&&c)m=mergeStudent(l,c,baseMap);
+    else if(c){m=c;applyReviewAverages(m);}
     else if(l._mod)m=l;   // added or changed here since loading
     else return;           // stale copy of a student someone else removed
     if(tomb[k]&&(m._mod||0)<=tomb[k])return;
@@ -1004,7 +1102,8 @@ function push(){
     }
   }
   setSd('busy','Saving...');
-  var mergedList,mergedCfg;
+  var mergedList,mergedCfg,startMap={},startJson=JSON.stringify(students.map(ser));
+  students.forEach(function(x){startMap[String(x.id)]=ser(x);});
   apiFetch(PROXY_URL+'?t='+Date.now())
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(d){
@@ -1029,7 +1128,10 @@ function push(){
   })
   .then(function(){
     lastKnownCloudCount=toSync.length;
-    if(adoptMerged(mergedList,mergedCfg)){render();if(selId)detail();renderActiveView();}
+    setBase(mergedList);
+    // edits made during the save are merged on top instead of being replaced
+    var nextList=JSON.stringify(students.map(ser))===startJson?mergedList:mergeLists(students,mergedList,mergedCfg.tomb,startMap);
+    if(adoptMerged(nextList,mergedCfg)){render();if(selId)detail();renderActiveView();}
     setSd('ok','Saved');setTimeout(function(){setSd('ok','');},2000);
   })
   .catch(function(e){
@@ -1054,6 +1156,7 @@ function pull(){
         var ml=mergeLists(students,rec.s,mc.tomb);
         var cfgChanged=JSON.stringify(mc)!==JSON.stringify(CFG);
         changed=adoptMerged(ml,mc)||cfgChanged;
+        setBase(rec.s);
         // anything newer here than in the shared copy still needs saving
         var cloudMod={};rec.s.forEach(function(x){cloudMod[String(x.id)]=x._mod||0;});
         if(students.some(function(x){return!(String(x.id) in cloudMod)||(x._mod||0)>cloudMod[String(x.id)];}))push();
@@ -1435,13 +1538,13 @@ function renderPresent(){
   // Checklist + decision
   h+='<div class="pm-card span2"><h4>Application checklist'+(s.ckDate?' <span style="font-weight:500;letter-spacing:0;text-transform:none;color:#9EA4B0">&middot; Finalsite '+fmtDay(s.ckDate)+'</span>':'')+'</h4><div>'+ckChips(s,false)+'</div>'+(ckn!==null&&ckn<CK_REQ.length?'<div class="ck-miss-txt" style="font-size:12px">Still missing: '+ckMissing(s).join(', ')+'</div>':'')+'</div>';
   var decs=['In','Win','Need to Win','Waitlist','Deny'];
-  h+='<div class="pm-card"><h4>Committee decision</h4><div class="pm-dec">'+decs.map(function(d){return'<button class="dec-btn'+(s.decision===d?' '+decBtnClass(d):'')+'" data-dec="'+d+'">'+d+'</button>';}).join('')+'</div>'+
+  h+='<div class="pm-card"><h4>Committee decision</h4><div class="pm-dec">'+decs.map(function(d){return'<button class="dec-btn'+(s.decision===d?' '+decBtnClass(d):'')+'" data-dec="'+d+'">'+d+'</button>';}).join('')+'</div>'+decHistHTML(s,3)+
     '<h4 style="margin-top:14px">Meeting group</h4><div class="pm-dec">'+grpButtons(s,'pm-grp-btn')+'</div>'+
     '<h4 style="margin-top:14px">Meeting notes</h4><textarea class="pm-notes" id="pm-notes" placeholder="Notes from the discussion (saved when you move on)">'+esc(s.notes||'')+'</textarea></div>';
   // Reader scores
   var sl=[['racad','Academic'],['rmission','Mission'],['rextra','Extracurr.'],['rsocial','Social'],['rrecs','Recs'],['rreach','Reach'],['roverall','Overall']];
-  h+='<div class="pm-card span3"><h4>Reader scores'+(scoredBy(s).length?' &middot; '+scoredBy(s).length+(scoredBy(s).length===1?' reader':' readers')+' averaged':'')+'</h4><div class="pm-scores">'+sl.map(function(x){var v=s[x[0]];return'<div class="pm-sc"><div class="v" style="color:'+(v?rScoreColor(v):'#C9CDD4')+'">'+(v?esc(v):'--')+'</div><div class="l">'+x[1]+'</div></div>';}).join('')+'</div>'+
-    (scoredBy(s).length?'<div style="margin-top:10px">'+scoredBy(s).map(function(n){var r=s.reviews[n],pp=reviewPct(r);return'<div class="pm-txt" style="font-size:12px;margin-top:6px"><strong>'+esc(n)+'</strong>'+(pp!=null?' &middot; '+pp.toFixed(0)+'%':'')+(r.comments?': '+esc(r.comments):'')+'</div>';}).join('')+'</div>':'')+
+  h+='<div class="pm-card span3"><h4>Scores'+(scoredBy(s).length?' &middot; '+scoredBy(s).length+(scoredBy(s).length===1?' source':' sources')+' averaged':'')+'</h4><div class="pm-scores">'+sl.map(function(x){var v=s[x[0]];return'<div class="pm-sc"><div class="v" style="color:'+(v?rScoreColor(v):'#C9CDD4')+'">'+(v?esc(v):'--')+'</div><div class="l">'+x[1]+'</div></div>';}).join('')+'</div>'+
+    (scoredBy(s).length?'<div style="margin-top:10px">'+scoredBy(s).map(function(n){var r=scoreSources(s)[n],pp=reviewPct(r);return'<div class="pm-txt" style="font-size:12px;margin-top:6px"><strong>'+esc(n)+'</strong>'+(pp!=null?' &middot; '+pp.toFixed(0)+'%':'')+(r.comments?': '+esc(r.comments):'')+'</div>';}).join('')+'</div>':'')+
     (s.rcomments?'<div class="pm-txt" style="margin-top:10px;background:#F8FAFD;border-radius:6px;padding:10px 12px">'+esc(s.rcomments)+'</div>':'')+
     (!score.length&&!s.rcomments?'<div class="pm-empty" style="margin-top:8px">No reader scores yet.</div>':'')+'</div>';
   // Interests
@@ -1454,7 +1557,7 @@ function renderPresent(){
   document.getElementById('pm-prev').addEventListener('click',function(){pmGo(-1);});
   document.getElementById('pm-next').addEventListener('click',function(){pmGo(1);});
   var db=box.querySelectorAll('.pm-dec .dec-btn');
-  for(var i=0;i<db.length;i++)db[i].addEventListener('click',function(){var d=this.getAttribute('data-dec');pmSaveNotes();var st=byId(PM.ids[PM.i]);if(!st)return;st.decision=st.decision===d?'':d;sync();renderPresent();});
+  for(var i=0;i<db.length;i++)db[i].addEventListener('click',function(){var d=this.getAttribute('data-dec');pmSaveNotes();var st=byId(PM.ids[PM.i]);if(!st)return;setDecision(st,st.decision===d?'':d);sync();renderPresent();});
   document.getElementById('pm-notes').addEventListener('blur',pmSaveNotes);
   var pg=box.querySelectorAll('.pm-grp-btn');
   for(var j=0;j<pg.length;j++)pg[j].addEventListener('click',function(){pmSaveNotes();setGroup(PM.ids[PM.i],this.getAttribute('data-grp'));renderPresent();});
@@ -1513,6 +1616,20 @@ function suggestGroup(s){
   if(comb===null||comb<75)return'';
   return s.aid==='yes'?'bubble':(s.aid==='no'?'fpwant':'');
 }
+// Setting a decision on a student with no meeting group files them in the
+// matching group, so the agenda stays sorted. A group you picked is never changed.
+var DEC_GROUP={'In':'clear','Need to Win':'win','Deny':'notfit'};
+function setDecision(st,d){
+  if(!st)return;var prev=st.decision||'';d=d||'';if(prev===d)return;
+  st.decision=d;
+  st.declog=(st.declog||[]).concat([{d:d,from:prev,by:READER||'',at:Date.now()}]).slice(-20);
+  if(d&&DEC_GROUP[d]&&!grpOf(st.group))st.group=DEC_GROUP[d];
+}
+function fmtStamp(t){var d=new Date(t);return(d.getMonth()+1)+'/'+d.getDate()+' '+d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});}
+function decHistHTML(s,max){
+  var L=(s.declog||[]).slice().reverse().slice(0,max||4);if(!L.length)return'';
+  return'<div class="dec-hist">'+L.map(function(e){return'<div><b>'+(e.d?esc(e.d):'Cleared')+'</b>'+(e.from?' <span>(was '+esc(e.from)+')</span>':'')+' &middot; '+(e.by?esc(e.by)+', ':'')+fmtStamp(e.at)+'</div>';}).join('')+'</div>';
+}
 function setGroup(id,k){var s=byId(id);if(!s)return;s.group=s.group===k?'':k;sync();}
 function grpSelect(s){
   var g=grpOf(s.group);
@@ -1523,8 +1640,9 @@ function agendaHTML(apps){
   var h='',byG=function(k){return apps.filter(function(r){return r.s.group===k;});};
   var disc=GROUPS.filter(function(g){return g.disc;}),cons=GROUPS.filter(function(g){return!g.disc;});
   var discN=disc.reduce(function(a,g){return a+byG(g.k).length;},0),consN=cons.reduce(function(a,g){return a+byG(g.k).length;},0);
-  var unsorted=apps.filter(function(r){return!grpOf(r.s.group);});
-  h+='<div class="ag-top"><div><strong>'+discN+' students to discuss</strong> &middot; about '+(discN*3)+' minutes at 3 minutes each &middot; '+consN+' on the consent list'+(unsorted.length?' &middot; <span style="color:#A8302A">'+unsorted.length+' not sorted yet</span>':'')+'</div>'+(discN?'<button class="present-btn" id="ag-present-all">&#9654; Present discussion groups</button>':'')+'</div>';
+  var decided=apps.filter(function(r){return!grpOf(r.s.group)&&r.s.decision;});
+  var unsorted=apps.filter(function(r){return!grpOf(r.s.group)&&!r.s.decision;});
+  h+='<div class="ag-top"><div><strong>'+discN+' students to discuss</strong> &middot; about '+(discN*3)+' minutes at 3 minutes each &middot; '+consN+' on the consent list'+(decided.length?' &middot; '+decided.length+' decided':'')+(unsorted.length?' &middot; <span style="color:#A8302A">'+unsorted.length+' not sorted yet</span>':'')+'</div>'+(discN?'<button class="present-btn" id="ag-present-all">&#9654; Present discussion groups</button>':'')+'</div>';
   function row(r){var s=r.s;return'<tr><td><a href="#" class="rv-open" data-id="'+esc(s.id)+'">'+esc(s.last)+', '+esc(s.first)+'</a></td><td>'+esc(s.school||'--')+'</td><td class="c">'+(gradeOf(s)||'--')+'</td><td class="c">'+(payOf(s)||'--')+'</td><td class="c">'+esc(s.actualgpa||s.gpa||'--')+'</td><td class="c">'+(ckIn(s)!==null?ckIn(s)+'/'+CK_REQ.length:'--')+'</td><td class="c">'+(r.combined!==null?r.combined.toFixed(0)+'%':'--')+'</td><td class="sens c">'+(s.aid==='yes'?fmt$(s.parentoffer):'--')+'</td><td class="c">'+(s.decision?'<span class="rv-dec rv-'+s.decision.replace(/\s/g,'').toLowerCase()+'">'+esc(s.decision)+'</span>':'--')+'</td><td>'+grpSelect(s)+'</td></tr>';}
   var thead='<tr><th>Student</th><th>School</th><th class="c">Gr</th><th class="c">Pay</th><th class="c">GPA</th><th class="c">Docs</th><th class="c">Combined</th><th class="sens c">Parent offer</th><th class="c">Decision</th><th>Group</th></tr>';
   disc.forEach(function(g){
@@ -1539,6 +1657,12 @@ function agendaHTML(apps){
     h+=L.length?'<div class="ag-chips">'+L.map(function(r){return'<a href="#" class="rv-open ag-chip" data-id="'+esc(r.s.id)+'">'+esc(r.s.first)+' '+esc(r.s.last)+(r.s.decision?' &middot; '+esc(r.s.decision):'')+'</a>';}).join('')+'</div>':'<div class="pm-empty">No one here yet.</div>';
     h+='</div>';
   });
+  if(decided.length){
+    var dOrder=['In','Win','Need to Win','Waitlist','Deny'];
+    decided.sort(function(a,b){return dOrder.indexOf(a.s.decision)-dOrder.indexOf(b.s.decision)||String(a.s.last||'').localeCompare(String(b.s.last||''));});
+    h+='<div class="ag-sec" style="border-left-color:#2A6B4A"><div class="ag-hd"><span class="gp" style="background:#E3F1E9;color:#2A6B4A;font-size:11px;padding:4px 11px">Decided</span><span class="ag-d">Decision already set, no meeting group needed</span><span class="ag-n">'+decided.length+'</span></div>';
+    h+='<div class="ag-chips">'+decided.map(function(r){return'<a href="#" class="rv-open ag-chip" data-id="'+esc(r.s.id)+'">'+esc(r.s.first)+' '+esc(r.s.last)+' <span class="rv-dec rv-'+r.s.decision.replace(/\s/g,'').toLowerCase()+'">'+esc(r.s.decision)+'</span></a>';}).join('')+'</div></div>';
+  }
   if(unsorted.length){
     var sug=unsorted.filter(function(r){return suggestGroup(r.s);});
     h+='<div class="ag-sec" style="border-left-color:#C9CDD4"><div class="ag-hd"><span class="gp" style="background:#F4F5F7;color:#5A6070;font-size:11px;padding:4px 11px">Not sorted yet</span><span class="ag-d">Pick a group for each before the meeting. Suggestions appear once readers score a file (75% or higher combined), based on pay type; nothing is set until you accept it.</span><span class="ag-n">'+unsorted.length+'</span>'+(sug.length?'<button class="call-btn" id="ag-accept-all">Accept all '+sug.length+' suggestions</button>':'')+'</div>';
@@ -2180,7 +2304,7 @@ function renderSnap(){
 var RV={grade:'all',pay:'all',dec:'all',docs:'all',grp:'all',mode:'list',q:''};
 var READER=(function(){try{return localStorage.getItem('pca_reader')||'';}catch(e){return'';}})();
 function myReview(s){return READER&&s.reviews&&s.reviews[READER]&&!s.reviews[READER].removed?s.reviews[READER]:null;}
-function scoredBy(s){var rv=s.reviews||{};return Object.keys(rv).filter(function(n){return rv[n]&&!rv[n].removed;});}
+function scoredBy(s){return Object.keys(scoreSources(s));}
 function reviewPct(r){var v=SCORE_KEYS.map(function(k){return parseFloat(r[k]);}).filter(function(n){return!isNaN(n);});return v.length?v.reduce(function(a,b){return a+b;},0)/v.length/5*100:null;}
 var SCORE_LABELS={racad:'Academic',rmission:'Mission fit',rextra:'Extracurricular',rsocial:'Social fit',rrecs:'Recommendations',rreach:'School reach',roverall:'Overall'};
 function openScore(id){
@@ -2190,7 +2314,7 @@ function openScore(id){
   if(!ov){ov=document.createElement('div');ov.className='ov';ov.id='ov-score';document.body.appendChild(ov);
     ov.addEventListener('click',function(e){if(e.target===ov)ov.classList.remove('open');});}
   var mine=myReview(st)||{};
-  var others=scoredBy(st).filter(function(n){return n!==READER;}).map(function(n){var p=reviewPct(st.reviews[n]);return esc(n)+(p!=null?' ('+p.toFixed(0)+'%)':'');});
+  var others=scoredBy(st).filter(function(n){return n!==READER;}).map(function(n){var p=reviewPct(scoreSources(st)[n]);return esc(n)+(p!=null?' ('+p.toFixed(0)+'%)':'');});
   var h='<div class="modal" style="width:520px"><div class="mh"><div class="mt2">Score: '+esc(st.first)+' '+esc(st.last)+'</div><button class="mx" id="sc-x">&times;</button></div><div class="mb">';
   h+='<div class="sc-who">Scoring as <strong>'+esc(READER)+'</strong> &middot; <a href="#" id="sc-change">not you?</a>'+(others.length?'<br>Also scored by: '+others.join(', '):'')+'</div>';
   h+='<div class="sc-grid">';
@@ -2243,7 +2367,7 @@ function renderReview(){
     if(RV.grp!=='all'&&RV.grp!=='none'&&s.group!==RV.grp)return false;
     if(RV.q){var n=((s.first||'')+' '+(s.last||'')+' '+(s.school||'')).toLowerCase();if(n.indexOf(RV.q.toLowerCase())<0)return false;}
     return true;
-  }).sort(function(a,b){return(b.combined==null?-1:b.combined)-(a.combined==null?-1:a.combined)||String(a.s.last||'').localeCompare(String(b.s.last||''));});
+  }).sort(function(a,b){return(b.s.decision?1:0)-(a.s.decision?1:0)||(b.combined==null?-1:b.combined)-(a.combined==null?-1:a.combined)||String(a.s.last||'').localeCompare(String(b.s.last||''));});
 
   // Summary of the filtered set
   var n=apps.length,c=function(f){return apps.filter(f).length;};
@@ -2254,12 +2378,12 @@ function renderReview(){
   var undecided=c(function(r){return!r.s.decision;});
   function pct(x){return n?Math.round(x/n*100)+'%':'--';}
 
-  var h='<div class="dash-hdr"><div><div class="dash-title">Committee Review</div><div class="dash-sub">'+n+' of '+all.length+' applicants shown -- sorted by Combined %, then last name. Click a name to open the profile, or present the list to the committee one student at a time.</div></div><button class="present-btn" id="rv-present">&#9654; Present to committee</button></div>';
+  var h='<div class="dash-hdr"><div><div class="dash-title">Committee Review</div><div class="dash-sub">'+n+' of '+all.length+' applicants shown -- decided students first, then by Combined %, then last name. Click a name to open the profile, or present the list to the committee one student at a time.</div></div><button class="present-btn" id="rv-present">&#9654; Present to committee</button></div>';
   h+='<div class="dgrid4">';
   h+='<div class="dc4"><div class="dn">'+n+'</div><div class="dl">Applicants</div><div class="dsub">'+fp+' full pay &middot; '+fa+' aid'+(n-fp-fa?' &middot; '+(n-fp-fa)+' unknown':'')+'</div>'+(nocl?'<div class="dsub" style="color:#A8302A">'+nocl+' aid with no Clarity file</div>':'')+'</div>';
   h+='<div class="dc4"><div class="dn">'+pct(visited)+'</div><div class="dl">Visited campus</div><div class="dsub">'+visited+' visited &middot; '+shadow+' shadowed &middot; '+legacy+' legacy</div></div>';
   h+='<div class="dc4"><div class="dn">'+readers+' / '+n+'</div><div class="dl">Readers assigned</div><div class="dsub">'+(pendR?pendR+' invited, not accepted yet &middot; ':'')+scored+' scored'+(READER?' ('+mineN+' by you)':'')+' &middot; '+interviews+' interviews set</div></div>';
-  h+='<div class="dc4"><div class="dn">'+undecided+'</div><div class="dl">Awaiting decision</div><div class="dsub">'+decs.map(function(d){return d+' '+tally[d];}).join(' &middot; ')+'</div></div>';
+  h+='<div class="dc4"><div class="dn">'+undecided+'</div><div class="dl">Awaiting decision</div><div class="dec-chips">'+decs.map(function(d){return'<button class="dec-chip rv-dec rv-'+d.replace(/\s/g,'').toLowerCase()+(RV.dec===d?' on':'')+'" data-dec="'+d+'" title="Show only '+d+'">'+d+' '+tally[d]+'</button>';}).join('')+(RV.dec!=='all'?'<button class="dec-chip clr" data-dec="all">Show all</button>':'')+'</div></div>';
   h+='</div>';
   // Meeting groups: counts across the grade/pay/decision/docs filters (not the group filter itself)
   h+='<div class="vw-bar" style="justify-content:space-between"><div class="seg" id="rv-mode"><button data-mode="list" class="'+(RV.mode==='list'?'on':'')+'">Scoring list</button><button data-mode="agenda" class="'+(RV.mode==='agenda'?'on':'')+'">Meeting agenda</button></div><span class="dsec-note">Meeting groups: sort students before committee so the meeting only discusses the ones who need it. Click a group to filter.</span></div>';
@@ -2268,7 +2392,8 @@ function renderReview(){
     '<div class="dc4 click grp-tile'+(RV.grp==='none'?' sel':'')+'" data-grp="none"><div class="dn" style="color:#9EA4B0">'+gbase.filter(function(r){return!grpOf(r.s.group);}).length+'</div><div class="dl">Not sorted</div></div></div>';
 
   function sel(id,cur,opts){return'<select class="rv-f" id="'+id+'">'+opts.map(function(o){return'<option value="'+o[0]+'"'+(cur===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>';}
-  h+='<div class="rv-reader">Scoring as: <input id="rv-reader" class="rv-f" placeholder="Type your name to score" value="'+esc(READER)+'"/> <span>Each reader\'s scores are saved separately and averaged into the columns below.</span></div>';
+  h+='<div class="rv-reader">Scoring as: <input id="rv-reader" class="rv-f" placeholder="Type your name to score" value="'+esc(READER)+'"/> <span>Each reader\'s scores are saved separately and averaged with interview scores into the columns below.</span>'+
+    '<label class="rv-iw">Interview counts as '+sel('rv-iw',String(intWeight()),[['0','0 (leave out)'],['0.5','half a reader'],['1','one reader'],['1.5','1.5 readers'],['2','two readers'],['3','three readers']])+'</label></div>';
   h+='<div class="rv-bar">'+
     sel('rv-grade',RV.grade,[['all','All grades'],['9','9th grade'],['tr','Transfers (10-12)']])+
     sel('rv-pay',RV.pay,[['all','Full pay + aid'],['FP','Full pay'],['FA','Financial aid'],['noclar','Aid, no Clarity file']])+
@@ -2281,9 +2406,9 @@ function renderReview(){
   h+='<div class="dsec rv-wrap"><table class="dtable rv-table"><tr><th>Student</th><th>Meeting group</th><th>Gr</th><th>School</th><th>Pay</th><th>Clarity</th><th class="sens">Income</th><th class="sens">Clarity sugg.</th><th class="sens">Offer</th><th>GPA</th><th title="Visited campus / Shadow day / Legacy">Visit</th><th title="Required application items received">Docs</th><th>Readers</th><th>Scored by</th><th>Interview</th><th>Acad</th><th>Mission</th><th>Extra</th><th>Social</th><th>Recs</th><th>Reach</th><th>Overall</th><th>Combined</th><th>Decision</th><th></th></tr>';
   apps.forEach(function(r){
     var s=r.s,flags=(s.visitedCampus?'V':'')+(s.shadowDay?' S':'')+(s.legacy==='yes'?' L':'');
-    h+='<tr><td><a href="#" class="rv-open" data-id="'+esc(s.id)+'">'+esc(s.last)+', '+esc(s.first)+'</a></td><td>'+grpSelect(s)+'</td><td>'+esc(g(s)||'--')+'</td><td>'+esc(s.school||'--')+'</td><td>'+(pay(s)||'--')+'</td><td>'+clarityCell(s)+'</td><td class="sens">'+fmt$(s.income)+'</td><td class="sens">'+fmt$(s.suggtuit)+'</td><td class="sens">'+fmt$(s.parentoffer)+'</td><td>'+esc(s.actualgpa||s.gpa||'--')+'</td><td>'+(flags.trim()||'<span class="rv-miss">none</span>')+'</td><td>'+(ckIn(s)!==null?'<span class="ckn'+(docsComplete(s)?' full':'')+'">'+ckIn(s)+'/'+CK_REQ.length+'</span>':'--')+'</td><td>'+readerChips(s)+'</td><td title="'+esc(scoredBy(s).join(', '))+'">'+(scoredBy(s).length?scoredBy(s).length+(scoredBy(s).length===1?' reader':' readers'):'--')+'</td><td>'+esc(intText(s)||'--')+(intLevel(s)?' <strong>'+esc(intLevel(s))+'</strong>':'')+'</td>';
-    scoreKeys.forEach(function(k){h+=s[k]?'<td style="color:'+rScoreColor(s[k])+'">'+esc(s[k])+'</td>':'<td class="rv-none">--</td>';});
-    h+='<td>'+(r.combined!==null?'<span class="comb" style="color:'+combColor(r.combined)+'">'+r.combined.toFixed(0)+'%</span>':'<span class="rv-none">--</span>')+'</td><td>'+(s.decision?'<span class="rv-dec rv-'+s.decision.replace(/\s/g,'').toLowerCase()+'">'+esc(s.decision)+'</span>':'--')+'</td><td><button class="rv-score'+(myReview(s)?' done':'')+'" data-id="'+esc(s.id)+'">'+(myReview(s)?'My score':'Score')+'</button></td></tr>';
+    h+='<tr'+(s.decision?' class="dec-row dr-'+s.decision.replace(/\s/g,'').toLowerCase()+'"':'')+'><td><a href="#" class="rv-open" data-id="'+esc(s.id)+'">'+esc(s.last)+', '+esc(s.first)+'</a>'+(intLevel(s)?' '+intLevelPill(s):'')+'</td><td>'+grpSelect(s)+'</td><td>'+esc(g(s)||'--')+'</td><td>'+esc(s.school||'--')+'</td><td>'+(pay(s)||'--')+'</td><td>'+clarityCell(s)+'</td><td class="sens">'+fmt$(s.income)+'</td><td class="sens">'+fmt$(s.suggtuit)+'</td><td class="sens">'+fmt$(s.parentoffer)+'</td><td>'+esc(s.actualgpa||s.gpa||'--')+'</td><td>'+(flags.trim()||'<span class="rv-miss">none</span>')+'</td><td>'+(ckIn(s)!==null?'<span class="ckn'+(docsComplete(s)?' full':'')+'">'+ckIn(s)+'/'+CK_REQ.length+'</span>':'--')+'</td><td>'+readerChips(s)+'</td><td title="'+esc(scoredBy(s).join(', '))+'">'+(scoredBy(s).length?scoredBy(s).map(function(n){return n.replace(' (interview)',' (int.)').split(' (')[0].split(' ')[0]+(/\(interview\)/.test(n)?' (int.)':'');}).join(', '):'--')+'</td><td>'+esc(intText(s)||'--')+'</td>';
+    scoreKeys.forEach(function(k){h+=s[k]?'<td><span class="scp" style="color:'+rScoreColor(s[k])+'">'+esc(s[k])+'</span></td>':'<td class="rv-none">--</td>';});
+    h+='<td>'+(r.combined!==null?'<span class="comb" style="color:'+combColor(r.combined)+'">'+r.combined.toFixed(0)+'%<i class="comb-bar"><b style="width:'+Math.min(100,r.combined).toFixed(0)+'%"></b></i></span>':'<span class="rv-none">--</span>')+'</td><td>'+(s.decision?'<span class="rv-dec rv-'+s.decision.replace(/\s/g,'').toLowerCase()+'">'+esc(s.decision)+'</span>':'--')+'</td><td><button class="rv-score'+(myReview(s)?' done':'')+'" data-id="'+esc(s.id)+'">'+(myReview(s)?'My score':'Score')+'</button></td></tr>';
   });
   if(!apps.length)h+='<tr><td colspan="25" style="text-align:center;color:#9EA4B0;font-style:italic">No applicants match these filters.</td></tr>';
   h+='</table></div><div class="dsec-note" style="margin-top:6px">Visit: V = visited campus, S = shadow day, L = legacy. Clarity: status from Clarity for aid applicants; "No file" means aid requested but no Clarity application found. Combined % averages whichever reader scores are entered, unweighted.</div>';
@@ -2298,6 +2423,7 @@ function renderReview(){
     if(RV.grp!=='all')lbl.push(RV.grp==='none'?'Not sorted':grpOf(RV.grp).l);
     openPresent(apps.map(function(r){return r.s.id;}),lbl.join(' · '));
   });
+  var dch=document.querySelectorAll('#review .dec-chip');for(var dci=0;dci<dch.length;dci++)dch[dci].addEventListener('click',function(){var d=this.getAttribute('data-dec');RV.dec=(RV.dec===d||d==='all')?'all':d;renderReview();});
   var mb=document.querySelectorAll('#rv-mode button');for(var mi=0;mi<mb.length;mi++)mb[mi].addEventListener('click',function(){RV.mode=this.getAttribute('data-mode');renderReview();});
   var gt=document.querySelectorAll('#review .grp-tile');for(var gi=0;gi<gt.length;gi++)gt[gi].addEventListener('click',function(){var k=this.getAttribute('data-grp');RV.grp=RV.grp===k?'all':k;renderReview();});
   var gs=document.querySelectorAll('#review .grp-sel');for(var gj=0;gj<gs.length;gj++)gs[gj].addEventListener('change',function(){var st=byId(this.getAttribute('data-id'));if(!st)return;st.group=this.value;sync();render();renderReview();});
@@ -2305,9 +2431,10 @@ function renderReview(){
   var aa=document.getElementById('ag-accept-all');if(aa)aa.addEventListener('click',function(){var n3=0;apps.forEach(function(r){var k=suggestGroup(r.s);if(k){r.s.group=k;n3++;}});if(n3){sync();render();}renderReview();});
   var gl=document.querySelectorAll('#review .ag-present');for(var gm=0;gm<gl.length;gm++)gl[gm].addEventListener('click',function(){var k=this.getAttribute('data-grp');presentGroups(apps,[k],grpOf(k).l);});
   var pa=document.getElementById('ag-present-all');if(pa)pa.addEventListener('click',function(){presentGroups(apps,GROUPS.filter(function(x){return x.disc;}).map(function(x){return x.k;}),'Discussion groups');});
+  document.getElementById('rv-iw').addEventListener('change',function(){CFG.intWeight=parseFloat(this.value);students.forEach(applyReviewAverages);sync();render();renderReview();});
   [['rv-grade','grade'],['rv-pay','pay'],['rv-dec','dec'],['rv-docs','docs'],['rv-grp','grp']].forEach(function(p){document.getElementById(p[0]).addEventListener('change',function(){RV[p[1]]=this.value;renderReview();});});
   var q=document.getElementById('rv-q');
-  q.addEventListener('input',function(){RV.q=this.value;var pos=this.selectionStart;renderReview();var nq=document.getElementById('rv-q');nq.focus();try{nq.setSelectionRange(pos,pos);}catch(e){}});
+  q.addEventListener('input',function(){RV.q=this.value;var pos=this.selectionStart;clearTimeout(RV._qt);RV._qt=setTimeout(function(){renderReview();var nq=document.getElementById('rv-q');nq.focus();try{nq.setSelectionRange(pos,pos);}catch(e){}},180);});
   var rin=document.getElementById('rv-reader');
   rin.addEventListener('change',function(){setReader(this.value.trim());renderReview();});
   var sbs=document.querySelectorAll('#review .rv-score');
@@ -2441,7 +2568,7 @@ function detail(){
             '<button class="hvis'+(s.visitedCampus?' on':'')+'" id="hvis" title="Has this student been on campus?">'+(s.visitedCampus?'&#10003; VISITED CAMPUS':'NOT ON CAMPUS YET')+'</button>'+
             '<button class="beh" id="bhe" style="margin-left:auto">Edit</button>'+
           '</div>'+
-          '<div class="decision-row" style="margin-top:8px">'+decBtns+'</div>'+
+          '<div class="decision-row" style="margin-top:8px">'+decBtns+'</div>'+decHistHTML(s,2).replace('class="dec-hist"','class="dec-hist dark"')+
           (app?'<div class="grp-row"><span class="lbl">Meeting group</span>'+grpButtons(s,'grp-btn')+'</div>':'')+
         '</div>'+
         '<div class="hr-right">'+
@@ -2484,7 +2611,7 @@ function detail(){
       '<div class="reader-card">'+
         '<div class="dch">Reader review'+(s.readers&&s.readers.toLowerCase()!=='deleted user'?' -- '+s.readers:'')+(intText(s)?' &middot; '+esc(intText(s)):'')+'</div>'+
         (hasScores?rsHTML:'')+
-        (scoredBy(s).length?'<div class="rv-list"><div class="rv-list-h">Scored by '+scoredBy(s).length+(scoredBy(s).length===1?' reader':' readers')+' (scores above are the average)</div>'+scoredBy(s).map(function(n){var r=s.reviews[n],p=reviewPct(r);return'<div class="rv-li"><strong>'+esc(n)+'</strong> '+(p!=null?p.toFixed(0)+'%':'')+' <span>'+SCORE_KEYS.filter(function(k){return r[k]!=null;}).map(function(k){return SCORE_LABELS[k]+' '+r[k];}).join(' &middot; ')+'</span>'+(r.comments?'<div class="rv-lc">'+esc(r.comments)+'</div>':'')+'</div>';}).join('')+'</div>':'')+
+        (scoredBy(s).length?'<div class="rv-list"><div class="rv-list-h">Scored by '+scoredBy(s).length+(scoredBy(s).length===1?' source':' sources')+' (scores above are the average)</div>'+scoredBy(s).map(function(n){var r=scoreSources(s)[n],p=reviewPct(r);return'<div class="rv-li"><span class="src-tag src-'+srcKind(r).toLowerCase()+'">'+srcKind(r)+'</span> <strong>'+esc(n)+'</strong> '+(p!=null?p.toFixed(0)+'%':'')+' <span>'+SCORE_KEYS.filter(function(k){return r[k]!=null;}).map(function(k){return SCORE_LABELS[k]+' '+r[k];}).join(' &middot; ')+'</span>'+(r.comments?'<div class="rv-lc">'+esc(r.comments)+'</div>':'')+'</div>';}).join('')+'</div>':'')+
         (s.rcomments?'<div class="reader-comments">'+(s.readers&&s.readers.toLowerCase()!=='deleted user'?'<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9EA4B0;margin-bottom:6px">'+s.readers+'</div>':'')+s.rcomments+'</div>':'')+
       '</div>':'')+
 
@@ -2542,8 +2669,8 @@ function detail(){
   for(var di=0;di<dbts.length;di++){
     dbts[di].addEventListener('click',function(){
       var dec=this.getAttribute('data-dec');
-      for(var i=0;i<students.length;i++){if(students[i].id===selId){students[i].decision=students[i].decision===dec?'':dec;break;}}
-      sync();render();detail();
+      for(var i=0;i<students.length;i++){if(students[i].id===selId){setDecision(students[i],students[i].decision===dec?'':dec);break;}}
+      sync();render();detail();renderActiveView();
     });
   }
 
@@ -2592,7 +2719,7 @@ function openEdit(id){
   var sm={'e-status':s.status||'Inquiry','e-decision':s.decision||'','e-aid':s.aid||'unknown','e-grade':normGrade(s.grade),'e-entry':s.entry||'','e-legacy':s.legacy||'','e-src':s.src||'','e-appform':s.appform||'','e-appfee':s.appfee||'','e-trans':s.trans||'','e-8thgrades':s.grades8th||'','e-rec-admin':s.recadmin||'','e-rec-eng':s.receng||'','e-rec-math':s.recmath||'','e-interview':s.interview||'','e-appphoto':s.appphoto||'','e-isee':s.isee||''};
   Object.keys(sm).forEach(function(k){var e=document.getElementById(k);if(e)e.value=sm[k];});
   var fromReaders=scoredBy(s).length>0;
-  ['e-r-acad','e-r-mission','e-r-extra','e-r-social','e-r-recs','e-r-reach','e-r-overall'].forEach(function(k){var e=document.getElementById(k);if(e){e.disabled=fromReaders;e.title=fromReaders?'Averaged from reader scores. Use Score on Committee Review to change.':'';}});
+  ['e-r-acad','e-r-mission','e-r-extra','e-r-social','e-r-recs','e-r-reach','e-r-overall'].forEach(function(k){var e=document.getElementById(k);if(e){e.disabled=fromReaders;e.title=fromReaders?'Averaged from '+scoredBy(s).join(', ')+'. Use Score on Committee Review to add or change a reader score.':'';}});
   var cm={'e-visited':s.visitedCampus,'e-hostour':s.hosTour,'e-vpd':s.vpd,'e-openhouse':s.openHouse,'e-privatetour':s.privateTour,'e-shadowday':s.shadowDay};
   Object.keys(cm).forEach(function(k){var e=document.getElementById(k);if(e)e.checked=!!cm[k];});
   if(mPhoto){document.getElementById('pp').innerHTML='<img src="'+mPhoto+'"/>';document.getElementById('rm-photo').style.display='block';}else resetPP();
@@ -2611,8 +2738,9 @@ function saveStudent(){
   var d={first:first,last:last,school:document.getElementById('e-school').value.trim(),worship:document.getElementById('e-worship').value.trim(),gpa:document.getElementById('e-gpa').value||null,actualgpa:document.getElementById('e-actualgpa').value||null,referral:document.getElementById('e-referral').value.trim(),grade:document.getElementById('e-grade').value,notes:document.getElementById('e-notes').value.trim(),parentoffer:document.getElementById('e-parentoffer').value||null,suggtuit:document.getElementById('e-suggtuit').value||null,income:document.getElementById('e-income').value||null,p1name:document.getElementById('e-p1name').value.trim(),p1rel:document.getElementById('e-p1rel').value.trim(),p1email:document.getElementById('e-p1email').value.trim(),p1phone:document.getElementById('e-p1phone').value.trim(),p2name:document.getElementById('e-p2name').value.trim(),p2rel:document.getElementById('e-p2rel').value.trim(),p2email:document.getElementById('e-p2email').value.trim(),p2phone:document.getElementById('e-p2phone').value.trim(),interests:tags(document.getElementById('e-int').value),activities:tags(document.getElementById('e-act').value),readers:document.getElementById('e-readers').value.trim(),intdate:document.getElementById('e-intdate').value.trim(),racad:document.getElementById('e-r-acad').value||null,rmission:document.getElementById('e-r-mission').value||null,rextra:document.getElementById('e-r-extra').value||null,rsocial:document.getElementById('e-r-social').value||null,rrecs:document.getElementById('e-r-recs').value||null,rreach:document.getElementById('e-r-reach').value||null,roverall:document.getElementById('e-r-overall').value||null,rcomments:document.getElementById('e-rcomments').value.trim(),status:status,decision:document.getElementById('e-decision').value,aid:document.getElementById('e-aid').value,idate:document.getElementById('e-idate').value.trim(),src:document.getElementById('e-src').value,visits:document.getElementById('e-visits').value.trim(),legacy:document.getElementById('e-legacy').value,entry:document.getElementById('e-entry').value,visitedCampus:document.getElementById('e-visited').checked,hosTour:document.getElementById('e-hostour').checked,vpd:document.getElementById('e-vpd').checked,openHouse:document.getElementById('e-openhouse').checked,privateTour:document.getElementById('e-privatetour').checked,shadowDay:document.getElementById('e-shadowday').checked,photo:mPhoto||null};
   if(d.hosTour||d.vpd||d.openHouse||d.privateTour||d.shadowDay)d.visitedCampus=true;
 
-  if(editId){for(var i=0;i<students.length;i++){if(students[i].id===editId){if(students[i].photo&&!mPhoto)REMOVED_PHOTOS[String(editId)]=1;Object.assign(students[i],d);break;}}selId=editId;}
-  else{var ns=Object.assign({id:uid()},d);students.push(ns);selId=ns.id;}
+  var newDec=d.decision;delete d.decision;
+  if(editId){for(var i=0;i<students.length;i++){if(students[i].id===editId){if(students[i].photo&&!mPhoto)REMOVED_PHOTOS[String(editId)]=1;Object.assign(students[i],d);setDecision(students[i],newDec);break;}}selId=editId;}
+  else{var ns=Object.assign({id:uid()},d);setDecision(ns,newDec);students.push(ns);selId=ns.id;}
   sync();closeEdit();render();detail();
 }
 
@@ -2784,8 +2912,7 @@ function runImport(){
         src:gv(vals,'source')||gv(vals,'heardfromus')||gv(vals,'bsr_referral_method_ss')||'',
         visits:visitParts.join('\n')||null,
         rcomments:rcomments||null,
-        racad:racad||null,rmission:rmission||null,rextra:rextra||null,
-        rsocial:rsocial||null,rrecs:rrecs||null,rreach:rreach||null,roverall:roverall||null,
+        fsrev:scoreObj({racad:racad,rmission:rmission,rextra:rextra,rsocial:rsocial,rrecs:rrecs,rreach:rreach,roverall:roverall}),
         readers:readers||null,intdate:intdate||null,
         income:income||null,parentoffer:parentoffer||null,suggtuit:suggtuit||null
       };
@@ -2803,10 +2930,10 @@ function runImport(){
         var keep=['photo','notes','decision','star'];
         keep.forEach(function(k){if(students[ex][k])data[k]=students[ex][k];});
         ['income','parentoffer','suggtuit'].forEach(function(k){if((data[k]==null||data[k]==='')&&students[ex][k]!=null)data[k]=students[ex][k];});
-        Object.assign(students[ex],data);
+        Object.assign(students[ex],data);applyReviewAverages(students[ex]);
         updated++;
       } else {
-        students.push(Object.assign({id:uid()},data));
+        var nst=Object.assign({id:uid()},data);applyReviewAverages(nst);students.push(nst);
         added++;
       }
     }
